@@ -1,0 +1,45 @@
+# Consensus-Based Routing Decisions
+# Critical routing changes require multi-agent approval
+
+IMPORT Std.Consensus
+IMPORT Std.RPKI
+
+# High-Value Prefix Protection
+# Routes to critical infrastructure require consensus
+POLICY critical_prefix_consensus:
+  route_prefix == "10.0.0.0/8" AND action_type == "withdraw"
+  THEN BEGIN
+    REPORT("Critical prefix withdrawal requested")
+    IF Std.Consensus.require_votes(ACCEPT(route), threshold: 0.75)
+    THEN ACCEPT(route)
+    ELSE REJECT("Insufficient consensus for critical prefix change")
+  END
+  PRIORITY: 500
+  EXPIRES: never
+  CREATED_BY: noc_team
+
+# Override RPKI Invalid (Emergency)
+# Allow override of RPKI invalid routes with super-majority
+POLICY rpki_emergency_override:
+  Std.RPKI.validate(route) == "invalid" AND emergency_flag == true
+  THEN BEGIN
+    REPORT("Emergency RPKI override requested")
+    IF Std.Consensus.require_votes(ACCEPT(route), threshold: 0.90)
+    THEN BEGIN
+      REPORT("RPKI override approved by consensus")
+      ACCEPT(route)
+    END
+    ELSE REJECT("Emergency override requires 90% consensus")
+  END
+  PRIORITY: 1000
+  EXPIRES: never
+  CREATED_BY: emergency_response
+
+# Default Accept
+# Routes that pass all checks are accepted
+POLICY default_accept:
+  true
+  THEN ACCEPT("Passed all policy checks")
+  PRIORITY: 1
+  EXPIRES: never
+  CREATED_BY: policy_engine

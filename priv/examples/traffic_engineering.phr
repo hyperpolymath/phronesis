@@ -1,0 +1,49 @@
+# Traffic Engineering Policies
+# Policies for controlling route preferences and traffic flow
+
+IMPORT Std.BGP
+
+# Prefer Customer Routes
+# Routes from customers get highest local preference
+POLICY prefer_customer_routes:
+  route_type == "customer"
+  THEN EXECUTE(set_local_pref, 200)
+  PRIORITY: 100
+  EXPIRES: never
+  CREATED_BY: te_team
+
+# Prefer Peer Routes
+# Routes from peers get medium local preference
+POLICY prefer_peer_routes:
+  route_type == "peer"
+  THEN EXECUTE(set_local_pref, 150)
+  PRIORITY: 100
+  EXPIRES: never
+  CREATED_BY: te_team
+
+# Transit Routes Lower Priority
+# Routes from transit providers get lowest preference
+POLICY transit_route_preference:
+  route_type == "transit"
+  THEN EXECUTE(set_local_pref, 100)
+  PRIORITY: 100
+  EXPIRES: never
+  CREATED_BY: te_team
+
+# Penalize Long Paths
+# Decrease preference for routes with long AS paths
+POLICY penalize_long_paths:
+  Std.BGP.path_length(route) > 10
+  THEN EXECUTE(decrease_local_pref, 50)
+  PRIORITY: 50
+  EXPIRES: never
+  CREATED_BY: te_team
+
+# Geographic Preference
+# Prefer routes through specific regions
+POLICY prefer_domestic_routes:
+  route_region == "US" AND Std.BGP.path_length(route) < 5
+  THEN EXECUTE(set_local_pref, 175)
+  PRIORITY: 75
+  EXPIRES: never
+  CREATED_BY: te_team
