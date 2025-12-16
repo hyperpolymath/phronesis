@@ -17,7 +17,8 @@ defmodule Phronesis.MixProject do
       description: description(),
       package: package(),
       docs: docs(),
-      dialyzer: dialyzer()
+      dialyzer: dialyzer(),
+      escript: escript()
     ]
   end
 
@@ -67,6 +68,13 @@ defmodule Phronesis.MixProject do
     [
       plt_add_apps: [:mix],
       plt_file: {:no_warn, "priv/plts/dialyzer.plt"}
+    ]
+  end
+
+  defp escript do
+    [
+      main_module: Phronesis.CLI,
+      name: "phronesis"
     ]
   end
 end
