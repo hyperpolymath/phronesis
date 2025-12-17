@@ -160,6 +160,24 @@ defmodule Phronesis.AST do
   end
 
   @doc """
+  Create a field access node (record.field).
+  """
+  @spec field_access(expression(), name()) :: expression()
+  def field_access(base, field) do
+    {:field_access, base, field}
+  end
+
+  @doc """
+  Create an optional access node (v0.2.x: record?.field).
+
+  Returns null if base is null, otherwise accesses the field.
+  """
+  @spec optional_access(expression(), name()) :: expression()
+  def optional_access(base, field) do
+    {:optional_access, base, field}
+  end
+
+  @doc """
   Create an execute action node.
   """
   @spec execute(name(), [expression()]) :: action()

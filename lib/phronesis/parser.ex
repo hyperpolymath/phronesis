@@ -363,6 +363,10 @@ defmodule Phronesis.Parser do
         # Could be module call (Std.RPKI.validate(...))
         parse_possible_module_call([{:identifier, name, 0, 0} | rest])
 
+      [{:question_dot, _, _, _} | rest2] ->
+        # Optional chaining: record?.field (v0.2.x)
+        parse_optional_chain(AST.identifier(name), rest2)
+
       [{:lparen, _, _, _} | _] ->
         # Function call
         parse_function_call(name, rest)
@@ -378,6 +382,40 @@ defmodule Phronesis.Parser do
 
   defp parse_factor([]) do
     Errors.error(:expression, "an expression", nil)
+  end
+
+  # Optional chaining: expr?.field?.nested (v0.2.x)
+  defp parse_optional_chain(base, tokens) do
+    with {:ok, field, rest} <- expect_identifier(tokens) do
+      expr = AST.optional_access(base, field)
+
+      # Check for further chaining
+      case rest do
+        [{:question_dot, _, _, _} | rest2] ->
+          parse_optional_chain(expr, rest2)
+
+        [{:dot, _, _, _}, {:identifier, field2, _, _} | rest2] ->
+          # Mix of optional and regular access
+          expr2 = AST.field_access(expr, field2)
+          parse_optional_chain_rest(expr2, rest2)
+
+        _ ->
+          {:ok, expr, rest}
+      end
+    end
+  end
+
+  defp parse_optional_chain_rest(base, [{:question_dot, _, _, _} | rest]) do
+    parse_optional_chain(base, rest)
+  end
+
+  defp parse_optional_chain_rest(base, [{:dot, _, _, _}, {:identifier, field, _, _} | rest]) do
+    expr = AST.field_access(base, field)
+    parse_optional_chain_rest(expr, rest)
+  end
+
+  defp parse_optional_chain_rest(base, tokens) do
+    {:ok, base, tokens}
   end
 
   defp parse_possible_module_call(tokens) do

@@ -358,5 +358,31 @@ line2""")
         {:eof, nil, _, _}
       ] = tokens
     end
+
+    test "optional chaining tokenization" do
+      {:ok, tokens} = Lexer.tokenize("record?.field?.nested")
+
+      assert [
+        {:identifier, "record", 1, 1},
+        {:question_dot, "?.", 1, 7},
+        {:identifier, "field", 1, 9},
+        {:question_dot, "?.", 1, 14},
+        {:identifier, "nested", 1, 16},
+        {:eof, nil, _, _}
+      ] = tokens
+    end
+
+    test "null coalescing with optional chaining" do
+      {:ok, tokens} = Lexer.tokenize("record?.value ?? 0")
+
+      assert [
+        {:identifier, "record", 1, 1},
+        {:question_dot, "?.", 1, 7},
+        {:identifier, "value", 1, 9},
+        {:double_question, "??", 1, 15},
+        {:integer, 0, 1, 18},
+        {:eof, nil, _, _}
+      ] = tokens
+    end
   end
 end
