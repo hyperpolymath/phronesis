@@ -44,7 +44,11 @@ defmodule Phronesis do
   - **Auditable**: All executions logged immutably
   """
 
-  alias Phronesis.{Lexer, Parser, Interpreter, State}
+  alias Phronesis.{Lexer, Parser, Interpreter, Compiler, State}
+
+  # ============================================================
+  # Parsing API
+  # ============================================================
 
   @doc """
   Parse Phronesis source code into an AST.
@@ -111,6 +115,93 @@ defmodule Phronesis do
     case File.read(path) do
       {:ok, source} -> parse(source)
       {:error, reason} -> {:error, {:file_error, reason}}
+    end
+  end
+
+  # ============================================================
+  # Compiler API
+  # ============================================================
+
+  @doc """
+  Compile source code to bytecode.
+
+  ## Options
+
+  - `:optimize` - Enable optimizations (default: true)
+
+  ## Examples
+
+      iex> {:ok, bytecode} = Phronesis.compile("CONST x = 42")
+      iex> bytecode.magic
+      "PHRC"
+  """
+  @spec compile(String.t(), keyword()) :: {:ok, Compiler.bytecode()} | {:error, term()}
+  def compile(source, opts \\ []) when is_binary(source) do
+    Compiler.compile(source, opts)
+  end
+
+  @doc """
+  Compile an AST to bytecode.
+  """
+  @spec compile_ast(list(), keyword()) :: {:ok, Compiler.bytecode()} | {:error, term()}
+  def compile_ast(ast, opts \\ []) when is_list(ast) do
+    Compiler.compile_ast(ast, "", opts)
+  end
+
+  @doc """
+  Save compiled bytecode to a .phrc file.
+
+  ## Example
+
+      {:ok, bytecode} = Phronesis.compile("CONST x = 42")
+      :ok = Phronesis.save_compiled(bytecode, "policy.phrc")
+  """
+  @spec save_compiled(Compiler.bytecode(), Path.t()) :: :ok | {:error, term()}
+  def save_compiled(bytecode, path) do
+    Compiler.save(bytecode, path)
+  end
+
+  @doc """
+  Load compiled bytecode from a .phrc file.
+
+  ## Example
+
+      {:ok, bytecode} = Phronesis.load_compiled("policy.phrc")
+      {:ok, state} = Phronesis.execute_compiled(bytecode, state)
+  """
+  @spec load_compiled(Path.t()) :: {:ok, Compiler.bytecode()} | {:error, term()}
+  def load_compiled(path) do
+    Compiler.load(path)
+  end
+
+  @doc """
+  Execute compiled bytecode.
+  """
+  @spec execute_compiled(Compiler.bytecode(), State.t()) :: {:ok, State.t()} | {:error, term()}
+  def execute_compiled(bytecode, %State{} = state) do
+    Compiler.execute(bytecode, state)
+  end
+
+  @doc """
+  Disassemble bytecode to human-readable format.
+  """
+  @spec disassemble(Compiler.bytecode()) :: String.t()
+  def disassemble(bytecode) do
+    Compiler.disassemble(bytecode)
+  end
+
+  @doc """
+  Compile and save a source file to .phrc.
+
+  ## Example
+
+      :ok = Phronesis.compile_file("policy.phr", "policy.phrc")
+  """
+  @spec compile_file(Path.t(), Path.t(), keyword()) :: :ok | {:error, term()}
+  def compile_file(source_path, output_path, opts \\ []) do
+    with {:ok, source} <- File.read(source_path),
+         {:ok, bytecode} <- compile(source, opts) do
+      save_compiled(bytecode, output_path)
     end
   end
 end

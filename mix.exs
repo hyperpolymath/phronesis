@@ -24,7 +24,7 @@ defmodule Phronesis.MixProject do
 
   def application do
     [
-      extra_applications: [:logger],
+      extra_applications: [:logger, :crypto, :inets],
       mod: {Phronesis.Application, []}
     ]
   end

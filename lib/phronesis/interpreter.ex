@@ -350,6 +350,14 @@ defmodule Phronesis.Interpreter do
 
   # Module system
 
+  @doc """
+  Call a module function (public API for compiler).
+  """
+  @spec call_module_public([String.t()], [any()], State.t()) :: {:ok, any(), State.t()} | {:error, term()}
+  def call_module_public(path, args, state) do
+    call_module(path, args, state)
+  end
+
   defp call_module(path, args, state) do
     case State.lookup_module(state, path) do
       {:ok, module} ->
