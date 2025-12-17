@@ -45,12 +45,20 @@ defmodule Phronesis.Token do
           | :never
           | :true
           | :false
+          | :null
           | :in
           # Literals
           | :integer
+          | :hex_integer       # v0.2.x: 0xFF
+          | :binary_integer    # v0.2.x: 0b1010
+          | :octal_integer     # v0.2.x: 0o777
           | :float
           | :string
-          | :ip_address
+          | :raw_string        # v0.2.x: r"no\escapes"
+          | :multiline_string  # v0.2.x: """..."""
+          | :interpolated_string  # v0.2.x: "hello ${name}"
+          | :ip_address        # IPv4
+          | :ipv6_address      # v0.2.x: IPv6
           | :datetime
           # Identifier
           | :identifier
@@ -59,6 +67,7 @@ defmodule Phronesis.Token do
           | :minus
           | :star
           | :slash
+          | :percent           # v0.2.x: modulo operator
           | :eq
           | :neq
           | :gt
@@ -66,9 +75,16 @@ defmodule Phronesis.Token do
           | :lt
           | :lte
           | :assign
+          | :question_dot      # v0.2.x: optional chaining ?.
+          | :double_question   # v0.2.x: null coalescing ??
+          | :dollar_lbrace     # v0.2.x: string interpolation ${
           # Delimiters
           | :lparen
           | :rparen
+          | :lbracket
+          | :rbracket
+          | :lbrace
+          | :rbrace
           | :comma
           | :colon
           | :dot
@@ -101,6 +117,7 @@ defmodule Phronesis.Token do
     "never" => :never,
     "true" => :true,
     "false" => :false,
+    "null" => :null,
     "IN" => :in
   }
 

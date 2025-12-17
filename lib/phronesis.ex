@@ -54,8 +54,9 @@ defmodule Phronesis do
       iex> Phronesis.parse("CONST x = 42")
       {:ok, [{:const, "x", {:literal, :integer, 42}}]}
 
-      iex> Phronesis.parse("INVALID SYNTAX")
-      {:error, {:parse_error, "expected POLICY, IMPORT, or CONST", 1, 1}}
+      iex> {:error, {:parse_error, msg, 1, 1, _details}} = Phronesis.parse("INVALID SYNTAX")
+      iex> msg =~ "expected"
+      true
   """
   @spec parse(String.t()) :: {:ok, list()} | {:error, term()}
   def parse(source) when is_binary(source) do

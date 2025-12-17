@@ -171,6 +171,84 @@ defmodule Phronesis.Interpreter do
     end
   end
 
+  # Field access: record.field (v0.2.x)
+  defp eval_expr({:field_access, base, field}, state) do
+    with {:ok, base_value, state} <- eval_expr(base, state) do
+      case base_value do
+        %{} = map ->
+          field_atom = String.to_existing_atom(field)
+          {:ok, Map.get(map, field_atom, Map.get(map, field)), state}
+
+        _ ->
+          {:error, {:type_error, "cannot access field '#{field}' on non-map value"}}
+      end
+    end
+  rescue
+    ArgumentError ->
+      {:ok, base_value, state} = eval_expr(base, state)
+      case base_value do
+        %{} = map -> {:ok, Map.get(map, field), state}
+        _ -> {:error, {:type_error, "cannot access field '#{field}' on non-map value"}}
+      end
+  end
+
+  # Optional access: record?.field - returns nil if base is nil (v0.2.x)
+  defp eval_expr({:optional_access, base, field}, state) do
+    with {:ok, base_value, state} <- eval_expr(base, state) do
+      case base_value do
+        nil ->
+          {:ok, nil, state}
+
+        %{} = map ->
+          field_atom =
+            try do
+              String.to_existing_atom(field)
+            rescue
+              ArgumentError -> nil
+            end
+
+          value = if field_atom, do: Map.get(map, field_atom, Map.get(map, field)), else: Map.get(map, field)
+          {:ok, value, state}
+
+        _ ->
+          {:error, {:type_error, "cannot access field '#{field}' on non-map value"}}
+      end
+    end
+  end
+
+  # Interpolated string (v0.2.x)
+  defp eval_expr({:interpolated_string, parts}, state) do
+    eval_interpolated_parts(parts, state, [])
+  end
+
+  defp eval_interpolated_parts([], state, acc) do
+    {:ok, IO.iodata_to_binary(Enum.reverse(acc)), state}
+  end
+
+  defp eval_interpolated_parts([{:string, s} | rest], state, acc) do
+    eval_interpolated_parts(rest, state, [s | acc])
+  end
+
+  defp eval_interpolated_parts([{:expr, tokens} | rest], state, acc) do
+    # Parse and evaluate the tokens as an expression
+    case Phronesis.Parser.parse(tokens ++ [{:eof, nil, 0, 0}]) do
+      {:ok, [expr]} ->
+        case eval_expr(expr, state) do
+          {:ok, value, state} ->
+            eval_interpolated_parts(rest, state, [to_string(value) | acc])
+
+          {:error, _} = err ->
+            err
+        end
+
+      {:ok, _} ->
+        {:error, {:interpolation_error, "interpolation must be a single expression"}}
+
+      {:error, _} = err ->
+        err
+    end
+  end
+
   defp eval_args(args, state) do
     Enum.reduce_while(args, {:ok, [], state}, fn
       {:named_arg, name, expr}, {:ok, acc, state} ->

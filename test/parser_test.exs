@@ -255,15 +255,28 @@ defmodule Phronesis.ParserTest do
 
   describe "parse/1 - error handling" do
     test "returns error for unexpected token" do
-      assert {:error, {:parse_error, _, _, _}} = parse("INVALID")
+      # v0.2.x: Enhanced error format includes details map
+      assert {:error, {:parse_error, msg, _, _, _}} = parse("INVALID")
+      assert msg =~ "expected"
     end
 
     test "returns error for missing identifier" do
-      assert {:error, {:parse_error, "expected identifier", _, _}} = parse("CONST = 1")
+      # v0.2.x: Enhanced error format includes context
+      assert {:error, {:parse_error, msg, _, _, _}} = parse("CONST = 1")
+      assert msg =~ "identifier"
     end
 
     test "returns error for missing colon in policy" do
-      assert {:error, {:parse_error, _, _, _}} = parse("POLICY test true THEN ACCEPT()")
+      # v0.2.x: Enhanced error format with context and suggestions
+      assert {:error, {:parse_error, msg, _, _, _}} = parse("POLICY test true THEN ACCEPT()")
+      assert msg =~ "expected"
+    end
+
+    test "enhanced errors include context and suggestions" do
+      {:error, {:parse_error, _msg, _line, _col, details}} = parse("INVALID")
+      assert details.context == :program
+      assert details.expected == [:policy, :import, :const]
+      assert is_binary(details.found)
     end
   end
 end
