@@ -33,6 +33,8 @@ defmodule Phronesis.Stdlib.StdRPKI do
 
   @behaviour Phronesis.Stdlib.Module
 
+  import Bitwise
+
   alias Phronesis.Stdlib.StdRPKI.Validator
 
   @type route :: %{
