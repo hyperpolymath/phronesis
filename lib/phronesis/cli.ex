@@ -16,15 +16,6 @@ defmodule Phronesis.CLI do
       # Validate syntax only
       phronesis check policy.phr
 
-      # Compile to bytecode
-      phronesis compile policy.phr -o policy.phrc
-
-      # Run compiled bytecode
-      phronesis run policy.phrc
-
-      # Disassemble bytecode
-      phronesis disasm policy.phrc
-
       # Start interactive REPL
       phronesis repl
 
@@ -32,7 +23,7 @@ defmodule Phronesis.CLI do
       phronesis --version
   """
 
-  alias Phronesis.{State, Interpreter, Compiler}
+  alias Phronesis.{State, Interpreter}
 
   @version Mix.Project.config()[:version]
 
@@ -49,11 +40,9 @@ defmodule Phronesis.CLI do
           help: :boolean,
           version: :boolean,
           verbose: :boolean,
-          output: :string,
-          optimize: :boolean,
           env: :string
         ],
-        aliases: [h: :help, v: :version, V: :verbose, o: :output, O: :optimize, e: :env]
+        aliases: [h: :help, v: :version, V: :verbose, e: :env]
       )
 
     {opts, args}
@@ -82,14 +71,6 @@ defmodule Phronesis.CLI do
         ["check", file] = args
         check_file(file)
 
-      match?(["compile", _], args) ->
-        ["compile", file] = args
-        compile_file(file, opts)
-
-      match?(["disasm", _], args) ->
-        ["disasm", file] = args
-        disasm_file(file)
-
       args == [] ->
         show_usage()
 
@@ -107,19 +88,15 @@ defmodule Phronesis.CLI do
     IO.puts("Usage: phronesis <command> [options] [file]")
     IO.puts("")
     IO.puts("Commands:")
-    IO.puts("  run <file>        Execute a policy file (.phr or .phrc)")
-    IO.puts("  parse <file>      Parse and display AST")
-    IO.puts("  check <file>      Validate syntax only")
-    IO.puts("  compile <file>    Compile to bytecode (.phrc)")
-    IO.puts("  disasm <file>     Disassemble bytecode")
-    IO.puts("  repl              Start interactive REPL")
+    IO.puts("  run <file>     Execute a policy file")
+    IO.puts("  parse <file>   Parse and display AST")
+    IO.puts("  check <file>   Validate syntax only")
+    IO.puts("  repl           Start interactive REPL")
     IO.puts("")
     IO.puts("Options:")
-    IO.puts("  -h, --help        Show this help")
-    IO.puts("  -v, --version     Show version")
-    IO.puts("  -V, --verbose     Verbose output")
-    IO.puts("  -o, --output      Output file for compile")
-    IO.puts("  -O, --optimize    Enable optimizations (default: true)")
+    IO.puts("  -h, --help     Show this help")
+    IO.puts("  -v, --version  Show version")
+    IO.puts("  -V, --verbose  Verbose output")
   end
 
   # REPL implementation
@@ -326,49 +303,6 @@ defmodule Phronesis.CLI do
 
       {:error, reason} ->
         IO.puts(:stderr, "Cannot read #{path}: #{reason}")
-        System.halt(1)
-    end
-  end
-
-  defp compile_file(path, opts) do
-    output = opts[:output] || String.replace(path, ~r/\.phr$/, ".phrc")
-    optimize = Keyword.get(opts, :optimize, true)
-
-    case File.read(path) do
-      {:ok, source} ->
-        case Compiler.compile(source, optimize: optimize) do
-          {:ok, bytecode} ->
-            case Compiler.save(bytecode, output) do
-              :ok ->
-                IO.puts("Compiled: #{path} -> #{output}")
-                IO.puts("  #{length(bytecode.instructions)} instructions")
-                IO.puts("  #{map_size(bytecode.constants)} constants")
-                IO.puts("  #{length(bytecode.policies)} policies")
-
-              {:error, reason} ->
-                IO.puts(:stderr, "Cannot write #{output}: #{reason}")
-                System.halt(1)
-            end
-
-          {:error, reason} ->
-            IO.puts(:stderr, "Compile error: #{format_error(reason)}")
-            System.halt(1)
-        end
-
-      {:error, reason} ->
-        IO.puts(:stderr, "Cannot read #{path}: #{reason}")
-        System.halt(1)
-    end
-  end
-
-  defp disasm_file(path) do
-    case Compiler.load(path) do
-      {:ok, bytecode} ->
-        IO.puts("# Disassembly of #{path}")
-        IO.puts(Compiler.disassemble(bytecode))
-
-      {:error, reason} ->
-        IO.puts(:stderr, "Cannot load #{path}: #{format_error(reason)}")
         System.halt(1)
     end
   end
