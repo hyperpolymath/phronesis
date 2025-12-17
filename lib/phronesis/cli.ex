@@ -16,15 +16,6 @@ defmodule Phronesis.CLI do
       # Validate syntax only
       phronesis check policy.phr
 
-      # Compile to bytecode
-      phronesis compile policy.phr -o policy.phrc
-
-      # Run compiled bytecode
-      phronesis run policy.phrc
-
-      # Disassemble bytecode
-      phronesis disasm policy.phrc
-
       # Start interactive REPL
       phronesis repl
 
@@ -32,7 +23,7 @@ defmodule Phronesis.CLI do
       phronesis --version
   """
 
-  alias Phronesis.{State, Interpreter, Compiler, Formatter, Linter}
+  alias Phronesis.{State, Interpreter}
 
   @version Mix.Project.config()[:version]
 
@@ -49,11 +40,9 @@ defmodule Phronesis.CLI do
           help: :boolean,
           version: :boolean,
           verbose: :boolean,
-          output: :string,
-          optimize: :boolean,
           env: :string
         ],
-        aliases: [h: :help, v: :version, V: :verbose, o: :output, O: :optimize, e: :env]
+        aliases: [h: :help, v: :version, V: :verbose, e: :env]
       )
 
     {opts, args}
@@ -82,22 +71,6 @@ defmodule Phronesis.CLI do
         ["check", file] = args
         check_file(file)
 
-      match?(["compile", _], args) ->
-        ["compile", file] = args
-        compile_file(file, opts)
-
-      match?(["disasm", _], args) ->
-        ["disasm", file] = args
-        disasm_file(file)
-
-      match?(["fmt" | _], args) ->
-        ["fmt" | files] = args
-        format_files(files, opts)
-
-      match?(["lint" | _], args) ->
-        ["lint" | files] = args
-        lint_files(files, opts)
-
       args == [] ->
         show_usage()
 
@@ -115,19 +88,15 @@ defmodule Phronesis.CLI do
     IO.puts("Usage: phronesis <command> [options] [file]")
     IO.puts("")
     IO.puts("Commands:")
-    IO.puts("  run <file>        Execute a policy file (.phr or .phrc)")
-    IO.puts("  parse <file>      Parse and display AST")
-    IO.puts("  check <file>      Validate syntax only")
-    IO.puts("  compile <file>    Compile to bytecode (.phrc)")
-    IO.puts("  disasm <file>     Disassemble bytecode")
-    IO.puts("  repl              Start interactive REPL")
+    IO.puts("  run <file>     Execute a policy file")
+    IO.puts("  parse <file>   Parse and display AST")
+    IO.puts("  check <file>   Validate syntax only")
+    IO.puts("  repl           Start interactive REPL")
     IO.puts("")
     IO.puts("Options:")
-    IO.puts("  -h, --help        Show this help")
-    IO.puts("  -v, --version     Show version")
-    IO.puts("  -V, --verbose     Verbose output")
-    IO.puts("  -o, --output      Output file for compile")
-    IO.puts("  -O, --optimize    Enable optimizations (default: true)")
+    IO.puts("  -h, --help     Show this help")
+    IO.puts("  -v, --version  Show version")
+    IO.puts("  -V, --verbose  Verbose output")
   end
 
   # REPL implementation
@@ -337,163 +306,6 @@ defmodule Phronesis.CLI do
         System.halt(1)
     end
   end
-
-  defp compile_file(path, opts) do
-    output = opts[:output] || String.replace(path, ~r/\.phr$/, ".phrc")
-    optimize = Keyword.get(opts, :optimize, true)
-
-    case File.read(path) do
-      {:ok, source} ->
-        case Compiler.compile(source, optimize: optimize) do
-          {:ok, bytecode} ->
-            case Compiler.save(bytecode, output) do
-              :ok ->
-                IO.puts("Compiled: #{path} -> #{output}")
-                IO.puts("  #{length(bytecode.instructions)} instructions")
-                IO.puts("  #{map_size(bytecode.constants)} constants")
-                IO.puts("  #{length(bytecode.policies)} policies")
-
-              {:error, reason} ->
-                IO.puts(:stderr, "Cannot write #{output}: #{reason}")
-                System.halt(1)
-            end
-
-          {:error, reason} ->
-            IO.puts(:stderr, "Compile error: #{format_error(reason)}")
-            System.halt(1)
-        end
-
-      {:error, reason} ->
-        IO.puts(:stderr, "Cannot read #{path}: #{reason}")
-        System.halt(1)
-    end
-  end
-
-  defp disasm_file(path) do
-    case Compiler.load(path) do
-      {:ok, bytecode} ->
-        IO.puts("# Disassembly of #{path}")
-        IO.puts(Compiler.disassemble(bytecode))
-
-      {:error, reason} ->
-        IO.puts(:stderr, "Cannot load #{path}: #{format_error(reason)}")
-        System.halt(1)
-    end
-  end
-
-  defp format_files([], _opts) do
-    IO.puts(:stderr, "Usage: phronesis fmt <file>...")
-    System.halt(1)
-  end
-
-  defp format_files(files, opts) do
-    check_only = Keyword.get(opts, :check, false)
-
-    results = Enum.map(files, fn file ->
-      case File.read(file) do
-        {:ok, source} ->
-          if check_only do
-            case Formatter.check(source) do
-              :ok -> {:ok, file, :unchanged}
-              {:error, :not_formatted} -> {:error, file, :needs_formatting}
-              {:error, reason} -> {:error, file, reason}
-            end
-          else
-            case Formatter.format(source) do
-              {:ok, formatted} ->
-                if formatted == source do
-                  {:ok, file, :unchanged}
-                else
-                  case File.write(file, formatted) do
-                    :ok -> {:ok, file, :formatted}
-                    {:error, reason} -> {:error, file, reason}
-                  end
-                end
-
-              {:error, reason} ->
-                {:error, file, reason}
-            end
-          end
-
-        {:error, reason} ->
-          {:error, file, reason}
-      end
-    end)
-
-    errors = Enum.filter(results, &match?({:error, _, _}, &1))
-    formatted = Enum.filter(results, &match?({:ok, _, :formatted}, &1))
-    needs_fmt = Enum.filter(results, &match?({:error, _, :needs_formatting}, &1))
-
-    if check_only do
-      if needs_fmt != [] do
-        IO.puts("Files need formatting:")
-        Enum.each(needs_fmt, fn {:error, f, _} -> IO.puts("  #{f}") end)
-        System.halt(1)
-      else
-        IO.puts("All files are formatted correctly.")
-      end
-    else
-      if formatted != [] do
-        IO.puts("Formatted #{length(formatted)} file(s):")
-        Enum.each(formatted, fn {:ok, f, _} -> IO.puts("  #{f}") end)
-      end
-    end
-
-    if errors != [] do
-      IO.puts(:stderr, "Errors:")
-      Enum.each(errors, fn {:error, f, reason} ->
-        IO.puts(:stderr, "  #{f}: #{format_error(reason)}")
-      end)
-      System.halt(1)
-    end
-  end
-
-  defp lint_files([], _opts) do
-    IO.puts(:stderr, "Usage: phronesis lint <file>...")
-    System.halt(1)
-  end
-
-  defp lint_files(files, _opts) do
-    all_issues = Enum.flat_map(files, fn file ->
-      case Linter.lint_file(file) do
-        {:ok, issues} ->
-          Enum.map(issues, fn issue -> Map.put(issue, :file, file) end)
-
-        {:error, reason} ->
-          IO.puts(:stderr, "#{file}: #{format_error(reason)}")
-          []
-      end
-    end)
-
-    if all_issues == [] do
-      IO.puts("No issues found in #{length(files)} file(s).")
-    else
-      grouped = Enum.group_by(all_issues, & &1.file)
-
-      Enum.each(grouped, fn {file, issues} ->
-        IO.puts("\n#{file}:")
-        Enum.each(issues, fn issue ->
-          severity = format_lint_severity(issue.severity)
-          IO.puts("  #{issue.line}:#{issue.column}: #{severity} [#{issue.code}] #{issue.message}")
-          if issue.suggestion do
-            IO.puts("    Suggestion: #{issue.suggestion}")
-          end
-        end)
-      end)
-
-      errors = Enum.count(all_issues, & &1.severity == :error)
-      warnings = Enum.count(all_issues, & &1.severity == :warning)
-      infos = Enum.count(all_issues, & &1.severity == :info)
-
-      IO.puts("\nSummary: #{errors} error(s), #{warnings} warning(s), #{infos} info(s)")
-
-      if errors > 0, do: System.halt(1)
-    end
-  end
-
-  defp format_lint_severity(:error), do: "error"
-  defp format_lint_severity(:warning), do: "warning"
-  defp format_lint_severity(:info), do: "info"
 
   defp load_and_execute(path, state) do
     with {:ok, source} <- File.read(path),
