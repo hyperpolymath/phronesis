@@ -18,9 +18,18 @@ defmodule Phronesis.Parser do
       ...
 
   See the grammar specification for the complete EBNF.
+
+  ## Error Recovery (v0.2.x)
+
+  The parser provides detailed, contextual error messages including:
+  - What was expected vs what was found
+  - Where in the parse tree the error occurred
+  - Suggestions for common mistakes
+  - Source location for IDE integration
   """
 
   alias Phronesis.{Token, AST}
+  alias Phronesis.Parser.Errors
 
   @type tokens :: [Token.t()]
   @type parse_result :: {:ok, AST.program()} | {:error, term()}
@@ -77,8 +86,9 @@ defmodule Phronesis.Parser do
     parse_const(tokens)
   end
 
-  defp parse_declaration([{_, _, line, col} | _]) do
-    {:error, {:parse_error, "expected POLICY, IMPORT, or CONST", line, col}}
+  defp parse_declaration([token | _]) do
+    Errors.error(:program, [:policy, :import, :const], token,
+      suggestion: "A program consists of POLICY, IMPORT, and CONST declarations")
   end
 
   # PolicyDecl ::= "POLICY" Identifier ":" Condition "THEN" Action PolicyMetadata
@@ -282,7 +292,20 @@ defmodule Phronesis.Parser do
     end
   end
 
+  # Integer literals (v0.2.x: hex, binary, octal)
   defp parse_factor([{:integer, value, _, _} | rest]) do
+    {:ok, AST.literal(:integer, value), rest}
+  end
+
+  defp parse_factor([{:hex_integer, value, _, _} | rest]) do
+    {:ok, AST.literal(:integer, value), rest}
+  end
+
+  defp parse_factor([{:binary_integer, value, _, _} | rest]) do
+    {:ok, AST.literal(:integer, value), rest}
+  end
+
+  defp parse_factor([{:octal_integer, value, _, _} | rest]) do
     {:ok, AST.literal(:integer, value), rest}
   end
 
@@ -290,12 +313,30 @@ defmodule Phronesis.Parser do
     {:ok, AST.literal(:float, value), rest}
   end
 
+  # String literals (v0.2.x: raw, multiline, interpolated)
   defp parse_factor([{:string, value, _, _} | rest]) do
     {:ok, AST.literal(:string, value), rest}
   end
 
+  defp parse_factor([{:raw_string, value, _, _} | rest]) do
+    {:ok, AST.literal(:string, value), rest}
+  end
+
+  defp parse_factor([{:multiline_string, value, _, _} | rest]) do
+    {:ok, AST.literal(:string, value), rest}
+  end
+
+  defp parse_factor([{:interpolated_string, parts, _, _} | rest]) do
+    {:ok, AST.interpolated_string(parts), rest}
+  end
+
+  # IP address literals (v0.2.x: IPv6)
   defp parse_factor([{:ip_address, value, _, _} | rest]) do
     {:ok, AST.literal(:ip_address, value), rest}
+  end
+
+  defp parse_factor([{:ipv6_address, value, _, _} | rest]) do
+    {:ok, AST.literal(:ipv6_address, value), rest}
   end
 
   defp parse_factor([{:datetime, value, _, _} | rest]) do
@@ -308,6 +349,11 @@ defmodule Phronesis.Parser do
 
   defp parse_factor([{:false, _, _, _} | rest]) do
     {:ok, AST.literal(:boolean, false), rest}
+  end
+
+  # v0.2.x: null literal
+  defp parse_factor([{:null, _, _, _} | rest]) do
+    {:ok, AST.literal(:null, nil), rest}
   end
 
   # Identifier or ModuleCall
@@ -326,12 +372,12 @@ defmodule Phronesis.Parser do
     end
   end
 
-  defp parse_factor([{_, _, line, col} | _]) do
-    {:error, {:parse_error, "expected expression", line, col}}
+  defp parse_factor([token | _]) do
+    Errors.error(:expression, "a value (number, string, identifier, or parenthesized expression)", token)
   end
 
   defp parse_factor([]) do
-    {:error, {:parse_error, "unexpected end of input", 0, 0}}
+    Errors.error(:expression, "an expression", nil)
   end
 
   defp parse_possible_module_call(tokens) do
@@ -414,8 +460,9 @@ defmodule Phronesis.Parser do
     parse_conditional_action(rest)
   end
 
-  defp parse_action([{_, _, line, col} | _]) do
-    {:error, {:parse_error, "expected action (EXECUTE, REPORT, REJECT, ACCEPT, BEGIN, or IF)", line, col}}
+  defp parse_action([token | _]) do
+    Errors.error(:action, [:execute, :report, :reject, :accept, :begin, :if], token,
+      suggestion: "Actions must be one of: EXECUTE(...), REPORT(...), REJECT(), ACCEPT(), BEGIN...END, or IF...THEN...")
   end
 
   # EXECUTE(function, args...)
@@ -516,31 +563,47 @@ defmodule Phronesis.Parser do
     {:ok, rest}
   end
 
-  defp expect(expected_type, [{_, _, line, col} | _]) do
-    {:error, {:parse_error, "expected #{expected_type}", line, col}}
+  defp expect(expected_type, [token | _] = _tokens) do
+    Errors.error(:expression, expected_type, token)
   end
 
   defp expect(expected_type, []) do
-    {:error, {:parse_error, "expected #{expected_type}, got end of input", 0, 0}}
+    Errors.error(:expression, expected_type, nil)
   end
 
   defp expect_identifier([{:identifier, name, _, _} | rest]) do
     {:ok, name, rest}
   end
 
-  defp expect_identifier([{_, _, line, col} | _]) do
-    {:error, {:parse_error, "expected identifier", line, col}}
+  defp expect_identifier([token | _] = _tokens) do
+    Errors.error(:expression, "an identifier", token)
   end
 
   defp expect_identifier([]) do
-    {:error, {:parse_error, "expected identifier, got end of input", 0, 0}}
+    Errors.error(:expression, "an identifier", nil)
   end
 
   defp expect_integer([{:integer, value, _, _} | rest]) do
     {:ok, value, rest}
   end
 
-  defp expect_integer([{_, _, line, col} | _]) do
-    {:error, {:parse_error, "expected integer", line, col}}
+  defp expect_integer([{:hex_integer, value, _, _} | rest]) do
+    {:ok, value, rest}
+  end
+
+  defp expect_integer([{:binary_integer, value, _, _} | rest]) do
+    {:ok, value, rest}
+  end
+
+  defp expect_integer([{:octal_integer, value, _, _} | rest]) do
+    {:ok, value, rest}
+  end
+
+  defp expect_integer([token | _] = _tokens) do
+    Errors.error(:metadata, "an integer", token)
+  end
+
+  defp expect_integer([]) do
+    Errors.error(:metadata, "an integer", nil)
   end
 end

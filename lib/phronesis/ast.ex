@@ -148,6 +148,18 @@ defmodule Phronesis.AST do
   end
 
   @doc """
+  Create an interpolated string node (v0.2.x).
+
+  Parts is a list of either:
+  - `{:string, "literal text"}`
+  - `{:expr, [tokens]}`
+  """
+  @spec interpolated_string([{:string, String.t()} | {:expr, list()}]) :: expression()
+  def interpolated_string(parts) do
+    {:interpolated_string, parts}
+  end
+
+  @doc """
   Create an execute action node.
   """
   @spec execute(name(), [expression()]) :: action()
