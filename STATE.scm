@@ -3,7 +3,7 @@
 ;; SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell
 
 (define metadata
-  '((version . "0.1.0") (updated . "2025-12-17") (project . "phronesis")))
+  '((version . "0.1.0") (updated . "2025-12-18") (project . "phronesis")))
 
 (define current-position
   '((phase . "v0.1.x - Foundation")
@@ -35,11 +35,12 @@
 (define session-history
   '((snapshots
       ((date . "2025-12-15") (session . "initial") (notes . "SCM files added"))
-      ((date . "2025-12-17") (session . "security-review") (notes . "Security audit, SCM cleanup, placeholder fixes")))))
+      ((date . "2025-12-17") (session . "security-review") (notes . "Security audit, SCM cleanup, placeholder fixes"))
+      ((date . "2025-12-18") (session . "readme-alignment") (notes . "Created comprehensive README.adoc, project alignment verified")))))
 
 (define state-summary
   '((project . "phronesis")
-    (completion . 35)
+    (completion . 40)
     (blockers . 0)
     (next-milestone . "v0.2.0 - Consensus")
-    (updated . "2025-12-17")))
+    (updated . "2025-12-18")))
