@@ -1,419 +1,140 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-// SPDX-FileCopyrightText: 2025 Phronesis Contributors
+🧠 Phronesis
+A Provably Safe Language for Agentic Ethical Reasoning
+Author: Jonathan D. A. Jewell Version: Standard Candidate 1.0
+Repository: https://gitlab.com/hyperpolymath/phronesis
+🌐 Overview
+Phronesis is a neuro-symbolic agentic language designed to formalize ethical reasoning in autonomous systems. It fuses the precision of Symbolic AI with the adaptability of neural networks, enforcing provable safety and fault tolerance through a dedicated BEAM VM runtime.
+🛡️ Intellectual Property & Licensing
+Phronesis defines its IP across three layers:
 
-= Phronesis
-:toc: macro
-:toc-title: Contents
-:toclevels: 3
-:icons: font
-:source-highlighter: rouge
-:url-repo: https://github.com/hyperpolymath/phronesis
-:url-wiki: https://github.com/hyperpolymath/phronesis/wiki
 
-image:https://img.shields.io/badge/license-AGPL--3.0--or--later-blue.svg[License,link=LICENSE]
-image:https://img.shields.io/badge/RSR-Gold-gold.svg[RSR Compliance]
-image:https://img.shields.io/badge/version-0.1.0-green.svg[Version]
+Dual Licensing: AGPLv3 + Palimpsest 0.5
+AGPLv3: Ensures the runtime and compiler remain free and open-source, even in networked deployments.
+Palimpsest v0.5: Protects the philosophical core and benchmark suite, enabling open research while preserving ethical integrity.
 
-*A consensus-gated policy language for network configuration*
 
-Phronesis is a minimal, declarative domain-specific language (DSL) for expressing network policies with formal safety guarantees and distributed consensus.
+Claimable IP: Novel Design & Semantic Architecture
 
-toc::[]
 
-== Overview
 
-Phronesis provides:
 
-* **Guaranteed Termination** - No infinite loops; all programs terminate
-* **Consensus-Gated Execution** - Critical actions require distributed agreement via Raft
-* **Formal Semantics** - Mathematical specification with only 5 evaluation rules
-* **Minimal Complexity** - ~40 lines of EBNF grammar, 15 keywords, <2000 LOC implementation
-* **RPKI Integration** - Built-in route origin validation
 
-=== Design Philosophy
+Component
+Novelty / Claim
+Technical Significance
 
-[cols="1,1,1"]
-|===
-|Component |Budget |Actual
 
-|Grammar
-|~40 lines EBNF
-|38 lines
 
-|Keywords
-|≤20
-|15
 
-|Evaluation Rules
-|≤10
-|5
+Hybrid Semantic Definition
+Formal axiomatic + operational semantics
+Guarantees trustworthiness and auditability
 
-|Implementation
-|<2000 LOC
-|~1800 LOC
-|===
 
-== Quick Start
+Probabilistic Types
+BeliefFunction, ProbabilityDistribution as statically checked types
+Solves symbol grounding between neural and symbolic layers
 
-=== Installation
 
-[source,bash]
-----
-# Clone the repository
-git clone https://github.com/hyperpolymath/phronesis.git
-cd phronesis
+Metaiconic API
+Modules return Expression
+Enables introspection and self-correction
 
-# Build with Mix (Elixir)
-mix deps.get
-mix escript.build
 
-# Or use Nix
-nix build
-----
+Map-Territory Mandate
+Mandatory REPORT action flags model-reality inconsistencies
+Enforces epistemological safety
 
-=== Hello World
 
-Create a file `policy.phr`:
+BEAM/Raft Architecture
+BEAM VM + Raft consensus for ethical loop execution
 
-[source,phronesis]
-----
-# Simple BGP security policy
-IMPORT Std.RPKI
-IMPORT Std.BGP
 
-CONST bogon_prefixes = ["0.0.0.0/8", "10.0.0.0/8", "127.0.0.0/8"]
 
-POLICY rpki_validation:
-  Std.RPKI.validate(route) == "invalid"
-  THEN REJECT("RPKI validation failed")
-  PRIORITY: 200
 
-POLICY bogon_filter:
-  route.prefix IN bogon_prefixes
-  THEN REJECT("Bogon prefix not allowed")
-  PRIORITY: 190
+A. Safety & Dependability
 
-POLICY default_accept:
-  true
-  THEN ACCEPT(route)
-  PRIORITY: 1
-----
 
-Run it:
 
-[source,bash]
-----
-./phronesis run policy.phr
-----
+Feature
+Rationale
 
-=== REPL
 
-[source,bash]
-----
-./phronesis repl
 
-phronesis> CONST x = 42
-{:ok, 42}
 
-phronesis> POLICY test: x > 10 THEN ACCEPT("yes") PRIORITY: 1
-{:ok, :policy_registered}
-----
+Strong Static Typing
+Prevents runtime errors in safety-critical systems
 
-== Language Reference
 
-=== Keywords (15 total)
+BEAM VM Execution
+Fault-tolerant, memory-safe, concurrent runtime for 24/7 operation
 
-[cols="1,3"]
-|===
-|Keyword |Purpose
 
-|`POLICY`
-|Declare a policy
+Sandboxing & Isolation
+Containerized (Podman) for secure module execution
 
-|`CONST`
-|Declare a constant
 
-|`IMPORT`
-|Import a module
+Formal Logic Integration
+Supports ∀, ∃, ¬, ∪, ∩ for rigorous ethical reasoning
 
-|`AS`
-|Alias for imports
 
-|`THEN`
-|Action clause
 
-|`ELSE`
-|Alternative action
+B. Agentic & Interoperable Core
+| Strong Static Typing     | Prevents runtime errors in safety-critical systems                     |
+| BEAM VM Execution        | Fault-tolerant, memory-safe, concurrent runtime for 24/7 operation     |
+| Sandboxing & Isolation   | Containerized (Podman) for secure module execution                     |
+| Formal Logic Integration | Supports ∀, ∃, ¬, ∪, ∩ for rigorous ethical reasoning                  |
+B. AGENTIC & INTEROPERABLE CORE
+🛠️ Roadmap & Implementation
+A. Phased Bootstrap Strategy
 
-|`IF`
-|Conditional
+Phase 1: Rapid Prototyping (Haskell) Validate type system and semantics via interpreter and REPL.
 
-|`PRIORITY`
-|Policy priority
+Phase 2: Production Compiler (Rust/BEAM) Compile to BEAM VM bytecode (or WASM-on-BEAM) for performance and safety.
 
-|`AND`
-|Logical and
 
-|`OR`
-|Logical or
+B. Preferred Tooling
 
-|`NOT`
-|Logical not
 
-|`ACCEPT`
-|Accept action
 
-|`REJECT`
-|Reject action
+Component
+Tool / Language Preference
 
-|`REPORT`
-|Report action
 
-|`EXECUTE`
-|Execute action
-|===
 
-=== Types
 
-[cols="1,2,2"]
-|===
-|Type |Description |Examples
+Development
+Haskell (Interpreter), Rust (Compiler)
 
-|Integer
-|Arbitrary precision
-|`42`, `-17`
 
-|Float
-|IEEE 754 double
-|`3.14`, `-0.5`
+Runtime
+Erlang / Elixir (BEAM VM)
 
-|String
-|Unicode text
-|`"hello"`
 
-|Boolean
-|Truth value
-|`true`, `false`
+Containerization
+Podman
 
-|IPAddress
-|IPv4/IPv6
-|`192.0.2.1`, `2001:db8::1`
 
-|DateTime
-|ISO 8601 timestamp
-|`2025-01-15T10:30:00Z`
+Database
+ArangoDB / Virtuoso
 
-|List
-|Ordered collection
-|`[1, 2, 3]`
 
-|Record
-|Named fields
-|`{a: 1, b: 2}`
-|===
+Automation
+Salt (Deployment & Configuration)
 
-=== Policy Structure
 
-[source,phronesis]
-----
-POLICY name:
-  condition
-  THEN action
-  [ELSE action]
-  PRIORITY: integer
-----
 
-Policies are evaluated in priority order (higher = first).
-
-== Standard Library
+🚀 Getting Started (For Contributors)
+To begin contributing:
 
-[cols="1,3"]
-|===
-|Module |Purpose
+Choose your repository name, Jonathan.
 
-|`Std.RPKI`
-|RPKI route origin validation
+Clone the repo: git clone git@gitlab.com:hyperpolymath/{REPOSITORY_NAME}.git
 
-|`Std.BGP`
-|BGP route operations
+Install dependencies:
 
-|`Std.Consensus`
-|Distributed consensus operations
-
-|`Std.Temporal`
-|Time-based constraints
-|===
-
-=== Example: RPKI Validation
-
-[source,phronesis]
-----
-IMPORT Std.RPKI
-
-POLICY enforce_rpki:
-  Std.RPKI.validate(route) == "invalid"
-  THEN REJECT("RPKI invalid origin")
-  PRIORITY: 100
-
-POLICY rpki_unknown_report:
-  Std.RPKI.validate(route) == "not_found"
-  THEN REPORT("No ROA found for prefix")
-  PRIORITY: 90
-----
-
-=== Example: Consensus-Gated Changes
-
-[source,phronesis]
-----
-IMPORT Std.Consensus
+    Rust toolchain
 
-POLICY critical_route_change:
-  route.prefix IN critical_prefixes
-  THEN Std.Consensus.require_votes(
-    ACCEPT(route),
-    threshold: 0.67,
-    timeout: 30000
-  )
-  PRIORITY: 500
-----
+    Haskell GHC
 
-== CLI Reference
-
-[source,bash]
-----
-phronesis run <file>      # Execute policy file
-phronesis parse <file>    # Parse and show AST
-phronesis check <file>    # Syntax validation
-phronesis repl            # Interactive mode
-----
-
-== Architecture
-
-----
-┌─────────────────────────────────────────────────────────┐
-│                     Phronesis                           │
-├─────────────────────────────────────────────────────────┤
-│  Source Code (.phr)                                     │
-│       │                                                 │
-│       ▼                                                 │
-│  ┌─────────┐    ┌─────────┐    ┌─────────────┐         │
-│  │  Lexer  │───▶│ Parser  │───▶│ Interpreter │         │
-│  └─────────┘    └─────────┘    └─────────────┘         │
-│       │              │               │                  │
-│       │              │               ▼                  │
-│       │              │    ┌───────────────────┐        │
-│       │              │    │ Raft Consensus    │        │
-│       │              │    │ (Leader Election, │        │
-│       │              │    │  Log Replication) │        │
-│       │              │    └───────────────────┘        │
-│       │              │               │                  │
-│       │              ▼               ▼                  │
-│       │    ┌─────────────────────────────────┐         │
-│       │    │         Standard Library         │         │
-│       │    │  ┌──────┐ ┌─────┐ ┌──────────┐  │         │
-│       │    │  │ RPKI │ │ BGP │ │ Temporal │  │         │
-│       │    │  └──────┘ └─────┘ └──────────┘  │         │
-│       │    └─────────────────────────────────┘         │
-└─────────────────────────────────────────────────────────┘
-----
-
-== Safety Guarantees
-
-1. **Termination** - No loops, bounded recursion
-2. **Type Safety** - Operations are type-checked
-3. **Sandbox Isolation** - No direct system access
-4. **Consensus Gating** - Critical actions require agreement
-5. **Audit Trail** - All decisions logged immutably
-
-== Roadmap
-
-[cols="1,1,2,1"]
-|===
-|Version |Codename |Focus |Target
-
-|0.1.x
-|Foundation
-|Core language, basic tooling
-|Q1 2025 ✓
-
-|0.2.x
-|Consensus
-|Distributed execution, Raft enhancements
-|Q2 2025
-
-|0.3.x
-|Validation
-|RPKI integration, type system
-|Q3 2025
-
-|0.4.x
-|Tooling
-|IDE support, LSP, debugging
-|Q4 2025
-
-|0.5.x
-|Production
-|Performance, security audit
-|Q1 2026
-
-|1.0.0
-|Genesis
-|Stable release
-|Q2 2026
-|===
-
-See link:ROADMAP.md[ROADMAP.md] for full details.
-
-== Documentation
-
-* link:{url-wiki}[Wiki] - Comprehensive documentation
-* link:wiki/Language-Overview.md[Language Overview] - Core concepts
-* link:wiki/CLI-Reference.md[CLI Reference] - Command-line usage
-* link:wiki/Formal-Semantics.md[Formal Semantics] - Mathematical specification
-* link:docs/draft-phronesis-policy-language.txt[IETF Draft] - Technical specification
-
-== Contributing
-
-We welcome contributions! See link:CONTRIBUTING.md[CONTRIBUTING.md] for guidelines.
-
-=== Development Setup
-
-[source,bash]
-----
-git clone https://github.com/hyperpolymath/phronesis.git
-cd phronesis
-mix deps.get
-mix test
-----
-
-=== Priority Areas
-
-1. **Testing** - More test coverage, edge cases
-2. **Documentation** - Tutorials, examples, guides
-3. **Tooling** - Editor support, CLI improvements
-4. **Libraries** - Standard library extensions
-5. **Integration** - Router vendor support
-
-== Security
-
-Please report security vulnerabilities via link:https://github.com/hyperpolymath/phronesis/security/advisories/new[GitHub Security Advisories].
-
-See link:SECURITY.md[SECURITY.md] for our full security policy.
-
-== License
-
-Phronesis is licensed under link:LICENSE[AGPL-3.0-or-later].
-
-[source]
-----
-SPDX-License-Identifier: AGPL-3.0-or-later
-Copyright 2025 Phronesis Contributors
-----
-
-== Acknowledgments
-
-Phronesis is part of the link:https://github.com/hyperpolymath[hyperpolymath] ecosystem and follows the link:https://github.com/hyperpolymath/rhodium-standard-repositories[Rhodium Standard Repository] guidelines.
-
----
-
-_"Phronesis" (φρόνησις) - Greek for practical wisdom; the ability to discern the appropriate course of action in any given situation._
+Run the benchmark suite: Passing all ethical scenarios is the definitive measure of correctness.
