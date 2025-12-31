@@ -161,12 +161,15 @@ defmodule Phronesis.Stdlib.StdRPKI do
   end
 
   defp prefix_length_valid?(prefix, roa) do
-    [_, len_str] = String.split(prefix, "/")
-    prefix_len = String.to_integer(len_str)
-    [_, roa_len_str] = String.split(roa.prefix, "/")
-    roa_len = String.to_integer(roa_len_str)
-
-    prefix_len >= roa_len && prefix_len <= roa.max_length
+    # Safe split with validation to prevent crashes on malformed input
+    with [_, len_str] <- String.split(prefix, "/", parts: 2),
+         {prefix_len, ""} <- Integer.parse(len_str),
+         [_, roa_len_str] <- String.split(roa.prefix, "/", parts: 2),
+         {roa_len, ""} <- Integer.parse(roa_len_str) do
+      prefix_len >= roa_len && prefix_len <= roa.max_length
+    else
+      _ -> false
+    end
   end
 
   # Local ROA database (mock/test data)
@@ -189,10 +192,19 @@ defmodule Phronesis.Stdlib.StdRPKI do
   end
 
   defp parse_prefix(prefix) do
-    [ip_str, len_str] = String.split(prefix, "/")
-    ip = ip_to_integer(ip_str)
-    len = String.to_integer(len_str)
-    {ip, len}
+    # Safe split with validation to prevent crashes on malformed input
+    case String.split(prefix, "/", parts: 2) do
+      [ip_str, len_str] ->
+        case Integer.parse(len_str) do
+          {len, ""} when len >= 0 and len <= 128 ->
+            ip = ip_to_integer(ip_str)
+            {ip, len}
+          _ ->
+            {0, 0}
+        end
+      _ ->
+        {0, 0}
+    end
   end
 
   defp ip_to_integer(ip_str) do

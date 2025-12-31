@@ -559,8 +559,10 @@ defmodule Phronesis.Consensus.Raft do
       end
 
       # Notify pending proposals
+      # NOTE: Range must go from lower to higher index. The previous code had
+      # commit_index..last_applied which is backwards (empty range when commit > applied).
       pending =
-        Enum.reduce(state.commit_index..state.last_applied, state.pending_proposals, fn idx, acc ->
+        Enum.reduce((state.last_applied + 1)..state.commit_index, state.pending_proposals, fn idx, acc ->
           case Map.pop(acc, idx) do
             {nil, acc} -> acc
             {from, acc} ->

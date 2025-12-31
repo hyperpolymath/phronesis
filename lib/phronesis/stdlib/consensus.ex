@@ -213,10 +213,23 @@ defmodule Phronesis.Stdlib.StdConsensus do
     _ -> ["local"]
   end
 
+  # Allowed option keys to prevent atom exhaustion attacks.
+  # Atoms are never garbage collected, so String.to_atom on untrusted
+  # input could exhaust the atom table (default limit: ~1M atoms).
+  @allowed_option_keys ~w(threshold timeout agents use_raft)a
+
   defp normalize_opts(opts) when is_list(opts) do
-    Enum.map(opts, fn
-      {key, value} when is_binary(key) -> {String.to_atom(key), value}
-      {key, value} -> {key, value}
+    Enum.flat_map(opts, fn
+      {key, value} when is_binary(key) ->
+        # Only convert known keys to atoms to prevent atom exhaustion
+        case Enum.find(@allowed_option_keys, &(Atom.to_string(&1) == key)) do
+          nil -> []  # Ignore unknown keys
+          atom_key -> [{atom_key, value}]
+        end
+      {key, value} when is_atom(key) ->
+        if key in @allowed_option_keys, do: [{key, value}], else: []
+      _ ->
+        []
     end)
   end
 end
