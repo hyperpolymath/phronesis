@@ -77,4 +77,5 @@ htmlcov/
 /tmp/
 *.tmp
 *.bak
-phronesis
+# Compiled escript binary
+/phronesis

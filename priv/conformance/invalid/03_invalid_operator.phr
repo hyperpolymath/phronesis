@@ -1,0 +1,9 @@
+# Invalid Conformance Test: Invalid operator
+# Expected: Parse error - === is not a valid operator
+
+POLICY invalid_operator:
+  value === 100
+  THEN ACCEPT("Should fail - invalid operator")
+  PRIORITY: 100
+  EXPIRES: never
+  CREATED_BY: test_suite

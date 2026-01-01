@@ -1,0 +1,9 @@
+# Conformance Test: Simple Policy
+# Expected: Parse successfully, register one policy
+
+POLICY simple_accept:
+  value > 0
+  THEN ACCEPT("Positive value accepted")
+  PRIORITY: 100
+  EXPIRES: never
+  CREATED_BY: test_suite

@@ -1,0 +1,9 @@
+# Invalid Conformance Test: Unclosed string literal
+# Expected: Lexer error - unterminated string
+
+POLICY unclosed_string:
+  value > 0
+  THEN REJECT("This string is never closed
+  PRIORITY: 100
+  EXPIRES: never
+  CREATED_BY: test_suite

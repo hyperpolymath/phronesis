@@ -1,0 +1,8 @@
+# Invalid Conformance Test: Missing required PRIORITY metadata
+# Expected: Parse error - PRIORITY is required
+
+POLICY missing_priority:
+  value > 0
+  THEN ACCEPT("Missing priority")
+  EXPIRES: never
+  CREATED_BY: test_suite
