@@ -1,0 +1,12 @@
+# Conformance Test: Constants and Policy
+# Expected: Parse successfully, bind constants, register policy
+
+CONST max_threshold = 100
+CONST min_threshold = 10
+
+POLICY threshold_check:
+  value >= min_threshold AND value <= max_threshold
+  THEN ACCEPT("Value within acceptable range")
+  PRIORITY: 50
+  EXPIRES: never
+  CREATED_BY: test_suite
