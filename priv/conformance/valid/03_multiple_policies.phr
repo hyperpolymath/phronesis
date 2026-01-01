@@ -1,0 +1,27 @@
+# Conformance Test: Multiple Policies with Priority
+# Expected: Parse successfully, register all policies in priority order
+
+CONST critical_level = 90
+CONST warning_level = 70
+CONST info_level = 50
+
+POLICY critical_alert:
+  severity >= critical_level
+  THEN REJECT("Critical severity detected")
+  PRIORITY: 300
+  EXPIRES: never
+  CREATED_BY: monitoring
+
+POLICY warning_alert:
+  severity >= warning_level AND severity < critical_level
+  THEN REPORT("Warning level severity")
+  PRIORITY: 200
+  EXPIRES: never
+  CREATED_BY: monitoring
+
+POLICY info_alert:
+  severity >= info_level AND severity < warning_level
+  THEN ACCEPT("Informational severity")
+  PRIORITY: 100
+  EXPIRES: never
+  CREATED_BY: monitoring
