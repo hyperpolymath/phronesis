@@ -1,3 +1,6 @@
+image:https://img.shields.io/badge/License-MPL_2.0-blue.svg[MPL-2.0,link="https://opensource.org/licenses/MPL-2.0"]
+image:https://img.shields.io/badge/Philosophy-Palimpsest-purple.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-licence"]
+
 🧠 Phronesis
 A Provably Safe Language for Agentic Ethical Reasoning
 Author: Jonathan D. A. Jewell Version: Standard Candidate 1.0
@@ -7,77 +10,51 @@ Phronesis is a neuro-symbolic agentic language designed to formalize ethical rea
 🛡️ Intellectual Property & Licensing
 Phronesis defines its IP across three layers:
 
-
 Dual Licensing: AGPLv3 + Palimpsest 0.5
 AGPLv3: Ensures the runtime and compiler remain free and open-source, even in networked deployments.
 Palimpsest v0.5: Protects the philosophical core and benchmark suite, enabling open research while preserving ethical integrity.
 
-
 Claimable IP: Novel Design & Semantic Architecture
-
-
-
-
 
 Component
 Novelty / Claim
 Technical Significance
 
-
-
-
 Hybrid Semantic Definition
 Formal axiomatic + operational semantics
 Guarantees trustworthiness and auditability
-
 
 Probabilistic Types
 BeliefFunction, ProbabilityDistribution as statically checked types
 Solves symbol grounding between neural and symbolic layers
 
-
 Metaiconic API
 Modules return Expression
 Enables introspection and self-correction
-
 
 Map-Territory Mandate
 Mandatory REPORT action flags model-reality inconsistencies
 Enforces epistemological safety
 
-
 BEAM/Raft Architecture
 BEAM VM + Raft consensus for ethical loop execution
 
-
-
-
 A. Safety & Dependability
-
-
 
 Feature
 Rationale
 
-
-
-
 Strong Static Typing
 Prevents runtime errors in safety-critical systems
-
 
 BEAM VM Execution
 Fault-tolerant, memory-safe, concurrent runtime for 24/7 operation
 
-
 Sandboxing & Isolation
 Containerized (Podman) for secure module execution
 
-
 Formal Logic Integration
 Supports ∀, ∃, ¬, ∪, ∩ for rigorous ethical reasoning
-
-
 
 B. Agentic & Interoperable Core
 | Strong Static Typing     | Prevents runtime errors in safety-critical systems                     |
@@ -92,37 +69,25 @@ Phase 1: Rapid Prototyping (Haskell) Validate type system and semantics via inte
 
 Phase 2: Production Compiler (Rust/BEAM) Compile to BEAM VM bytecode (or WASM-on-BEAM) for performance and safety.
 
-
 B. Preferred Tooling
-
-
 
 Component
 Tool / Language Preference
 
-
-
-
 Development
 Haskell (Interpreter), Rust (Compiler)
-
 
 Runtime
 Erlang / Elixir (BEAM VM)
 
-
 Containerization
 Podman
-
 
 Database
 ArangoDB / Virtuoso
 
-
 Automation
 Salt (Deployment & Configuration)
-
-
 
 🚀 Getting Started (For Contributors)
 To begin contributing:
