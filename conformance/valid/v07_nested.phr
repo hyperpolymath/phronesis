@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Conformance: nested conditions
+
+POLICY nested_check:
+  IF level > 1 THEN
+    IF score > 80 THEN
+      ACCEPT "High score at high level"
+    ELSE
+      REJECT "Low score at high level"
+  ELSE
+    ACCEPT "Any score at base level"
+PRIORITY 150
+EXPIRES "2030-12-31"
+CREATED_BY "test_suite"

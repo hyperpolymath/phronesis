@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Conformance: IF/THEN/ELSE conditional in policy
+
+POLICY conditional_check:
+  IF status == :valid THEN
+    ACCEPT "Status is valid"
+  ELSE
+    REJECT "Status is invalid"
+PRIORITY 50
+EXPIRES "2030-12-31"
+CREATED_BY "test_suite"

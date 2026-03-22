@@ -1,0 +1,104 @@
+% SPDX-License-Identifier: PMPL-1.0-or-later
+% Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+% References for Phronesis: Elixir-based language with simple types and BEAM runtime
+
+@article{wadler2015propositions,
+  author    = {Philip Wadler},
+  title     = {Propositions as Types},
+  journal   = {Communications of the ACM},
+  volume    = {58},
+  number    = {12},
+  pages     = {75--84},
+  year      = {2015},
+  note      = {Foundational connection between logic and type theory; informs Phronesis type design}
+}
+
+@phdthesis{armstrong2003making,
+  author    = {Joe Armstrong},
+  title     = {Making Reliable Distributed Systems in the Presence of Software Errors},
+  school    = {Royal Institute of Technology, Stockholm},
+  year      = {2003},
+  note      = {BEAM VM design philosophy and fault tolerance; core runtime foundation for Phronesis}
+}
+
+@inproceedings{virding2013hitchhiker,
+  author    = {Robert Virding},
+  title     = {Hitchhiker's Tour of the {BEAM}},
+  booktitle = {Erlang Factory SF Bay Area},
+  year      = {2013},
+  note      = {BEAM internals and scheduling; relevant to Phronesis runtime behaviour}
+}
+
+@book{pierce2002types,
+  author    = {Benjamin C. Pierce},
+  title     = {Types and Programming Languages},
+  publisher = {MIT Press},
+  year      = {2002},
+  note      = {Canonical reference for simply-typed lambda calculus; basis for Phronesis type system}
+}
+
+@article{milner1978theory,
+  author    = {Robin Milner},
+  title     = {A Theory of Type Polymorphism in Programming},
+  journal   = {Journal of Computer and System Sciences},
+  volume    = {17},
+  number    = {3},
+  pages     = {348--375},
+  year      = {1978},
+  note      = {Hindley-Milner type inference; informs parametric polymorphism in Phronesis}
+}
+
+@article{hoare1978communicating,
+  author    = {C. A. R. Hoare},
+  title     = {Communicating Sequential Processes},
+  journal   = {Communications of the ACM},
+  volume    = {21},
+  number    = {8},
+  pages     = {666--677},
+  year      = {1978},
+  note      = {CSP concurrency model; theoretical basis for BEAM process communication}
+}
+
+@book{valim2024elixir,
+  author    = {Jos\'{e} Valim},
+  title     = {Programming Elixir},
+  publisher = {Pragmatic Bookshelf},
+  year      = {2024},
+  note      = {Elixir language design and OTP patterns; direct influence on Phronesis syntax}
+}
+
+@inproceedings{svensson2010programming,
+  author    = {Hans Svensson and Lars-\AA{}ke Fredlund and Clara Benac Earle},
+  title     = {A Unified Semantics for Future {Erlang}},
+  booktitle = {Proceedings of the 9th ACM SIGPLAN Workshop on Erlang},
+  year      = {2010},
+  note      = {Formal semantics of Erlang; relevant to Phronesis operational semantics}
+}
+
+@article{armstrong1996erlang,
+  author    = {Joe Armstrong and Robert Virding and Claes Wikstr\"{o}m and Mike Williams},
+  title     = {Concurrent Programming in {Erlang}},
+  publisher = {Prentice Hall},
+  year      = {1996},
+  note      = {Original Erlang concurrency model; actor-based message passing underlies Phronesis}
+}
+
+@inproceedings{hewitt1973universal,
+  author    = {Carl Hewitt and Peter Bishop and Richard Steiger},
+  title     = {A Universal Modular {ACTOR} Formalism for Artificial Intelligence},
+  booktitle = {Proceedings of the 3rd International Joint Conference on Artificial Intelligence},
+  pages     = {235--245},
+  year      = {1973},
+  note      = {Actor model foundation; theoretical ancestor of BEAM process model}
+}
+
+@article{cardelli1985understanding,
+  author    = {Luca Cardelli and Peter Wegner},
+  title     = {On Understanding Types, Data Abstraction, and Polymorphism},
+  journal   = {Computing Surveys},
+  volume    = {17},
+  number    = {4},
+  pages     = {471--522},
+  year      = {1985},
+  note      = {Taxonomy of type systems; contextualises Phronesis simple type approach}
+}

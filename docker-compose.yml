@@ -1,0 +1,104 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Docker Compose for Phronesis multi-node cluster
+
+version: '3.8'
+
+services:
+  node1:
+    build: .
+    image: phronesis:latest
+    container_name: phronesis-node1
+    hostname: phronesis-node1
+    environment:
+      RELEASE_DISTRIBUTION: name
+      RELEASE_NODE: node1@phronesis-node1
+      RELEASE_COOKIE: ${PHRONESIS_CLUSTER_COOKIE:-phronesis_secure_cookie}
+      PHRONESIS_CONSENSUS_ENABLED: "true"
+      PHRONESIS_NODE_ID: node1
+      ERL_DIST_PORT: 9100
+    ports:
+      - "4369:4369"
+      - "9100:9100"
+    volumes:
+      - node1_data:/app/priv/consensus_data
+    networks:
+      - phronesis_cluster
+    healthcheck:
+      test: ["CMD", "/app/bin/phronesis", "rpc", "node()"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  node2:
+    build: .
+    image: phronesis:latest
+    container_name: phronesis-node2
+    hostname: phronesis-node2
+    environment:
+      RELEASE_DISTRIBUTION: name
+      RELEASE_NODE: node2@phronesis-node2
+      RELEASE_COOKIE: ${PHRONESIS_CLUSTER_COOKIE:-phronesis_secure_cookie}
+      PHRONESIS_CONSENSUS_ENABLED: "true"
+      PHRONESIS_NODE_ID: node2
+      ERL_DIST_PORT: 9101
+    ports:
+      - "4370:4369"
+      - "9101:9101"
+    volumes:
+      - node2_data:/app/priv/consensus_data
+    networks:
+      - phronesis_cluster
+    depends_on:
+      node1:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/app/bin/phronesis", "rpc", "node()"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  node3:
+    build: .
+    image: phronesis:latest
+    container_name: phronesis-node3
+    hostname: phronesis-node3
+    environment:
+      RELEASE_DISTRIBUTION: name
+      RELEASE_NODE: node3@phronesis-node3
+      RELEASE_COOKIE: ${PHRONESIS_CLUSTER_COOKIE:-phronesis_secure_cookie}
+      PHRONESIS_CONSENSUS_ENABLED: "true"
+      PHRONESIS_NODE_ID: node3
+      ERL_DIST_PORT: 9102
+    ports:
+      - "4371:4369"
+      - "9102:9102"
+    volumes:
+      - node3_data:/app/priv/consensus_data
+    networks:
+      - phronesis_cluster
+    depends_on:
+      node2:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/app/bin/phronesis", "rpc", "node()"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  node1_data:
+    driver: local
+  node2_data:
+    driver: local
+  node3_data:
+    driver: local
+
+networks:
+  phronesis_cluster:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16

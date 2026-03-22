@@ -1,0 +1,51 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Test file for static analysis - contains various issues
+
+# Unused import - should trigger warning
+IMPORT Std.Temporal
+
+# Unused constant - should trigger info message
+CONST unused_value = 42
+
+# Used constant - should be fine
+CONST threshold = 75
+
+# Dead code - policy with false condition
+POLICY never_matches:
+  false
+  THEN REJECT("This will never execute")
+  PRIORITY: 100
+  EXPIRES: never
+  CREATED_BY: test
+
+# Policy with always-true condition - makes later policies unreachable
+POLICY always_matches:
+  true
+  THEN ACCEPT("Always accepts")
+  PRIORITY: 90
+  EXPIRES: never
+  CREATED_BY: test
+
+# Unreachable policy - should trigger warning
+POLICY unreachable:
+  risk_level > threshold
+  THEN REJECT("This is unreachable")
+  PRIORITY: 80
+  EXPIRES: never
+  CREATED_BY: test
+
+# Overly permissive policy - should trigger warning
+POLICY too_permissive:
+  true
+  THEN ACCEPT("Accepts everything")
+  PRIORITY: 1
+  EXPIRES: never
+  CREATED_BY: test
+
+# Valid policy - should be fine
+POLICY valid_check:
+  risk_level > threshold
+  THEN REJECT("Valid policy")
+  PRIORITY: 50
+  EXPIRES: never
+  CREATED_BY: test

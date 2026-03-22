@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Conformance: IMPORT clause
+
+IMPORT Std.BGP
+IMPORT Std.RPKI
+
+POLICY import_test:
+  rpki_result = Std.RPKI.validate(route)
+  IF rpki_result == :valid THEN
+    ACCEPT "RPKI validation passed"
+  ELSE
+    REJECT "RPKI validation failed"
+PRIORITY 100
+EXPIRES "2030-12-31"
+CREATED_BY "test_suite"

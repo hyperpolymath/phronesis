@@ -1,0 +1,184 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "_comment": "SPDX-License-Identifier: PMPL-1.0-or-later",
+  "name": "Phronesis",
+  "scopeName": "source.phronesis",
+  "fileTypes": [
+    "phr"
+  ],
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#constants"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#identifiers"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.hash.phronesis",
+          "match": "#.*$"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.triple.phronesis",
+          "begin": "\"\"\"",
+          "end": "\"\"\""
+        },
+        {
+          "name": "string.quoted.raw.phronesis",
+          "begin": "r\"",
+          "end": "\""
+        },
+        {
+          "name": "string.quoted.double.phronesis",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.phronesis",
+              "match": "\\\\[nrt\\\\\"$]"
+            },
+            {
+              "name": "meta.interpolation.phronesis",
+              "begin": "\\$\\{",
+              "end": "\\}",
+              "beginCaptures": {
+                "0": {
+                  "name": "punctuation.section.interpolation.begin.phronesis"
+                }
+              },
+              "endCaptures": {
+                "0": {
+                  "name": "punctuation.section.interpolation.end.phronesis"
+                }
+              },
+              "patterns": [
+                {
+                  "include": "source.phronesis"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.hex.phronesis",
+          "match": "\\b0[xX][0-9a-fA-F]+\\b"
+        },
+        {
+          "name": "constant.numeric.binary.phronesis",
+          "match": "\\b0[bB][01]+\\b"
+        },
+        {
+          "name": "constant.numeric.octal.phronesis",
+          "match": "\\b0[oO][0-7]+\\b"
+        },
+        {
+          "name": "constant.numeric.float.phronesis",
+          "match": "\\b[0-9]+\\.[0-9]+([eE][+-]?[0-9]+)?\\b"
+        },
+        {
+          "name": "constant.numeric.float.scientific.phronesis",
+          "match": "\\b[0-9]+[eE][+-]?[0-9]+\\b"
+        },
+        {
+          "name": "constant.numeric.integer.phronesis",
+          "match": "\\b[0-9]+\\b"
+        }
+      ]
+    },
+    "constants": {
+      "patterns": [
+        {
+          "name": "constant.other.ip.phronesis",
+          "match": "\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}(/\\d{1,2})?\\b"
+        },
+        {
+          "name": "constant.other.datetime.phronesis",
+          "match": "\\b\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z\\b"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.phronesis",
+          "match": "\\b(IF|ELSE|THEN)\\b"
+        },
+        {
+          "name": "keyword.declaration.phronesis",
+          "match": "\\b(POLICY|CONST|IMPORT|AS|PRIORITY)\\b"
+        },
+        {
+          "name": "keyword.operator.word.phronesis",
+          "match": "\\b(AND|OR|NOT)\\b"
+        },
+        {
+          "name": "keyword.action.phronesis",
+          "match": "\\b(ACCEPT|REJECT|REPORT|EXECUTE)\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.optional-chaining.phronesis",
+          "match": "\\?\\."
+        },
+        {
+          "name": "keyword.operator.null-coalescing.phronesis",
+          "match": "\\?\\?"
+        },
+        {
+          "name": "keyword.operator.comparison.phronesis",
+          "match": "==|!=|<=|>=|<|>"
+        },
+        {
+          "name": "keyword.operator.assignment.phronesis",
+          "match": "="
+        },
+        {
+          "name": "keyword.operator.arithmetic.phronesis",
+          "match": "\\+|-|\\*|/|%"
+        }
+      ]
+    },
+    "identifiers": {
+      "patterns": [
+        {
+          "name": "entity.name.type.phronesis",
+          "match": "\\b[A-Z][A-Z0-9_]+\\b"
+        },
+        {
+          "name": "variable.other.phronesis",
+          "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+        }
+      ]
+    }
+  },
+  "_taxonomy": "editors/textmate-grammar"
+}

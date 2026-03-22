@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# RPKI validation policies
+
+POLICY rpki_invalid_reject:
+  rpki_status == "invalid"
+  THEN REJECT("RPKI validation: Invalid ROA")
+  PRIORITY: 100
+  EXPIRES: never
+  CREATED_BY: rpki
+
+POLICY rpki_not_found_warn:
+  rpki_status == "not_found"
+  THEN ACCEPT("RPKI validation: No ROA found - accepting with warning")
+  PRIORITY: 50
+  EXPIRES: never
+  CREATED_BY: rpki
+
+POLICY rpki_valid_accept:
+  rpki_status == "valid"
+  THEN ACCEPT("RPKI validation: Valid ROA")
+  PRIORITY: 75
+  EXPIRES: never
+  CREATED_BY: rpki

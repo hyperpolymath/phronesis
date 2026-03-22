@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Conformance (INVALID): POLICY with no condition or action body
+
+POLICY broken:
+  IF value > 0 THEN

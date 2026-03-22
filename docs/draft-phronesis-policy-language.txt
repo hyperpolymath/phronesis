@@ -1,0 +1,867 @@
+
+
+
+
+
+Network Working Group                                     Phronesis Team
+Internet-Draft                                          Hyperpolymath Labs
+Intended status: Experimental                           December 2025
+Expires: June 2026
+
+
+        Phronesis: A Consensus-Gated Policy Language for Network
+                           Configuration
+
+Abstract
+
+   This document specifies Phronesis, a minimal domain-specific language
+   for expressing network policies with formal safety guarantees.
+   Phronesis provides consensus-gated execution, ensuring that network
+   configuration changes require distributed agreement before taking
+   effect.  The language is designed to be decidable (always terminates),
+   type-safe, and auditable, making it suitable for critical network
+   infrastructure where policy correctness is paramount.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on June 16, 2026.
+
+Copyright Notice
+
+   Copyright (c) 2025 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (https://trustee.ietf.org/license-info) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.
+
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   3
+     1.1.  Motivation  . . . . . . . . . . . . . . . . . . . . . . .   3
+     1.2.  Design Goals  . . . . . . . . . . . . . . . . . . . . . .   4
+     1.3.  Requirements Language . . . . . . . . . . . . . . . . . .   4
+   2.  Language Overview . . . . . . . . . . . . . . . . . . . . . .   5
+     2.1.  Lexical Structure . . . . . . . . . . . . . . . . . . . .   5
+     2.2.  Grammar . . . . . . . . . . . . . . . . . . . . . . . . .   6
+     2.3.  Types . . . . . . . . . . . . . . . . . . . . . . . . . .   8
+   3.  Operational Semantics . . . . . . . . . . . . . . . . . . . .   9
+     3.1.  State Model . . . . . . . . . . . . . . . . . . . . . . .   9
+     3.2.  Evaluation Rules  . . . . . . . . . . . . . . . . . . . .  10
+     3.3.  Consensus Protocol  . . . . . . . . . . . . . . . . . . .  12
+   4.  Standard Library  . . . . . . . . . . . . . . . . . . . . . .  13
+     4.1.  Std.RPKI  . . . . . . . . . . . . . . . . . . . . . . . .  13
+     4.2.  Std.BGP . . . . . . . . . . . . . . . . . . . . . . . . .  14
+     4.3.  Std.Consensus . . . . . . . . . . . . . . . . . . . . . .  15
+     4.4.  Std.Temporal  . . . . . . . . . . . . . . . . . . . . . .  16
+   5.  Security Considerations . . . . . . . . . . . . . . . . . . .  17
+     5.1.  Threat Model  . . . . . . . . . . . . . . . . . . . . . .  17
+     5.2.  Sandbox Isolation . . . . . . . . . . . . . . . . . . . .  17
+     5.3.  Capability Enforcement  . . . . . . . . . . . . . . . . .  18
+     5.4.  Byzantine Fault Tolerance . . . . . . . . . . . . . . . .  19
+   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  20
+   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  20
+     7.1.  Normative References  . . . . . . . . . . . . . . . . . .  20
+     7.2.  Informative References  . . . . . . . . . . . . . . . . .  21
+   Appendix A.  Example Policies . . . . . . . . . . . . . . . . . .  22
+   Appendix B.  Formal Semantics . . . . . . . . . . . . . . . . . .  24
+   Appendix C.  Safety Proofs  . . . . . . . . . . . . . . . . . . .  28
+   Appendix D.  TLA+ Specification . . . . . . . . . . . . . . . . .  32
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  35
+
+
+1.  Introduction
+
+1.1.  Motivation
+
+   Network configuration errors are a leading cause of outages and
+   security incidents.  Studies show that 50-80% of network outages
+   are caused by human configuration errors [Mahajan2002].  Traditional
+   approaches to network policy management suffer from several problems:
+
+   *  Imperative configuration languages that are difficult to reason
+      about formally
+
+   *  Lack of distributed consensus, allowing single points of failure
+
+   *  No formal guarantee of termination, risking infinite loops
+
+   *  Insufficient audit trails for policy changes
+
+   Phronesis addresses these issues by providing a declarative policy
+   language with:
+
+   1.  Formal decidability guarantees (always terminates)
+
+   2.  Consensus-gated execution (distributed agreement required)
+
+   3.  Type safety (static verification of policy correctness)
+
+   4.  Non-repudiation (append-only audit log)
+
+1.2.  Design Goals
+
+   Phronesis was designed with a strict complexity budget:
+
+   *  Grammar: ~40 lines of EBNF, 15 keywords
+
+   *  Implementation: < 2000 lines of code
+
+   *  Semantics: 5 core evaluation rules
+
+   This minimalism serves two purposes:
+
+   1.  Security: Less code means smaller attack surface
+
+   2.  Verifiability: Small languages can be formally verified
+
+   Features were deliberately excluded when they would exceed the
+   complexity budget:
+
+   *  General loops (replaced by bounded iteration)
+
+   *  User-defined functions (replaced by module imports)
+
+   *  Mutable state (replaced by immutable bindings)
+
+   *  Exceptions (replaced by result types)
+
+1.3.  Requirements Language
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in
+   BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+
+2.  Language Overview
+
+2.1.  Lexical Structure
+
+   Phronesis source code consists of Unicode text encoded in UTF-8.
+   The following lexical elements are defined:
+
+2.1.1.  Keywords
+
+   The following 15 keywords are reserved:
+
+       POLICY  CONST  IMPORT  AS  THEN  IF  ELSE  PRIORITY
+       AND  OR  NOT  ACCEPT  REJECT  REPORT  EXECUTE
+
+2.1.2.  Identifiers
+
+   Identifiers start with a letter or underscore, followed by zero or
+   more letters, digits, or underscores:
+
+       identifier = [a-zA-Z_][a-zA-Z0-9_]*
+
+2.1.3.  Literals
+
+   Phronesis supports the following literal types:
+
+       integer    = [0-9]+
+       float      = [0-9]+"."[0-9]+
+       string     = '"' [^"]* '"'
+       boolean    = "true" | "false"
+       ip_address = IPv4 or IPv6 address literal
+       datetime   = ISO 8601 format
+
+2.1.4.  Comments
+
+   Single-line comments begin with "#" and extend to end of line:
+
+       # This is a comment
+
+2.2.  Grammar
+
+   The complete grammar in EBNF notation:
+
+       program        = { declaration } ;
+
+       declaration    = policy_decl
+                      | const_decl
+                      | import_decl ;
+
+       policy_decl    = "POLICY" identifier ":"
+                        condition
+                        "THEN" action_block
+                        [ "ELSE" action_block ]
+                        "PRIORITY:" integer ;
+
+       const_decl     = "CONST" identifier "=" expression ;
+
+       import_decl    = "IMPORT" module_path [ "AS" identifier ] ;
+
+       module_path    = identifier { "." identifier } ;
+
+       condition      = logical_expr ;
+
+       logical_expr   = comparison_expr
+                        { ("AND" | "OR") comparison_expr } ;
+
+       comparison_expr = [ "NOT" ] (
+                           arith_expr [ comp_op arith_expr ]
+                         | "(" logical_expr ")" ) ;
+
+       comp_op        = "==" | "!=" | "<" | ">" | "<=" | ">=" ;
+
+       arith_expr     = term { ("+" | "-") term } ;
+
+       term           = factor { ("*" | "/" | "%") factor } ;
+
+       factor         = literal
+                      | identifier
+                      | module_call
+                      | "(" arith_expr ")" ;
+
+       module_call    = module_path "(" [ args ] ")" ;
+
+       args           = expression { "," expression } ;
+
+       action_block   = action
+                      | "IF" condition "THEN" action_block
+                        [ "ELSE" action_block ] ;
+
+       action         = accept_action
+                      | reject_action
+                      | report_action
+                      | execute_action ;
+
+       accept_action  = "ACCEPT" "(" [ expression ] ")" ;
+       reject_action  = "REJECT" "(" [ expression ] ")" ;
+       report_action  = "REPORT" "(" expression ")" ;
+       execute_action = "EXECUTE" "(" identifier "," args ")" ;
+
+       literal        = integer | float | string | boolean
+                      | ip_address | datetime | list | record ;
+
+       list           = "[" [ expression { "," expression } ] "]" ;
+
+       record         = "{" [ field { "," field } ] "}" ;
+
+       field          = identifier ":" expression ;
+
+2.3.  Types
+
+   Phronesis is dynamically typed with the following value types:
+
+       Type        Description                  Example
+       -------     -------------------------    ----------------
+       Integer     Arbitrary precision integer  42, -17
+       Float       IEEE 754 double              3.14159
+       String      Unicode text                 "hello"
+       Boolean     Truth value                  true, false
+       IPAddress   IPv4 or IPv6 address         192.0.2.1
+       DateTime    Timestamp                    2025-01-15T10:30:00Z
+       List        Ordered collection           [1, 2, 3]
+       Record      Named fields                 {prefix: "10.0.0.0/8"}
+       Null        Absence of value             null
+
+   Type coercion is minimal and explicit.  Comparing values of
+   incompatible types results in false.
+
+
+3.  Operational Semantics
+
+3.1.  State Model
+
+   Execution state is modeled as a 5-tuple:
+
+       State = (PolicyTable, ConsensusLog, Environment,
+                PendingActions, Agents)
+
+   Where:
+
+   *  PolicyTable: Map from policy name to policy definition
+
+   *  ConsensusLog: Append-only sequence of (action, result, votes)
+
+   *  Environment: Map from identifier to value (immutable bindings)
+
+   *  PendingActions: Set of actions awaiting consensus
+
+   *  Agents: Set of agent identifiers participating in consensus
+
+3.2.  Evaluation Rules
+
+   The following small-step operational semantics define policy
+   execution:
+
+3.2.1.  Rule 1: POLICY-MATCH
+
+   When a routing event occurs, find all applicable policies:
+
+       route ∈ Routes
+       P = {p ∈ PolicyTable | eval(p.condition, route) = true}
+       p_max = argmax_{p ∈ P}(p.priority)
+       ─────────────────────────────────────────────────────────
+       (PolicyTable, Log, Env, Pending) →
+         (PolicyTable, Log, Env, Pending ∪ {p_max.action})
+
+3.2.2.  Rule 2: ACTION-EXECUTE
+
+   Execute a pending action with consensus:
+
+       a ∈ PendingActions
+       consensus(a, Agents) = votes
+       |{v ∈ votes | v = approve}| / |Agents| ≥ threshold
+       result = execute(a)
+       ────────────────────────────────────────────────────────
+       (PolicyTable, Log, Env, Pending) →
+         (PolicyTable, Log ++ [(a, result, votes)],
+          Env, Pending \ {a})
+
+3.2.3.  Rule 3: COND-TRUE
+
+   Evaluate conditional when condition is true:
+
+       eval(condition, Env) = true
+       eval(then_branch, Env) = result
+       ────────────────────────────────────────────────────────
+       eval(IF condition THEN then_branch ELSE else_branch, Env)
+         = result
+
+3.2.4.  Rule 4: COND-FALSE
+
+   Evaluate conditional when condition is false:
+
+       eval(condition, Env) = false
+       eval(else_branch, Env) = result
+       ────────────────────────────────────────────────────────
+       eval(IF condition THEN then_branch ELSE else_branch, Env)
+         = result
+
+3.2.5.  Rule 5: MODULE-CALL
+
+   Call a standard library module:
+
+       module ∈ RegisteredModules
+       has_capability(Env, module.required_cap)
+       result = module.call(args)
+       ────────────────────────────────────────────────────────
+       eval(module.path(args), Env) = result
+
+3.3.  Consensus Protocol
+
+   Phronesis uses a Raft-based consensus protocol for action execution.
+   The protocol ensures:
+
+   *  Safety: No conflicting actions are executed
+
+   *  Liveness: Valid actions eventually execute (after GST)
+
+   *  Non-repudiation: All decisions are logged with votes
+
+3.3.1.  Protocol Phases
+
+       Phase 1: PROPOSE
+         Leader proposes action to all agents
+
+       Phase 2: VOTE
+         Each agent evaluates policy and votes
+         Votes are signed with agent's key
+
+       Phase 3: COMMIT
+         If votes >= threshold, action commits
+         Result logged to ConsensusLog
+
+3.3.2.  Threshold Configuration
+
+   The default threshold is (2N + 1) / 3 where N is the number of
+   agents.  This provides Byzantine fault tolerance with f < N/3
+   faulty agents.
+
+
+4.  Standard Library
+
+   Phronesis provides a standard library of modules for common network
+   operations.  All modules are capability-gated.
+
+4.1.  Std.RPKI
+
+   The RPKI module provides Route Origin Authorization validation
+   using the Resource Public Key Infrastructure [RFC6480].
+
+4.1.1.  Functions
+
+       Std.RPKI.validate(route) -> "valid" | "invalid" | "not_found"
+
+         Validates the route's origin AS against registered ROAs.
+         Returns "valid" if a matching ROA exists, "invalid" if
+         a conflicting ROA exists, "not_found" if no ROA covers
+         the prefix.
+
+       Std.RPKI.get_roas(prefix) -> List<ROA>
+
+         Returns all ROAs covering the given prefix.
+
+       Std.RPKI.check_origin(route) -> Boolean
+
+         Convenience function returning true iff validate returns
+         "valid".
+
+4.1.2.  Example
+
+       POLICY rpki_enforce:
+         Std.RPKI.validate(route) == "invalid"
+         THEN REJECT("RPKI validation failed")
+         PRIORITY: 200
+
+4.2.  Std.BGP
+
+   The BGP module provides access to BGP routing information.
+
+4.2.1.  Functions
+
+       Std.BGP.extract_as_path(route) -> List<ASN>
+
+         Returns the AS path from the route announcement.
+
+       Std.BGP.get_origin(route) -> ASN
+
+         Returns the origin AS (last AS in path).
+
+       Std.BGP.check_loop(route, local_as) -> Boolean
+
+         Returns true if local_as appears in the AS path.
+
+       Std.BGP.community_contains(route, community) -> Boolean
+
+         Checks if route has the specified BGP community.
+
+4.2.2.  Example
+
+       POLICY as_path_filter:
+         65000 IN Std.BGP.extract_as_path(route)
+         THEN REJECT("Filtered AS in path")
+         PRIORITY: 150
+
+4.3.  Std.Consensus
+
+   The Consensus module provides distributed voting primitives.
+
+4.3.1.  Functions
+
+       Std.Consensus.require_votes(action, threshold: Float) -> Boolean
+
+         Requests votes from all agents for the specified action.
+         Returns true if threshold percentage approve.
+
+       Std.Consensus.get_leader() -> AgentID | null
+
+         Returns the current Raft leader's identifier.
+
+       Std.Consensus.propose(command) -> {ok, index} | {error, reason}
+
+         Proposes a command through Raft consensus.
+
+4.3.2.  Example
+
+       POLICY consensus_required:
+         sensitive_action == true
+         THEN IF Std.Consensus.require_votes(ACCEPT(route),
+                                             threshold: 0.75)
+              THEN ACCEPT(route)
+              ELSE REJECT("Insufficient consensus")
+         PRIORITY: 100
+
+4.4.  Std.Temporal
+
+   The Temporal module provides time-based constraints.
+
+4.4.1.  Functions
+
+       Std.Temporal.within_window(start, end) -> Boolean
+
+         Returns true if current time is within the window.
+
+       Std.Temporal.eventually(action, deadline) -> Boolean
+
+         Schedules action to execute before deadline.
+
+       Std.Temporal.now() -> DateTime
+
+         Returns current UTC timestamp.
+
+4.4.2.  Example
+
+       POLICY maintenance_window:
+         Std.Temporal.within_window("02:00", "04:00")
+         AND maintenance_mode == true
+         THEN ACCEPT(route)
+         PRIORITY: 50
+
+
+5.  Security Considerations
+
+5.1.  Threat Model
+
+   Phronesis assumes the following threat model:
+
+   Adversary capabilities:
+   *  Can author arbitrary policy code
+   *  Can attempt to access system resources
+   *  Can control up to f < N/3 agents (Byzantine)
+
+   Adversary cannot:
+   *  Modify the interpreter or runtime
+   *  Break cryptographic primitives
+   *  Control network completely (eventual delivery assumed)
+
+5.2.  Sandbox Isolation
+
+   Policy code executes in a sandboxed environment with no access to:
+
+   *  Filesystem operations
+   *  Network connections (except through Std modules)
+   *  System command execution
+   *  Memory outside the execution context
+
+   This isolation is enforced by:
+
+   1.  Grammar restrictions: No I/O primitives in the language
+
+   2.  Module gating: Only registered modules can be called
+
+   3.  Capability enforcement: Operations require explicit grants
+
+   Theorem (Sandbox Isolation): For any policy P and initial state S0,
+   executing P cannot read/write files, make network connections,
+   execute system commands, or access memory outside the sandbox.
+
+   Proof: See Appendix C.
+
+5.3.  Capability Enforcement
+
+   Each operation requires a capability token.  Capabilities are:
+
+   *  Granted at policy registration time
+   *  Cannot be escalated during execution
+   *  Checked at every module call
+
+   Capability types:
+
+       Capability           Required For
+       -------------------  ---------------------------
+       route_decision       ACCEPT, REJECT actions
+       consensus_log        REPORT action
+       rpki_validate        Std.RPKI functions
+       bgp_access           Std.BGP functions
+       consensus_vote       Std.Consensus functions
+       temporal_access      Std.Temporal functions
+
+   Theorem (Capability Soundness): No operation executes without the
+   required capability.
+
+   Proof: See Appendix C.
+
+5.4.  Byzantine Fault Tolerance
+
+   With N agents and threshold t = (2N + 1) / 3:
+
+   *  Safety holds with up to f < N/3 Byzantine agents
+   *  Liveness holds after GST with f < N/3 Byzantine agents
+
+   Theorem (Byzantine Safety): With N >= 3f + 1 agents:
+   1.  No conflicting actions commit
+   2.  Byzantine agents cannot force invalid actions
+
+   Proof: See Appendix C.
+
+
+6.  IANA Considerations
+
+   This document has no IANA actions.
+
+   Future versions may request:
+
+   *  Media type registration for application/phronesis+json
+   *  Port number for Phronesis RPC protocol
+
+
+7.  References
+
+7.1.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
+
+   [RFC6480]  Lepinski, M. and S. Kent, "An Infrastructure to Support
+              Secure Internet Routing", RFC 6480, DOI 10.17487/RFC6480,
+              February 2012,
+              <https://www.rfc-editor.org/info/rfc6480>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
+
+7.2.  Informative References
+
+   [Mahajan2002]
+              Mahajan, R., Wetherall, D., and T. Anderson,
+              "Understanding BGP Misconfiguration", SIGCOMM 2002.
+
+   [Castro1999]
+              Castro, M. and B. Liskov, "Practical Byzantine Fault
+              Tolerance", OSDI 1999.
+
+   [Ongaro2014]
+              Ongaro, D. and J. Ousterhout, "In Search of an
+              Understandable Consensus Algorithm", USENIX ATC 2014.
+
+   [RFC7454]  Durand, J., Pepelnjak, I., and G. Doering, "BGP
+              Operations and Security", BCP 194, RFC 7454,
+              DOI 10.17487/RFC7454, February 2015,
+              <https://www.rfc-editor.org/info/rfc7454>.
+
+
+Appendix A.  Example Policies
+
+A.1.  BGP Security Policy
+
+   A comprehensive BGP security policy combining RPKI validation,
+   AS path filtering, and prefix length limits:
+
+       # BGP Security Policy
+       # Implements common security best practices
+
+       CONST max_prefix_len_v4 = 24
+       CONST max_prefix_len_v6 = 48
+
+       POLICY rpki_strict:
+         Std.RPKI.validate(route) == "invalid"
+         THEN REJECT("RPKI invalid")
+         PRIORITY: 200
+
+       POLICY bogon_filter:
+         route.prefix IN ["0.0.0.0/8", "10.0.0.0/8",
+                          "127.0.0.0/8", "169.254.0.0/16",
+                          "172.16.0.0/12", "192.168.0.0/16",
+                          "224.0.0.0/4", "240.0.0.0/4"]
+         THEN REJECT("Bogon prefix")
+         PRIORITY: 190
+
+       POLICY prefix_length:
+         route.prefix_length > max_prefix_len_v4
+         AND route.afi == "ipv4"
+         THEN REJECT("Prefix too specific")
+         PRIORITY: 180
+
+       POLICY as_path_length:
+         Std.BGP.as_path_length(route) > 50
+         THEN REJECT("AS path too long")
+         PRIORITY: 170
+
+       POLICY default_accept:
+         true
+         THEN ACCEPT(route)
+         PRIORITY: 1
+
+A.2.  Consensus-Gated Routing
+
+   A policy requiring multi-party approval for sensitive changes:
+
+       CONST sensitive_prefixes = ["192.0.2.0/24", "198.51.100.0/24"]
+
+       POLICY consensus_routing:
+         route.prefix IN sensitive_prefixes
+         THEN IF Std.Consensus.require_votes(ACCEPT(route),
+                                             threshold: 0.67)
+              THEN ACCEPT(route)
+              ELSE REJECT("Consensus not reached")
+         PRIORITY: 100
+
+       POLICY maintenance_override:
+         Std.Temporal.within_window("02:00", "04:00")
+         AND route.community_contains("65000:999")
+         THEN ACCEPT(route)
+         PRIORITY: 50
+
+
+Appendix B.  Formal Semantics
+
+   This appendix provides the complete formal semantics for Phronesis.
+
+B.1.  Abstract Syntax
+
+       Expr ::= n                    (integer literal)
+              | x                    (variable)
+              | Expr op Expr         (binary operation)
+              | M.f(Expr, ...)       (module call)
+              | IF Expr THEN Expr ELSE Expr
+
+       Action ::= ACCEPT(Expr)
+                | REJECT(Expr)
+                | REPORT(Expr)
+                | EXECUTE(f, Expr, ...)
+                | IF Expr THEN Action ELSE Action
+
+       Policy ::= POLICY name: Expr THEN Action PRIORITY: n
+
+       Decl ::= Policy | CONST name = Expr | IMPORT path [AS name]
+
+       Program ::= Decl*
+
+B.2.  Type System
+
+       Gamma ::= . | Gamma, x : T
+
+       ----------- (T-Int)
+       Gamma |- n : Integer
+
+       Gamma(x) = T
+       ----------- (T-Var)
+       Gamma |- x : T
+
+       Gamma |- e1 : Integer    Gamma |- e2 : Integer
+       ----------------------------------------------- (T-Arith)
+       Gamma |- e1 op e2 : Integer
+
+       Gamma |- e1 : T    Gamma |- e2 : T    op in {==, !=}
+       ----------------------------------------------------- (T-Eq)
+       Gamma |- e1 op e2 : Boolean
+
+B.3.  Termination Proof
+
+   Theorem: All Phronesis programs terminate.
+
+   Proof: By structural induction on the AST.
+
+   Base cases:
+   - Literals evaluate in O(1)
+   - Variables look up in O(1)
+
+   Inductive cases:
+   - Binary ops: subexpressions terminate (IH), then O(1) op
+   - Conditionals: condition terminates (IH), one branch terminates (IH)
+   - Module calls: finite, terminating implementations
+
+   There are no constructs for unbounded iteration or recursion.
+   Therefore, all programs terminate.  QED.
+
+
+Appendix C.  Safety Proofs
+
+C.1.  Sandbox Isolation Theorem
+
+   Theorem: Policy code cannot access system resources.
+
+   Proof: By exhaustive analysis of execution paths.
+
+   The grammar allows only:
+   - EXECUTE(f, args): calls registered functions only
+   - REPORT(msg): appends to ConsensusLog only
+   - REJECT/ACCEPT: returns result only
+
+   The interpreter's execute_action function handles these cases
+   exhaustively. Module lookup is restricted to registered modules.
+   No path exists to file, network, or system operations.  QED.
+
+C.2.  Capability Soundness Theorem
+
+   Theorem: No operation executes without required capability.
+
+   Proof: By inspection of enforcement points.
+
+   All execution paths go through:
+   1. call_module/3: checks capability_for_module
+   2. do_execute_action/2: checks capability_for_action
+
+   Capabilities cannot be escalated because:
+   - Set only at context creation
+   - Never modified during execution
+   - State.capabilities is immutable
+
+   Therefore, all operations require proper capability.  QED.
+
+C.3.  Byzantine Fault Tolerance Theorem
+
+   Theorem: With N >= 3f + 1 agents and threshold t = (2N+1)/3,
+   no conflicting actions commit and Byzantine agents cannot
+   force invalid actions.
+
+   Proof:
+
+   (1) No conflicting actions:
+   Suppose actions A and A' both commit.
+   - A requires t votes: |votes_A| >= (2N+1)/3
+   - A' requires t votes: |votes_A'| >= (2N+1)/3
+   - Total: |votes_A| + |votes_A'| >= (4N+2)/3 > N
+
+   This contradicts N total agents. Therefore at most one commits.
+
+   (2) Byzantine cannot force invalid actions:
+   - Byzantine control at most f votes
+   - Threshold t = (2N+1)/3 = 2f+1 (for N = 3f+1)
+   - f < 2f+1, so Byzantine alone cannot reach threshold
+   - At least f+1 honest votes needed
+   - Honest agents only vote for valid actions
+
+   Therefore only valid actions can commit.  QED.
+
+
+Appendix D.  TLA+ Specification
+
+   The consensus protocol has been specified in TLA+ for model checking.
+
+D.1.  State Variables
+
+       VARIABLES
+         currentTerm,    \* Current term for each node
+         votedFor,       \* Candidate voted for in current term
+         log,            \* Log entries for each node
+         commitIndex,    \* Highest committed index
+         state,          \* Node state (follower/candidate/leader)
+         votes           \* Votes received by candidates
+
+D.2.  Safety Property
+
+       Safety ==
+         /\ ElectionSafety
+         /\ LogMatching
+         /\ LeaderCompleteness
+         /\ StateMachineSafety
+
+       ElectionSafety ==
+         \A t \in 1..MaxTerm:
+           Cardinality({n \in Nodes: state[n] = "leader"
+                        /\ currentTerm[n] = t}) <= 1
+
+D.3.  Liveness Property
+
+       Liveness ==
+         \A c \in Commands:
+           WF_vars(LeaderAppendEntry(c)) =>
+             <>(c \in CommittedCommands)
+
+   The complete TLA+ specification is available at:
+   https://github.com/hyperpolymath/phronesis/blob/main/formal/
+
+
+Authors' Addresses
+
+   Phronesis Development Team
+   Hyperpolymath Labs
+
+   Email: phronesis@hyperpolymath.io
+   URI:   https://github.com/hyperpolymath/phronesis

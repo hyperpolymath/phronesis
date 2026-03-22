@@ -1,0 +1,32 @@
+# GitHub Linguist language definition for Phronesis
+# Place this in .github/linguist.yml or submit to github/linguist
+
+# Language definition
+Phronesis:
+  type: programming
+  color: "#5E2CA5"  # Purple (consensus/policy theme)
+  extensions:
+    - ".phr"
+  tm_scope: source.phronesis
+  ace_mode: text
+  language_id: 999999999  # Temporary ID, will be assigned by GitHub
+
+# File associations
+*.phr:
+  language: Phronesis
+
+# Documentation files
+README.phr:
+  documentation: true
+EXAMPLE.phr:
+  documentation: true
+
+# Vendored paths (exclude from language stats)
+vendored:
+  - "vendor/**"
+  - "deps/**"
+
+# Generated files
+generated:
+  - "**/*.phrc"  # Compiled bytecode
+  - "_build/**"

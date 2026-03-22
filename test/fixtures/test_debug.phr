@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Test policy for debugger
+
+CONST threshold = 50
+
+POLICY test_policy:
+  risk_level > threshold
+  THEN REJECT("Risk too high")
+  PRIORITY: 100
+  EXPIRES: never
+  CREATED_BY: test

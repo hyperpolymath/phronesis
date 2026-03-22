@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Example file to demonstrate enhanced diagnostics
+
+# Correct constant
+CONST threshold = 0.75
+
+# Typo in variable name (will suggest 'threshold')
+POLICY example_policy:
+  risk_level > threshhold
+  THEN ACCEPT("Risk acceptable")
+  PRIORITY: 100
+  EXPIRES: never
+  CREATED_BY: diagnostics_demo
+
+# Unused import (will warn)
+IMPORT Std.Temporal
+
+# Reference to undefined variable (will error with suggestion)
+POLICY undefined_var:
+  risk_levle > 50
+  THEN REJECT("High risk")
+  PRIORITY: 90
+  EXPIRES: never
+  CREATED_BY: diagnostics_demo

@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Sample Phronesis policy for LSP testing
+
+IMPORT Std.BGP
+IMPORT Std.RPKI
+IMPORT Std.Consensus
+
+CONST VALID_ASN_LIST = [64496, 64497, 64498]
+CONST MIN_APPROVALS = 0.6
+
+# Test policy for BGP route validation
+POLICY validate_bgp_route:
+  # Check RPKI validation
+  rpki_result = Std.RPKI.validate(route)
+
+  # Get AS path
+  as_path = Std.BGP.extract_as_path(route)
+  origin_asn = Std.BGP.get_origin(route)
+
+  # Consensus check
+  votes = [
+    {:approve, "rpki-validator"},
+    {:approve, "route-server-1"},
+    {:reject, "route-server-2"}
+  ]
+
+  consensus = Std.Consensus.vote("validate_route", votes, MIN_APPROVALS)
+
+  IF rpki_result == :valid AND consensus == :approved THEN
+    ACCEPT "Route validated by RPKI and consensus"
+  ELSE
+    REJECT "Route failed validation"
+PRIORITY 100
+EXPIRES "2025-12-31"
+CREATED_BY "network-admin"
+
+# Test auto-completion here
+# Type: Std.

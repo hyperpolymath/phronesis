@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Example for performance profiling
+
+CONST threshold_high = 100
+CONST threshold_low = 10
+
+# Fast policy - simple comparison
+POLICY fast_check:
+  risk_level > threshold_low
+  THEN ACCEPT("Low risk passed")
+  PRIORITY: 10
+  EXPIRES: never
+  CREATED_BY: profiler
+
+# Medium policy - some computation
+POLICY medium_check:
+  risk_level > threshold_high
+  THEN REJECT("High risk detected")
+  PRIORITY: 50
+  EXPIRES: never
+  CREATED_BY: profiler
+
+# Another fast check
+POLICY another_fast:
+  risk_level < threshold_high
+  THEN ACCEPT("Within threshold")
+  PRIORITY: 30
+  EXPIRES: never
+  CREATED_BY: profiler

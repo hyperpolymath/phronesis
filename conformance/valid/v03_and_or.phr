@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Conformance: compound conditions with AND/OR
+
+POLICY compound_logic:
+  IF (score > 50 AND status == :active) OR override == true THEN
+    ACCEPT "Conditions met"
+  ELSE
+    REJECT "Conditions not met"
+PRIORITY 75
+EXPIRES "2030-12-31"
+CREATED_BY "test_suite"

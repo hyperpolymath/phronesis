@@ -1,0 +1,80 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Example test file for BGP security policies
+# Run with: phronesis test test/test_bgp_security.phr
+
+TEST "BGP Security Policies" {
+  SCENARIO "RPKI validation rejects invalid route" {
+    GIVEN
+      route = {prefix: "192.0.2.0/24", origin: 99999}
+
+    EXPECT REJECT("RPKI validation failed")
+  }
+
+  SCENARIO "RPKI validation accepts valid route" {
+    GIVEN
+      route = {prefix: "192.0.2.0/24", origin: 64512}
+
+    EXPECT ACCEPT()
+  }
+
+  SCENARIO "AS path loop detection" {
+    GIVEN
+      my_asn = 64512
+      route = {as_path: [64513, 64512, 64514]}
+
+    EXPECT REJECT("AS path loop detected")
+  }
+
+  SCENARIO "Bogon ASN filter" {
+    GIVEN
+      route = {as_path: [64512], origin: 64512}
+
+    EXPECT REJECT("Bogon private ASN in origin")
+  }
+
+  SCENARIO "Valid public AS path" {
+    GIVEN
+      route = {as_path: [1, 2, 3], origin: 3}
+
+    EXPECT ACCEPT()
+  }
+}
+
+TEST "Consensus Voting" {
+  SCENARIO "2/3 consensus achieved" {
+    GIVEN
+      agents = ["alice", "bob", "carol"]
+      threshold = 0.67
+
+    EXPECT CONSENSUS(threshold: 0.67, agents: 3)
+  }
+
+  SCENARIO "Simple majority required" {
+    GIVEN
+      agents = ["alice", "bob"]
+      threshold = 0.5
+
+    EXPECT CONSENSUS(threshold: 0.5, agents: 2)
+  }
+}
+
+TEST "Temporal Policies" {
+  SCENARIO "Policy expired" {
+    GIVEN
+      created_at = Std.Temporal.now()
+      duration = 3600
+      # Simulate time passing
+      elapsed = 7200
+
+    EXPECT REJECT("Policy expired")
+  }
+
+  SCENARIO "Within time window" {
+    GIVEN
+      start_time = "2026-01-30T09:00:00Z"
+      end_time = "2026-01-30T17:00:00Z"
+      # Current time within window
+
+    EXPECT ACCEPT("Within business hours")
+  }
+}

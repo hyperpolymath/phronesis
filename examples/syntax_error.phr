@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# File with syntax errors to test diagnostics
+
+CONST threshold = 0.75
+
+# Missing THEN keyword
+POLICY broken_policy:
+  risk_level > threshold
+  ACCEPT("This is broken")
+  PRIORITY: 100
+  EXPIRES: never
+  CREATED_BY: test

@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Conformance: ACCEPT and REJECT actions
+
+POLICY accept_action:
+  value >= 100
+  THEN ACCEPT("High value accepted")
+  PRIORITY: 200
+  EXPIRES: never
+  CREATED_BY: conformance_suite
+
+POLICY reject_action:
+  value < 0
+  THEN REJECT("Negative value rejected")
+  PRIORITY: 300
+  EXPIRES: never
+  CREATED_BY: conformance_suite

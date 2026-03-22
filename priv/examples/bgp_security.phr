@@ -1,0 +1,45 @@
+# BGP Security Policies
+# These policies implement common BGP security best practices
+
+IMPORT Std.RPKI
+IMPORT Std.BGP
+IMPORT Std.Consensus
+
+# Define local ASN
+CONST my_asn = 64512
+
+# RPKI Validation Policy
+# Reject routes that fail RPKI validation
+POLICY rpki_validation:
+  Std.RPKI.validate(route) == "invalid"
+  THEN REJECT("RPKI validation failed: origin not authorized")
+  PRIORITY: 200
+  EXPIRES: never
+  CREATED_BY: security_team
+
+# AS Path Loop Detection
+# Reject routes that contain our own ASN (loop)
+POLICY as_path_loop_detection:
+  my_asn IN Std.BGP.extract_as_path(route)
+  THEN REJECT("AS path loop detected")
+  PRIORITY: 300
+  EXPIRES: never
+  CREATED_BY: bgp_module
+
+# Bogon ASN Filter
+# Reject routes with private/reserved ASNs
+POLICY bogon_asn_filter:
+  Std.BGP.get_origin(route) >= 64512 AND Std.BGP.get_origin(route) <= 65534
+  THEN REJECT("Bogon private ASN in origin")
+  PRIORITY: 250
+  EXPIRES: never
+  CREATED_BY: security_team
+
+# Maximum AS Path Length
+# Reject routes with excessively long AS paths
+POLICY max_as_path_length:
+  Std.BGP.path_length(route) > 50
+  THEN REJECT("AS path too long")
+  PRIORITY: 100
+  EXPIRES: never
+  CREATED_BY: policy_team

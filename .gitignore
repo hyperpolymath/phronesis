@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+
+# Elixir/Mix
+/_build/
+/deps/
+*.ez
+erl_crash.dump
+*.beam
+.fetch
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+Thumbs.db
+.Trash-*/
+
+# Temporary
+*.tmp
+*.log

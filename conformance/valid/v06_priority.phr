@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Conformance: priority declaration with numeric value
+
+CONST THRESHOLD = 42
+
+POLICY priority_test:
+  value > THRESHOLD
+  THEN ACCEPT("Above threshold")
+  PRIORITY: 999
+  EXPIRES: never
+  CREATED_BY: conformance_suite

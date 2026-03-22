@@ -1,0 +1,35 @@
+{
+  "comments": {
+    "lineComment": "#",
+    "blockComment": ["##", "##"]
+  },
+  "brackets": [
+    ["{", "}"],
+    ["[", "]"],
+    ["(", ")"]
+  ],
+  "autoClosingPairs": [
+    { "open": "{", "close": "}" },
+    { "open": "[", "close": "]" },
+    { "open": "(", "close": ")" },
+    { "open": "\"", "close": "\"", "notIn": ["string"] },
+    { "open": "'", "close": "'", "notIn": ["string"] }
+  ],
+  "surroundingPairs": [
+    ["{", "}"],
+    ["[", "]"],
+    ["(", ")"],
+    ["\"", "\""],
+    ["'", "'"]
+  ],
+  "indentationRules": {
+    "increaseIndentPattern": "^\\s*(POLICY|SCENARIO|TEST|GIVEN).*:$",
+    "decreaseIndentPattern": "^\\s*(THEN|PRIORITY|EXPIRES|CREATED_BY|EXPECT).*$"
+  },
+  "folding": {
+    "markers": {
+      "start": "^\\s*(POLICY|TEST|SCENARIO)",
+      "end": "^\\s*(PRIORITY|EXPECT)"
+    }
+  }
+}

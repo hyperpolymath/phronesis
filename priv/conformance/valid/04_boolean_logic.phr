@@ -1,0 +1,18 @@
+# Conformance Test: Boolean Logic Operators
+# Expected: Parse successfully with AND, OR, NOT operators
+
+CONST enabled = true
+
+POLICY complex_condition:
+  (is_valid == true AND enabled) OR (override == true AND NOT is_blocked)
+  THEN ACCEPT("Complex condition satisfied")
+  PRIORITY: 100
+  EXPIRES: never
+  CREATED_BY: test_suite
+
+POLICY negation_test:
+  NOT is_rejected
+  THEN ACCEPT("Not rejected")
+  PRIORITY: 50
+  EXPIRES: never
+  CREATED_BY: test_suite

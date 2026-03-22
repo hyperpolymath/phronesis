@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Conformance: basic POLICY with action and metadata
+
+POLICY basic_check:
+  value > 0
+  THEN ACCEPT("Value is positive")
+  PRIORITY: 100
+  EXPIRES: never
+  CREATED_BY: conformance_suite

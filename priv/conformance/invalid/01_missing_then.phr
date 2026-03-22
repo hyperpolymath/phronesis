@@ -1,0 +1,9 @@
+# Invalid Conformance Test: Missing THEN keyword
+# Expected: Parse error - THEN keyword required after condition
+
+POLICY missing_then:
+  value > 0
+  ACCEPT("Should fail - missing THEN")
+  PRIORITY: 100
+  EXPIRES: never
+  CREATED_BY: test_suite

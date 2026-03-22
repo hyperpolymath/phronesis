@@ -1,0 +1,27 @@
+# Conformance Test: Arithmetic and Comparison Operators
+# Expected: Parse successfully with all arithmetic and comparison operators
+
+CONST base_rate = 100
+CONST multiplier = 2
+CONST offset = 50
+
+POLICY arithmetic_check:
+  calculated_value == base_rate * multiplier + offset
+  THEN ACCEPT("Calculation matches expected")
+  PRIORITY: 100
+  EXPIRES: never
+  CREATED_BY: test_suite
+
+POLICY comparison_operators:
+  a > 0 AND b >= 0 AND c < 100 AND d <= 100 AND e != f
+  THEN ACCEPT("All comparisons passed")
+  PRIORITY: 90
+  EXPIRES: never
+  CREATED_BY: test_suite
+
+POLICY division_check:
+  total / count > threshold
+  THEN REJECT("Average exceeds threshold")
+  PRIORITY: 80
+  EXPIRES: never
+  CREATED_BY: test_suite

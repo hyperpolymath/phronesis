@@ -1,0 +1,210 @@
+(* ====================================================================== *)
+(* Phronesis Policy Language Grammar Specification                        *)
+(* Version: 0.2.0                                                        *)
+(* Date: 2026-03-14                                                       *)
+(* Source: lib/phronesis/parser.ex (recursive descent, LL(1))             *)
+(* Notation: ISO/IEC 14977 EBNF                                          *)
+(* SPDX-License-Identifier: PMPL-1.0-or-later                            *)
+(* ====================================================================== *)
+
+(* ====================================================================== *)
+(* OPERATOR PRECEDENCE (lowest to highest)                                *)
+(* ====================================================================== *)
+(*                                                                        *)
+(*  Level  Assoc   Operators                                              *)
+(*  -----  ------  -----------------------------------------------        *)
+(*    1    left    AND OR              (logical connectives)               *)
+(*    2    none    == != < > <= >= IN  (comparison / membership)           *)
+(*    3    left    + -                 (additive)                          *)
+(*    4    left    * /                 (multiplicative)                    *)
+(*    5    right   NOT -              (unary prefix)                       *)
+(*    -    left    . ?.               (postfix access)                     *)
+(*                                                                        *)
+(* ====================================================================== *)
+
+
+(* ====================================================================== *)
+(* 1. PROGRAM STRUCTURE                                                   *)
+(* ====================================================================== *)
+
+program          = { declaration } ;
+
+declaration      = policy_decl
+                 | import_decl
+                 | const_decl ;
+
+
+(* ====================================================================== *)
+(* 2. POLICY DECLARATIONS                                                 *)
+(* ====================================================================== *)
+
+policy_decl      = "POLICY" , identifier , ":" ,
+                   logical_expr ,
+                   "THEN" , action ,
+                   policy_metadata ;
+
+policy_metadata  = "PRIORITY:" , integer ,
+                   [ "EXPIRES:" , expires_value ] ,
+                   [ "CREATED_BY:" , identifier ] ;
+
+expires_value    = "never" | datetime ;
+
+
+(* ====================================================================== *)
+(* 3. IMPORT DECLARATIONS                                                 *)
+(* ====================================================================== *)
+
+import_decl      = "IMPORT" , module_path , [ "AS" , identifier ] ;
+
+module_path      = identifier , { "." , identifier } ;
+
+
+(* ====================================================================== *)
+(* 4. CONSTANT DECLARATIONS                                               *)
+(* ====================================================================== *)
+
+const_decl       = "CONST" , identifier , "=" , logical_expr ;
+
+
+(* ====================================================================== *)
+(* 5. ACTIONS                                                             *)
+(* ====================================================================== *)
+
+action           = execute_action
+                 | report_action
+                 | reject_action
+                 | accept_action
+                 | block_action
+                 | conditional_action ;
+
+execute_action   = "EXECUTE" , "(" , identifier , [ "," , arguments ] , ")" ;
+
+report_action    = "REPORT" , "(" , expression , ")" ;
+
+reject_action    = "REJECT" , [ "(" , [ expression ] , ")" ] ;
+
+accept_action    = "ACCEPT" , [ "(" , [ expression ] , ")" ] ;
+
+block_action     = "BEGIN" , { action } , "END" ;
+
+conditional_action = "IF" , logical_expr , "THEN" , action ,
+                     [ "ELSE" , action ] ;
+
+
+(* ====================================================================== *)
+(* 6. LOGICAL EXPRESSIONS                                                 *)
+(* ====================================================================== *)
+
+(* Logical expressions form the condition language for policies.          *)
+(* They combine comparisons with AND/OR/NOT connectives.                  *)
+
+logical_expr     = comparison_expr , { ( "AND" | "OR" ) , comparison_expr } ;
+
+comparison_expr  = "NOT" , comparison_expr
+                 | expression , rel_op , expression
+                 | expression ;
+
+rel_op           = "==" | "!=" | ">" | ">=" | "<" | "<=" | "IN" ;
+
+
+(* ====================================================================== *)
+(* 7. ARITHMETIC EXPRESSIONS                                              *)
+(* ====================================================================== *)
+
+expression       = term , { ( "+" | "-" ) , term } ;
+
+term             = factor , { ( "*" | "/" ) , factor } ;
+
+factor           = "-" , factor                             (* unary negation *)
+                 | "(" , expression , ")"                   (* grouping *)
+                 | literal
+                 | identifier_or_call ;
+
+
+(* ====================================================================== *)
+(* 8. IDENTIFIERS, CALLS, AND ACCESS                                      *)
+(* ====================================================================== *)
+
+identifier_or_call = identifier , postfix_chain ;
+
+postfix_chain    = (* empty *)
+                 | "." , identifier , postfix_chain           (* field access *)
+                 | "?." , identifier , postfix_chain          (* optional chain *)
+                 | "(" , [ arguments ] , ")" , postfix_chain  (* function call *)
+                 ;
+
+(* Module-qualified calls: Std.RPKI.validate(route)                       *)
+(* Optional chaining: record?.field?.nested (v0.2.x)                      *)
+
+arguments        = argument , { "," , argument } ;
+
+argument         = expression
+                 | identifier , ":" , expression ;  (* named argument *)
+
+
+(* ====================================================================== *)
+(* 9. LITERALS                                                            *)
+(* ====================================================================== *)
+
+literal          = integer
+                 | hex_integer
+                 | binary_integer
+                 | octal_integer
+                 | float
+                 | string_lit
+                 | raw_string_lit
+                 | multiline_string_lit
+                 | interpolated_string_lit
+                 | ip_address
+                 | ipv6_address
+                 | datetime
+                 | "true" | "false"
+                 | "null" ;
+
+
+(* ====================================================================== *)
+(* 10. LEXICAL ELEMENTS                                                   *)
+(* ====================================================================== *)
+
+identifier       = ? letter or '_' followed by alphanumerics or '_' ? ;
+
+integer          = ? decimal digit sequence ? ;
+
+hex_integer      = "0x" , ? hex digit sequence ? ;
+
+binary_integer   = "0b" , ? binary digit sequence ? ;
+
+octal_integer    = "0o" , ? octal digit sequence ? ;
+
+float            = ? decimal digits with '.' and optional exponent ? ;
+
+string_lit       = '"' , { ? any char except '"' with escape support ? } , '"' ;
+
+raw_string_lit   = ? raw string literal (no escape processing) ? ;
+
+multiline_string_lit = ? triple-quoted string literal ? ;
+
+interpolated_string_lit = ? string with embedded ${expression} segments ? ;
+
+ip_address       = ? IPv4 address literal (e.g. 192.168.1.0/24) ? ;
+
+ipv6_address     = ? IPv6 address literal (e.g. 2001:db8::/32) ? ;
+
+datetime         = ? ISO 8601 datetime literal ? ;
+
+
+(* ====================================================================== *)
+(* 11. LEXICAL NOTES                                                      *)
+(* ====================================================================== *)
+(* 1. Whitespace is ignored except to separate tokens.                    *)
+(* 2. The language is case-sensitive.                                     *)
+(* 3. Keywords (all uppercase): POLICY, IMPORT, CONST, THEN, PRIORITY,   *)
+(*    EXPIRES, CREATED_BY, EXECUTE, REPORT, REJECT, ACCEPT, BEGIN, END,  *)
+(*    IF, ELSE, AND, OR, NOT, IN, AS.                                    *)
+(* 4. Special literals: "never" (for EXPIRES), "true", "false", "null".  *)
+(* 5. The parser is LL(1) -- all constructs use distinct leading tokens,  *)
+(*    requiring no backtracking.                                          *)
+(* 6. v0.2.x additions: hex/binary/octal integers, raw strings,         *)
+(*    multiline strings, interpolated strings, IPv6 addresses, optional  *)
+(*    chaining (?.), named arguments, null literal.                       *)
+(* ====================================================================== *)

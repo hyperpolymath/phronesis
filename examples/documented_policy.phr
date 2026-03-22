@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Example policy file with documentation comments
+
+# CONST: threshold - Risk threshold above which routes are rejected
+CONST threshold = 75
+
+# CONST: max_as_path_length - Maximum allowed AS path length
+CONST max_as_path_length = 10
+
+# POLICY: security_check - Primary security validation policy
+POLICY security_check:
+  risk_level > threshold
+  THEN REJECT("Risk level too high")
+  PRIORITY: 100
+  EXPIRES: never
+  CREATED_BY: security_team
+
+# POLICY: as_path_validation - Validates BGP AS path length
+POLICY as_path_validation:
+  as_path_length > max_as_path_length
+  THEN REJECT("AS path too long")
+  PRIORITY: 90
+  EXPIRES: never
+  CREATED_BY: bgp_team
+
+# POLICY: low_risk_accept - Accepts routes with low risk scores
+POLICY low_risk_accept:
+  risk_level < threshold
+  THEN ACCEPT("Low risk route accepted")
+  PRIORITY: 50
+  EXPIRES: never
+  CREATED_BY: routing_team

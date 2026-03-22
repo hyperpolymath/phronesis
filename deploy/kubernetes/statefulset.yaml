@@ -1,0 +1,195 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Kubernetes StatefulSet for Phronesis consensus cluster
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: phronesis
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: phronesis-cluster-secret
+  namespace: phronesis
+type: Opaque
+stringData:
+  # Change this to a secure random string in production
+  erlang-cookie: "phronesis_production_cookie_change_me"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: phronesis-headless
+  namespace: phronesis
+  labels:
+    app: phronesis
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app: phronesis
+  ports:
+    - name: epmd
+      port: 4369
+      targetPort: 4369
+    - name: distribution
+      port: 9100
+      targetPort: 9100
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: phronesis-service
+  namespace: phronesis
+  labels:
+    app: phronesis
+spec:
+  type: LoadBalancer
+  selector:
+    app: phronesis
+  ports:
+    - name: epmd
+      port: 4369
+      targetPort: 4369
+    - name: distribution
+      port: 9100
+      targetPort: 9100
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: phronesis
+  namespace: phronesis
+  labels:
+    app: phronesis
+spec:
+  serviceName: phronesis-headless
+  replicas: 3
+  selector:
+    matchLabels:
+      app: phronesis
+  template:
+    metadata:
+      labels:
+        app: phronesis
+    spec:
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+        runAsNonRoot: true
+
+      initContainers:
+        - name: wait-for-cluster
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              # Wait for DNS to be ready
+              until nslookup phronesis-headless.phronesis.svc.cluster.local; do
+                echo "Waiting for DNS..."
+                sleep 2
+              done
+              echo "DNS ready!"
+
+      containers:
+        - name: phronesis
+          image: phronesis:latest
+          imagePullPolicy: IfNotPresent
+
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+
+            - name: RELEASE_DISTRIBUTION
+              value: "name"
+
+            - name: RELEASE_NODE
+              value: "$(POD_NAME)@$(POD_NAME).phronesis-headless.$(POD_NAMESPACE).svc.cluster.local"
+
+            - name: RELEASE_COOKIE
+              valueFrom:
+                secretKeyRef:
+                  name: phronesis-cluster-secret
+                  key: erlang-cookie
+
+            - name: PHRONESIS_CONSENSUS_ENABLED
+              value: "true"
+
+            - name: PHRONESIS_NODE_ID
+              value: "$(POD_NAME)"
+
+            - name: ERL_DIST_PORT
+              value: "9100"
+
+          ports:
+            - name: epmd
+              containerPort: 4369
+              protocol: TCP
+
+            - name: distribution
+              containerPort: 9100
+              protocol: TCP
+
+          volumeMounts:
+            - name: consensus-data
+              mountPath: /app/priv/consensus_data
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+          livenessProbe:
+            exec:
+              command:
+                - /app/bin/phronesis
+                - rpc
+                - "node()"
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+
+          readinessProbe:
+            exec:
+              command:
+                - /app/bin/phronesis
+                - rpc
+                - "Application.started_applications() |> Enum.any?(fn {app, _, _} -> app == :phronesis end)"
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 3
+
+  volumeClaimTemplates:
+    - metadata:
+        name: consensus-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
+        # Uncomment and set your storage class
+        # storageClassName: fast-ssd

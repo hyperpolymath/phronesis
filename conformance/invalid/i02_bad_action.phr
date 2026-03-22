@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Conformance (INVALID): unknown action keyword (DESTROY is not valid)
+
+POLICY bad_action:
+  value > 0
+  THEN DESTROY("invalid action")
+  PRIORITY: 100
+  EXPIRES: never
+  CREATED_BY: test

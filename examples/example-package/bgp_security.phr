@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# BGP Security policies
+
+CONST max_as_path_length = 255
+CONST suspicious_asn_threshold = 3
+
+POLICY reject_long_as_path:
+  as_path_length > max_as_path_length
+  THEN REJECT("AS path too long - potential route hijacking")
+  PRIORITY: 100
+  EXPIRES: never
+  CREATED_BY: bgp_security
+
+POLICY check_rpki_validation:
+  rpki_status == "invalid"
+  THEN REJECT("RPKI validation failed")
+  PRIORITY: 90
+  EXPIRES: never
+  CREATED_BY: bgp_security

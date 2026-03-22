@@ -1,0 +1,11 @@
+# Invalid Conformance Test: Using reserved word as identifier
+# Expected: Parse error - POLICY cannot be used as constant name
+
+CONST POLICY = 100
+
+POLICY bad_const:
+  POLICY > 50
+  THEN ACCEPT("Should fail - reserved word as const")
+  PRIORITY: 100
+  EXPIRES: never
+  CREATED_BY: test_suite
