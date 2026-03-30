@@ -375,7 +375,7 @@ defmodule Phronesis.Interpreter do
 
   defp resolve_module(["Std", module_name | _rest] = path) do
     # Map Std.BGP → Phronesis.Stdlib.BGP, Std.RPKI → Phronesis.Stdlib.RPKI, etc.
-    elixir_module = Module.concat([Phronesis, Stdlib, String.to_atom(module_name)])
+    elixir_module = Module.concat([Phronesis, Stdlib, String.to_existing_atom(module_name)])
 
     case Code.ensure_loaded(elixir_module) do
       {:module, _mod} ->

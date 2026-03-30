@@ -19,7 +19,7 @@ defmodule Phronesis.Consensus.Supervisor do
   def init(_opts) do
     # Check if consensus mode is enabled via environment
     consensus_enabled = System.get_env("PHRONESIS_CONSENSUS_ENABLED", "false") == "true"
-    node_id = String.to_atom(System.get_env("PHRONESIS_NODE_ID", "node1"))
+    node_id = String.to_existing_atom(System.get_env("PHRONESIS_NODE_ID", "node1"))
 
     children =
       if consensus_enabled do

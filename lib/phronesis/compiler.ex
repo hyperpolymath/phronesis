@@ -619,7 +619,7 @@ defmodule Phronesis.Compiler do
 
     value =
       case base do
-        %{} = map -> Map.get(map, String.to_atom(field)) || Map.get(map, field)
+        %{} = map -> Map.get(map, String.to_existing_atom(field)) || Map.get(map, field)
         _ -> nil
       end
 
@@ -632,7 +632,7 @@ defmodule Phronesis.Compiler do
     value =
       case base do
         nil -> nil
-        %{} = map -> Map.get(map, String.to_atom(field)) || Map.get(map, field)
+        %{} = map -> Map.get(map, String.to_existing_atom(field)) || Map.get(map, field)
         _ -> nil
       end
 

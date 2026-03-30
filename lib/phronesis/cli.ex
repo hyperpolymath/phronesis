@@ -897,7 +897,7 @@ defmodule Phronesis.CLI do
   end
 
   defp run_benchmark(name, opts) do
-    benchmark = String.to_atom(name)
+    benchmark = String.to_existing_atom(name)
     iterations = Keyword.get(opts, :iterations, 10_000)
 
     result = Phronesis.Benchmark.run(benchmark, iterations: iterations)

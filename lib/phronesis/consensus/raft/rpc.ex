@@ -108,7 +108,7 @@ defmodule Phronesis.Consensus.Raft.RPC do
   defp parse_distributed_node(node_id) do
     case String.split(node_id, "@") do
       [name, host] ->
-        node = String.to_atom("#{name}@#{host}")
+        node = String.to_existing_atom("#{name}@#{host}")
 
         if node in [node() | Node.list()] do
           {:ok, node, {:via, Registry, {Phronesis.Consensus.Registry, name}}}
