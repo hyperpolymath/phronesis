@@ -146,10 +146,54 @@ lookupEnv (there x) (ρ ▷ _) = lookupEnv x ρ
 open import Data.Integer using (_+_; _-_; _*_; _≤ᵇ_) renaming (_+_ to _+ℤ_; _-_ to _-ℤ_; _*_ to _*ℤ_)
 
 -- Value equality (for comparison operators)
-postulate
-  _≡ᵛ_ : ∀ {τ} → ⟦ τ ⟧ → ⟦ τ ⟧ → Bool
-  _<ᵛ_ : ℤ → ℤ → Bool
-  _∈ᵛ_ : ∀ {τ} → ⟦ τ ⟧ → List ⟦ τ ⟧ → Bool
+-- Implemented via decidable equality per type, not postulated.
+
+open import Data.Integer using (_≟_) renaming (_≟_ to _≟ℤ_)
+open import Data.String using () renaming (_≟_ to _≟ˢ_)
+open import Data.Nat using () renaming (_≟_ to _≟ⁿ_)
+open import Data.Bool using () renaming (_≟_ to _≟ᵇ_)
+
+-- Decidable equality on semantic values, by induction on the type index.
+-- TFloat is represented as ℤ (placeholder), TDateTime as ℤ, TIP as 4-tuple of ℕ.
+-- TRecord and TList use structural recursion.
+{-# TERMINATING #-}
+_≡ᵛ_ : ∀ {τ} → ⟦ τ ⟧ → ⟦ τ ⟧ → Bool
+_≡ᵛ_ {TInt} a b with a ≟ℤ b
+... | yes _ = true
+... | no  _ = false
+_≡ᵛ_ {TFloat} a b with a ≟ℤ b
+... | yes _ = true
+... | no  _ = false
+_≡ᵛ_ {TString} a b with a ≟ˢ b
+... | yes _ = true
+... | no  _ = false
+_≡ᵛ_ {TBool} a b with a ≟ᵇ b
+... | yes _ = true
+... | no  _ = false
+_≡ᵛ_ {TIP} (a₁ , a₂ , a₃ , a₄) (b₁ , b₂ , b₃ , b₄)
+  with a₁ ≟ⁿ b₁ | a₂ ≟ⁿ b₂ | a₃ ≟ⁿ b₃ | a₄ ≟ⁿ b₄
+... | yes _ | yes _ | yes _ | yes _ = true
+... | _     | _     | _     | _     = false
+_≡ᵛ_ {TDateTime} a b with a ≟ℤ b
+... | yes _ = true
+... | no  _ = false
+_≡ᵛ_ {TList τ} [] [] = true
+_≡ᵛ_ {TList τ} (x ∷ xs) (y ∷ ys) = (_≡ᵛ_ {τ} x y) ∧ (_≡ᵛ_ {TList τ} xs ys)
+_≡ᵛ_ {TList _} _ _ = false
+_≡ᵛ_ {TRecord []} tt tt = true
+_≡ᵛ_ {TRecord ((f , τ) ∷ fs)} (v , vs) (w , ws) =
+  (_≡ᵛ_ {τ} v w) ∧ (_≡ᵛ_ {TRecord fs} vs ws)
+_≡ᵛ_ {TNull} tt tt = true
+
+-- Integer less-than via the standard library ordering.
+_<ᵛ_ : ℤ → ℤ → Bool
+a <ᵛ b = a ≤ᵇ b ∧ not (a ≡ᵛ b)
+  where open import Data.Integer using (_≤ᵇ_)
+
+-- List membership via value equality.
+_∈ᵛ_ : ∀ {τ} → ⟦ τ ⟧ → List ⟦ τ ⟧ → Bool
+x ∈ᵛ [] = false
+x ∈ᵛ (y ∷ ys) = (x ≡ᵛ y) ∨ (x ∈ᵛ ys)
 
 -- The evaluation function - total by construction!
 eval : ∀ {Γ τ} → Env Γ → Expr Γ τ → ⟦ τ ⟧
