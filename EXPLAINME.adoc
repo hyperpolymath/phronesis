@@ -1,0 +1,163 @@
+// SPDX-License-Identifier: PMPL-1.0-or-later
+= Phronesis — Show Me The Receipts
+:toc:
+:icons: font
+
+The README makes claims. This file backs them up.
+
+== A Provably Safe Language for Agentic Ethical Reasoning
+
+[quote, README]
+____
+Phronesis is a neuro-symbolic, agentic language designed to formalize ethical
+reasoning in autonomous systems. It fuses the precision of Symbolic AI with the
+adaptability of neural networks, enforcing provable safety and fault tolerance
+through a dedicated BEAM VM runtime.
+____
+
+Phronesis is a compiled policy language, not a library. The pipeline is:
+source text → `Phronesis.Lexer` → `Phronesis.Parser` → AST → `Phronesis.Compiler`
+→ bytecode (`.phrc` files) → `Phronesis.Interpreter`. The Elixir implementation
+lives in `lib/phronesis/`. The language has 15 keywords including `ACCEPT`,
+`REJECT`, `REPORT`, and `EXECUTE`, plus probabilistic type literals
+(`BeliefFunction`, `ProbabilityDistribution`) and a mandatory `REPORT` action
+for flagging model-reality inconsistencies (the "map-territory mandate"). Running
+on the BEAM gives fault tolerance via OTP supervisor trees.
+https://erlang.org/doc/design_principles/des_princ.html[OTP Design Principles]
+
+**Caveat:** The production Rust/BEAM compiler is Phase 2 roadmap. The current
+implementation is the Elixir prototype. Probabilistic types are represented as
+runtime values, not statically checked by the type checker at this stage.
+Consensus (Raft) is a TLA+ spec in `formal/` and a skeleton in
+`lib/phronesis/consensus/`; it is not yet a deployable runtime.
+
+- Lexer: `lib/phronesis/lexer.ex`
+- Parser: `lib/phronesis/parser.ex`, `lib/phronesis/parser/`
+- Type checker: `lib/phronesis/type_checker.ex`
+- Compiler: `lib/phronesis/compiler.ex`
+- Interpreter: `lib/phronesis/interpreter.ex`
+- Learn more: https://en.wikipedia.org/wiki/Phronesis
+
+== Formal Verification: TLA+ Consensus Spec
+
+[quote, README]
+____
+BEAM/Raft Architecture: BEAM VM + Raft consensus for ethical loop execution.
+Ensures fault-tolerant, distributed reasoning.
+____
+
+`formal/PhronesisConsensus.tla` is a TLA+ specification of the Raft-based
+consensus protocol for multi-node Phronesis execution. `formal/PhronesisConsensus.cfg`
+is the TLC model checker configuration. These are model-checked artefacts, not
+executable code, but they are the authoritative spec from which the
+`lib/phronesis/consensus/` Elixir implementation derives.
+https://lamport.azurewebsites.net/tla/tla.html[TLA+]
+
+**Caveat:** The Elixir consensus implementation in `lib/phronesis/consensus/`
+is a scaffold. The TLA+ spec has not been formally published or independently
+reviewed.
+
+- Spec: `formal/PhronesisConsensus.tla`
+- Config: `formal/PhronesisConsensus.cfg`
+- Implementation: `lib/phronesis/consensus/`
+- Test: `test/consensus_test.exs`
+
+== Incremental Lexer and Parser
+
+[quote, README]
+____
+Strong Static Typing: Prevents runtime errors in safety-critical systems.
+____
+
+`lib/phronesis/incremental_lexer.ex` and `lib/phronesis/incremental_parser.ex`
+support re-parsing only the changed portion of a document — the critical path
+for the LSP integration. The incremental infrastructure feeds `lib/phronesis/lsp/`
+which provides hover, completion, and diagnostics to editors. Incremental
+correctness is verified in `test/incremental_lexer_test.exs` and
+`test/incremental_parser_test.exs`.
+
+**Caveat:** Incremental reparsing is bounded by expression boundaries. Edits
+spanning multiple top-level policy blocks still trigger a full re-parse.
+
+- Implementation: `lib/phronesis/incremental_lexer.ex`, `lib/phronesis/incremental_parser.ex`
+- LSP: `lib/phronesis/lsp/`
+- Tests: `test/incremental_lexer_test.exs`, `test/incremental_parser_test.exs`, `test/lsp_integration_test.exs`
+
+== Standard Library and Package Manager
+
+[quote, README]
+____
+Running all ethical scenarios is the definitive measure of correctness.
+____
+
+`lib/phronesis/stdlib/` provides the built-in policy predicates and ethical
+reasoning primitives. `lib/phronesis/library/` contains reusable policy modules.
+`lib/phronesis/package_manager.ex` and `lib/phronesis/package_manager/` implement
+a Phronesis-native package system for distributing policy modules. The conformance
+test suite in `test/conformance_test.exs` and `conformance/` exercises the
+mandatory ethical scenario set.
+
+**Caveat:** The package registry is local-only. There is no hosted registry or
+cryptographic signing for packages yet.
+
+- Standard library: `lib/phronesis/stdlib/`
+- Package manager: `lib/phronesis/package_manager.ex`, `lib/phronesis/package_manager/`
+- Conformance suite: `conformance/`, `test/conformance_test.exs`
+
+== Dogfooded Across The Account
+
+[cols="1,2"]
+|===
+| Technology | Also Used In
+
+| **Elixir / BEAM** | https://github.com/hyperpolymath/http-capability-gateway, https://github.com/hyperpolymath/burble
+| **TLA+ formal spec** | https://github.com/hyperpolymath/ephapax (Raft consensus for linear type proofs)
+| **LSP integration** | https://github.com/hyperpolymath/universal-language-server-plugin
+| **Incremental parsing** | https://github.com/hyperpolymath/tree-sitter-k9 (grammar-level incremental parse)
+| **Containerfile (Podman)** | https://github.com/hyperpolymath/session-sentinel, https://github.com/hyperpolymath/stapeln
+|===
+
+== File Map
+
+[cols="1,2"]
+|===
+| Path | Proves
+
+| `lib/phronesis/lexer.ex` | Tokenises Phronesis source: 15 keywords, IPv4/6 literals, DateTimes, probabilistic type tokens
+| `lib/phronesis/parser.ex`, `lib/phronesis/parser/` | Recursive-descent parser producing typed AST nodes
+| `lib/phronesis/type_checker.ex` | Static type checker (probabilistic types, scope resolution)
+| `lib/phronesis/compiler.ex` | AST → `.phrc` bytecode with constant folding and dead-code elimination
+| `lib/phronesis/interpreter.ex` | Tree-walking interpreter for prototyping and REPL use
+| `lib/phronesis/tracing_interpreter.ex` | Interpreter with execution trace hooks for debugger/profiler
+| `lib/phronesis/incremental_lexer.ex` | Incremental re-lexing for LSP edit support
+| `lib/phronesis/incremental_parser.ex` | Incremental re-parsing bounded by expression boundaries
+| `lib/phronesis/lsp/` | Language Server Protocol implementation (hover, completion, diagnostics)
+| `lib/phronesis/stdlib/` | Built-in policy predicates and ethical reasoning primitives
+| `lib/phronesis/library/` | Reusable distributable policy modules
+| `lib/phronesis/package_manager.ex` | Package manager entry point
+| `lib/phronesis/package_manager/` | Package resolution, fetching, caching
+| `lib/phronesis/diagnostics.ex`, `diagnostics/` | Error reporting with source spans
+| `lib/phronesis/debugger.ex`, `debugger/` | Interactive debugger and trace viewer
+| `lib/phronesis/profiler.ex` | Execution profiler
+| `lib/phronesis/hot_reload.ex` | Live policy reload without process restart
+| `lib/phronesis/consensus/` | Elixir Raft consensus scaffold
+| `formal/PhronesisConsensus.tla` | TLA+ Raft consensus specification (model-checked)
+| `formal/PhronesisConsensus.cfg` | TLC model checker configuration
+| `conformance/` | Ethical scenario conformance test fixtures
+| `test/lexer_test.exs` | Lexer unit tests
+| `test/parser_test.exs` | Parser unit tests
+| `test/type_checker_test.exs` | (via phronesis_test.exs) Type checker coverage
+| `test/compiler_test.exs` | Compiler bytecode tests
+| `test/interpreter_test.exs` | Interpreter execution tests
+| `test/conformance_test.exs` | Mandatory ethical scenario suite
+| `test/lsp_integration_test.exs` | LSP integration tests
+| `test/e2e_test.exs`, `test_e2e.exs` | End-to-end pipeline tests
+| `src/` | Supplementary source assets (non-Elixir)
+| `spec/` | Language specification documents
+| `syntax/` | Syntax highlighting definitions
+| `editors/` | Editor plugin scaffolds
+| `Containerfile` | Podman container definition (Chainguard base)
+| `.machine_readable/` | A2ML state, meta, ecosystem files
+| `TESTING-REPORT.adoc` | Test results narrative
+| `LSP-IMPLEMENTATION-SUMMARY.md` | LSP feature coverage summary
+|===
