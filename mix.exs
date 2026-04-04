@@ -35,7 +35,10 @@ defmodule Phronesis.MixProject do
       {:jason, "~> 1.4"},
 
       # Raft consensus library for distributed consensus
-      {:ra, "~> 2.7"}
+      {:ra, "~> 2.7"},
+
+      # Property-based testing with StreamData (CRG Grade C requirement)
+      {:stream_data, "~> 1.0", only: :test}
     ]
     # Note: Additional dependencies can be added when hex.pm is available:
     # {:nimble_parsec, "~> 1.4"},

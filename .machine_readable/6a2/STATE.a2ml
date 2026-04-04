@@ -134,6 +134,18 @@
         (description "Add Idris2 ABI definitions and Zig FFI layer")
         (effort "15-20 hours"))))
 
+  (crg
+    (grade "C")
+    (achieved "2026-04-04")
+    (evidence
+      (unit "ExUnit tests in test/*.exs (lexer, parser, compiler, consensus, conformance)")
+      (smoke "phronesis_test.exs — basic compile/run checks")
+      (p2p "test/property_test.exs — 5 StreamData properties (2026-04-04)")
+      (e2e "test/e2e_test.exs — 6 full-pipeline tests (2026-04-04)")
+      (aspect "test/fuzz/lexer_fuzz_test.exs + test/fuzz/parser_fuzz_test.exs")
+      (contract "type_checker_test.exs + conformance_test.exs")
+      (benchmarks "bench/bench_lexer.exs + bench/bench_parser.exs (Benchee)")))
+
   (session-history
     ((2026-03-14
       (focus "Corrected STATE.scm - was completely blank despite 95% completion")
@@ -148,4 +160,12 @@
         "Only 3 test files - testing is the main gap")
       (actions
         "Rewrote STATE.scm to reflect actual 95% completion"
-        "Identified test coverage as primary gap")))))
+        "Identified test coverage as primary gap"))
+     (2026-04-04
+      (focus "CRG Grade C: add property, E2E, and fix compilation error")
+      (actions
+        "Added test/property_test.exs with 5 StreamData properties"
+        "Added test/e2e_test.exs with 6 full-pipeline tests"
+        "Fixed incremental_parser.ex: after reserved word → after_text"
+        "Added stream_data ~> 1.0 to mix.exs dev deps"
+        "All 11 new tests pass alongside existing suite")))))

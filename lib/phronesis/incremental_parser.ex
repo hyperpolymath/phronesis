@@ -77,8 +77,8 @@ defmodule Phronesis.IncrementalParser do
 
     # 1. Apply text edit to source
     before = binary_part(state.source, 0, start)
-    after = binary_part(state.source, old_end, byte_size(state.source) - old_end)
-    new_source = before <> new_text <> after
+    after_text = binary_part(state.source, old_end, byte_size(state.source) - old_end)
+    new_source = before <> new_text <> after_text
 
     # 2. Find affected items
     {first_affected, last_affected} = find_affected(state.items, start, old_end)
