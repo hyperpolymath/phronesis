@@ -1,0 +1,46 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# stapeln.toml — Layer-based container build for phronesis
+#
+# stapeln builds containers as composable layers (German: "to stack").
+# Each layer is independently cacheable, verifiable, and signable.
+
+[metadata]
+name = "phronesis"
+version = "0.1.0"
+description = "Phronesis — Elixir-based distributed consensus system"
+author = "Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"
+license = "PMPL-1.0-or-later"
+registry = "ghcr.io/hyperpolymath"
+
+[build]
+containerfile = "Containerfile"
+context = "."
+runtime = "podman"
+
+# Layer definitions — Elixir/Phoenix mix release pattern
+[layers.base]
+description = "Chainguard wolfi-base image for Elixir build"
+from = "cgr.dev/chainguard/wolfi-base:latest"
+cache = true
+verify = true
+
+[layers.build]
+description = "Elixir/Erlang build dependencies and mix release"
+extends = "base"
+cache = true
+
+[layers.mix-release]
+description = "Compiled Elixir application release (_build/prod/rel/phronesis)"
+extends = "build"
+cache = false
+
+[layers.runtime]
+description = "Minimal runtime image with Erlang/OTP libraries"
+from = "cgr.dev/chainguard/wolfi-base:latest"
+cache = true
+verify = true
+
+[layers.health]
+description = "Health check: verifies phronesis application is started via RPC"
+extends = "runtime"
+cache = false
