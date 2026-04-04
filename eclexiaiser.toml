@@ -5,9 +5,16 @@
 name = "phronesis"
 
 [[functions]]
-name = "main"
-source = "src/main.rs"
-energy-budget-mj = 20
+name = "handle_call"
+source = "lib/phronesis/consensus/server.ex"
+energy-budget-mj = 30.0
+carbon-budget-mg = 6.0
+
+[[functions]]
+name = "vote"
+source = "lib/phronesis/consensus/server.ex"
+energy-budget-mj = 25.0
+carbon-budget-mg = 5.0
 
 [carbon]
 provider = "static"
