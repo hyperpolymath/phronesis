@@ -1,171 +1,60 @@
-;; SPDX-License-Identifier: PMPL-1.0-or-later
-;; STATE.scm - Project state for phronesis
-;; Media-Type: application/vnd.state+scm
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# STATE.a2ml — Phronesis project state
+[metadata]
+project = "phronesis"
+version = "0.9.0"
+last-updated = "2026-03-14"
+status = "active"
+session = "converted from scheme — 2026-04-11"
 
-(state
-  (metadata
-    (version "0.9.0")
-    (schema-version "1.0")
-    (created "2026-01-03")
-    (updated "2026-03-14")
-    (project "phronesis")
-    (repo "github.com/hyperpolymath/phronesis"))
+[project-context]
+name = "Phronesis"
+purpose = """Scale testing, edge case handling, production deployment"""
+completion-percentage = 95
 
-  (project-context
-    (name "phronesis")
-    (tagline "Decision engine language with BGP security and consensus protocols")
-    (tech-stack (Elixir BEAM OTP))
-    (implementation-language Elixir)
-    (target-domains (network-security consensus-protocols decision-systems bgp rpki)))
+[position]
+phase = "production-ready"   # design | implementation | testing | maintenance | archived
+maturity = "experimental"  # experimental | alpha | beta | production | lts
 
-  (current-position
-    (phase "production-ready")
-    (overall-completion 95)
-    (loc 4271)
-    (files 79)
-    (components
-      ((lexer (status complete) (completion 100) (file "lib/phronesis/lexer.ex"))
-       (parser (status complete) (completion 100) (file "lib/phronesis/parser.ex"))
-       (ast (status complete) (completion 100) (file "lib/phronesis/ast.ex"))
-       (interpreter (status complete) (completion 95) (file "lib/phronesis/interpreter.ex"))
-       (tracing-interpreter (status complete) (completion 95) (file "lib/phronesis/tracing_interpreter.ex"))
-       (compiler (status complete) (completion 90) (file "lib/phronesis/compiler.ex"))
-       (cli (status complete) (completion 95) (file "lib/phronesis/cli.ex"))
-       (consensus-raft (status complete) (completion 95)
-         (files ("lib/phronesis/consensus/raft.ex"
-                 "lib/phronesis/consensus/raft/log.ex"
-                 "lib/phronesis/consensus/raft/rpc.ex"
-                 "lib/phronesis/consensus/server.ex"
-                 "lib/phronesis/consensus/server/machine.ex"
-                 "lib/phronesis/consensus/supervisor.ex")))
-       (stdlib (status complete) (completion 95)
-         (modules (bgp rpki rpki-validator consensus temporal module)))
-       (lsp-server (status complete) (completion 95)
-         (files ("lib/phronesis/lsp/server.ex"
-                 "lib/phronesis/lsp/text_document.ex"
-                 "lib/phronesis/lsp/completion.ex"
-                 "lib/phronesis/lsp/hover.ex"
-                 "lib/phronesis/lsp/definition.ex")))
-       (debugger (status complete) (completion 90) (file "lib/phronesis/debugger.ex"))
-       (profiler (status complete) (completion 90)
-         (exports (html csv markdown))
-         (file "lib/phronesis/profiler.ex"))
-       (doc-generator (status complete) (completion 90) (file "lib/phronesis/doc_generator.ex"))
-       (static-analyzer (status complete) (completion 90) (file "lib/phronesis/analyzer.ex"))
-       (package-manager (status complete) (completion 85)
-         (files ("lib/phronesis/package_manager.ex"
-                 "lib/phronesis/package_manager/manifest.ex"
-                 "lib/phronesis/package_manager/resolver.ex"
-                 "lib/phronesis/package_manager/registry.ex")))
-       (diagnostics (status complete) (completion 90)
-         (files ("lib/phronesis/diagnostics.ex"
-                 "lib/phronesis/diagnostics/reporter.ex"
-                 "lib/phronesis/diagnostics/suggestions.ex")))
-       (formatter (status complete) (completion 90) (file "lib/phronesis/formatter.ex"))
-       (linter (status complete) (completion 90) (file "lib/phronesis/linter.ex"))
-       (test-framework (status complete) (completion 85) (file "lib/phronesis/test_framework.ex"))
-       (benchmark (status complete) (completion 85) (file "lib/phronesis/benchmark.ex"))
-       (hot-reload (status complete) (completion 80) (file "lib/phronesis/hot_reload.ex"))
-       (tracing (status complete) (completion 90) (file "lib/phronesis/trace.ex"))
-       (state-management (status complete) (completion 90) (file "lib/phronesis/state.ex"))
-       (demo (status complete) (file "lib/phronesis/demo.ex"))))
-    (working-features
-      (lexing "Full tokenization of Phronesis syntax")
-      (parsing "Complete parser with error recovery")
-      (interpretation "Tree-walking interpreter with tracing variant")
-      (compilation "Bytecode compilation")
-      (consensus "Full Raft consensus protocol implementation")
-      (bgp-security "BGP route validation and RPKI verification")
-      (rpki-validation "Production-quality RPKI validator")
-      (lsp "Full IDE support - diagnostics, completion, hover, go-to-definition")
-      (debugging "Interactive debugger with REPL")
-      (profiling "Performance profiling with multi-format export")
-      (documentation "Auto-generated documentation")
-      (hot-reload "Live code reloading during development")))
+[route-to-mvp]
+milestones = [
+  # No milestones recorded
+]
 
-  (route-to-mvp
-    (milestones
-      ((production-hardening
-        (priority high)
-        (effort "10-15 hours")
-        (description "Scale testing, edge case handling, production deployment"))
-       (real-world-bgp-testing
-        (priority high)
-        (effort "15-20 hours")
-        (description "Test RPKI validation against real BGP feeds"))
-       (expand-test-suite
-        (priority medium)
-        (effort "8-12 hours")
-        (description "Only 3 test files exist - need comprehensive test coverage"))
-       (idris2-abi
-        (priority medium)
-        (effort "10-15 hours")
-        (description "Add formal ABI definitions per hyperpolymath standard"))
-       (zig-ffi
-        (priority medium)
-        (effort "8-12 hours")
-        (description "Add Zig FFI layer per hyperpolymath standard")))))
+[blockers-and-issues]
+issues = [
+  # No blockers recorded
+]
 
-  (blockers-and-issues
-    (critical)
-    (high
-      (limited-test-coverage
-        (severity high)
-        (impact "Only 3 test files for 79 source files")
-        (description "Test coverage inadequate for production-ready claim")))
-    (medium
-      (no-abi-ffi
-        (severity medium)
-        (impact "Missing Idris2 ABI and Zig FFI per hyperpolymath standard")
-        (description "Needs formal interface definitions")))
-    (low))
-
-  (critical-next-actions
-    (immediate
-      (expand-tests
-        (description "Write comprehensive tests for lexer, parser, interpreter, consensus, RPKI")
-        (effort "8-12 hours")))
-    (this-week
-      (production-testing
-        (description "Scale test and real-world BGP feed testing")
-        (effort "15-20 hours")))
-    (this-month
-      (add-abi-ffi
-        (description "Add Idris2 ABI definitions and Zig FFI layer")
-        (effort "15-20 hours"))))
-
-  (crg
-    (grade "C")
-    (achieved "2026-04-04")
+[critical-next-actions]
+actions = [
+  "Write comprehensive tests for lexer, parser, interpreter, consensus, RPKI",
+  "8-12 hours",
+  "Scale test and real-world BGP feed testing",
+  "15-20 hours",
+  "Add Idris2 ABI definitions and Zig FFI layer",
+  "15-20 hours",
+  ")
+    (achieved ",
+  ")
     (evidence
-      (unit "ExUnit tests in test/*.exs (lexer, parser, compiler, consensus, conformance)")
-      (smoke "phronesis_test.exs — basic compile/run checks")
-      (p2p "test/property_test.exs — 5 StreamData properties (2026-04-04)")
-      (e2e "test/e2e_test.exs — 6 full-pipeline tests (2026-04-04)")
-      (aspect "test/fuzz/lexer_fuzz_test.exs + test/fuzz/parser_fuzz_test.exs")
-      (contract "type_checker_test.exs + conformance_test.exs")
-      (benchmarks "bench/bench_lexer.exs + bench/bench_parser.exs (Benchee)")))
+      (unit ",
+  ")
+      (smoke ",
+  ")
+      (p2p ",
+  ")
+      (e2e ",
+  ")
+      (aspect ",
+  ")
+      (contract ",
+  ")
+      (benchmarks ",
+]
 
-  (session-history
-    ((2026-03-14
-      (focus "Corrected STATE.scm - was completely blank despite 95% completion")
-      (discoveries
-        "STATE.scm had never been updated from initial placeholder"
-        "79 Elixir files, 4,271 LOC - production-quality implementation"
-        "Full toolchain: lexer, parser, interpreter, compiler, CLI"
-        "Complete Raft consensus protocol"
-        "Production RPKI validator for BGP security"
-        "Full LSP, debugger, profiler, doc generator, package manager"
-        "Only 3 FIXME markers - very mature code"
-        "Only 3 test files - testing is the main gap")
-      (actions
-        "Rewrote STATE.scm to reflect actual 95% completion"
-        "Identified test coverage as primary gap"))
-     (2026-04-04
-      (focus "CRG Grade C: add property, E2E, and fix compilation error")
-      (actions
-        "Added test/property_test.exs with 5 StreamData properties"
-        "Added test/e2e_test.exs with 6 full-pipeline tests"
-        "Fixed incremental_parser.ex: after reserved word → after_text"
-        "Added stream_data ~> 1.0 to mix.exs dev deps"
-        "All 11 new tests pass alongside existing suite")))))
+[maintenance-status]
+last-run-utc = "2026-03-14T00:00:00Z"
+last-result = "unknown"  # unknown | pass | warn | fail
