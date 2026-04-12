@@ -1,7 +1,7 @@
 ;; SPDX-License-Identifier: PMPL-1.0-or-later
 ;; SPDX-FileCopyrightText: 2025 Phronesis Contributors
 ;;
-;; SPEC.core.scm - Core Specification for Phronesis Rule Evaluation
+;; SPEC.core.a2ml - Core Specification for Phronesis Rule Evaluation
 ;;
 ;; This file defines the formal semantics of rule evaluation and the
 ;; decision trace model in executable Guile Scheme.
