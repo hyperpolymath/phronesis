@@ -155,35 +155,46 @@ open import Data.Bool using () renaming (_≟_ to _≟ᵇ_)
 
 -- Decidable equality on semantic values, by induction on the type index.
 -- TFloat is represented as ℤ (placeholder), TDateTime as ℤ, TIP as 4-tuple of ℕ.
--- TRecord and TList use structural recursion.
-{-# TERMINATING #-}
-_≡ᵛ_ : ∀ {τ} → ⟦ τ ⟧ → ⟦ τ ⟧ → Bool
-_≡ᵛ_ {TInt} a b with a ≟ℤ b
-... | yes _ = true
-... | no  _ = false
-_≡ᵛ_ {TFloat} a b with a ≟ℤ b
-... | yes _ = true
-... | no  _ = false
-_≡ᵛ_ {TString} a b with a ≟ˢ b
-... | yes _ = true
-... | no  _ = false
-_≡ᵛ_ {TBool} a b with a ≟ᵇ b
-... | yes _ = true
-... | no  _ = false
-_≡ᵛ_ {TIP} (a₁ , a₂ , a₃ , a₄) (b₁ , b₂ , b₃ , b₄)
-  with a₁ ≟ⁿ b₁ | a₂ ≟ⁿ b₂ | a₃ ≟ⁿ b₃ | a₄ ≟ⁿ b₄
-... | yes _ | yes _ | yes _ | yes _ = true
-... | _     | _     | _     | _     = false
-_≡ᵛ_ {TDateTime} a b with a ≟ℤ b
-... | yes _ = true
-... | no  _ = false
-_≡ᵛ_ {TList τ} [] [] = true
-_≡ᵛ_ {TList τ} (x ∷ xs) (y ∷ ys) = (_≡ᵛ_ {τ} x y) ∧ (_≡ᵛ_ {TList τ} xs ys)
-_≡ᵛ_ {TList _} _ _ = false
-_≡ᵛ_ {TRecord []} tt tt = true
-_≡ᵛ_ {TRecord ((f , τ) ∷ fs)} (v , vs) (w , ws) =
-  (_≡ᵛ_ {τ} v w) ∧ (_≡ᵛ_ {TRecord fs} vs ws)
-_≡ᵛ_ {TNull} tt tt = true
+-- TList and TRecord are split into helper functions in a mutual block so Agda's
+-- termination checker sees the structural decrease explicitly:
+--   * eqList decreases on the List (structural); calls _≡ᵛ_ on elements (τ < TList τ)
+--   * eqRecord decreases on the field List (structural); calls _≡ᵛ_ on parts (τ < TRecord)
+-- This replaces the former {-# TERMINATING #-} pragma.
+mutual
+  _≡ᵛ_ : ∀ {τ} → ⟦ τ ⟧ → ⟦ τ ⟧ → Bool
+  _≡ᵛ_ {TInt} a b with a ≟ℤ b
+  ... | yes _ = true
+  ... | no  _ = false
+  _≡ᵛ_ {TFloat} a b with a ≟ℤ b
+  ... | yes _ = true
+  ... | no  _ = false
+  _≡ᵛ_ {TString} a b with a ≟ˢ b
+  ... | yes _ = true
+  ... | no  _ = false
+  _≡ᵛ_ {TBool} a b with a ≟ᵇ b
+  ... | yes _ = true
+  ... | no  _ = false
+  _≡ᵛ_ {TIP} (a₁ , a₂ , a₃ , a₄) (b₁ , b₂ , b₃ , b₄)
+    with a₁ ≟ⁿ b₁ | a₂ ≟ⁿ b₂ | a₃ ≟ⁿ b₃ | a₄ ≟ⁿ b₄
+  ... | yes _ | yes _ | yes _ | yes _ = true
+  ... | _     | _     | _     | _     = false
+  _≡ᵛ_ {TDateTime} a b with a ≟ℤ b
+  ... | yes _ = true
+  ... | no  _ = false
+  _≡ᵛ_ {TList τ} xs ys   = eqList {τ} xs ys
+  _≡ᵛ_ {TRecord fs} vs ws = eqRecord {fs} vs ws
+  _≡ᵛ_ {TNull} tt tt = true
+
+  -- List equality: structural recursion on the List; calls _≡ᵛ_ on elements.
+  eqList : ∀ {τ} → List ⟦ τ ⟧ → List ⟦ τ ⟧ → Bool
+  eqList [] []           = true
+  eqList (x ∷ xs) (y ∷ ys) = _≡ᵛ_ x y ∧ eqList xs ys
+  eqList _ _             = false
+
+  -- Record equality: structural recursion on the field List.
+  eqRecord : ∀ {fs} → ⟦ TRecord fs ⟧ → ⟦ TRecord fs ⟧ → Bool
+  eqRecord {[]} tt tt = true
+  eqRecord {(_ , τ) ∷ fs} (v , vs) (w , ws) = _≡ᵛ_ v w ∧ eqRecord {fs} vs ws
 
 -- Integer less-than via the standard library ordering.
 _<ᵛ_ : ℤ → ℤ → Bool
