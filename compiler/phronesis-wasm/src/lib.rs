@@ -813,7 +813,7 @@ mod tests {
     #[test]
     fn test_empty_program_generates_valid_wasm() {
         let mut backend = WasmBackend::new();
-        let module = backend.generate(&empty_program()).unwrap();
+        let module = backend.generate(&empty_program()).expect("TODO: handle error");
         let bytes = module.to_bytes();
         assert_eq!(&bytes[0..4], b"\0asm");
         assert_eq!(bytes[4], 1);
@@ -823,7 +823,7 @@ mod tests {
     #[test]
     fn test_simple_accept_reject_rules() {
         let mut backend = WasmBackend::new();
-        let module = backend.generate(&simple_program()).unwrap();
+        let module = backend.generate(&simple_program()).expect("TODO: handle error");
         assert_eq!(module.functions.len(), 2);
         assert_eq!(module.functions[0].name, "allow_all");
         assert_eq!(module.functions[1].name, "deny_all");
@@ -857,7 +857,7 @@ mod tests {
         };
 
         let mut backend = WasmBackend::new();
-        let module = backend.generate(&program).unwrap();
+        let module = backend.generate(&program).expect("TODO: handle error");
         assert_eq!(module.functions.len(), 3);
         assert!(module.functions[2].is_composite);
         assert_eq!(module.functions[2].name, "both_must_accept");
@@ -880,7 +880,7 @@ mod tests {
         };
 
         let mut backend = WasmBackend::new();
-        let module = backend.generate(&program).unwrap();
+        let module = backend.generate(&program).expect("TODO: handle error");
         assert_eq!(module.functions.len(), 2);
         assert!(module.functions[1].is_composite);
     }
@@ -938,15 +938,15 @@ mod tests {
         let program = simple_program();
         let mut b1 = WasmBackend::new();
         let mut b2 = WasmBackend::new();
-        let m1 = b1.generate(&program).unwrap();
-        let m2 = b2.generate(&program).unwrap();
+        let m1 = b1.generate(&program).expect("TODO: handle error");
+        let m2 = b2.generate(&program).expect("TODO: handle error");
         assert_eq!(m1.to_bytes(), m2.to_bytes());
     }
 
     #[test]
     fn test_module_has_runtime_imports() {
         let mut backend = WasmBackend::new();
-        let module = backend.generate(&simple_program()).unwrap();
+        let module = backend.generate(&simple_program()).expect("TODO: handle error");
         assert_eq!(module.imports.len(), 3);
         assert_eq!(module.imports[0].name, "context_get");
         assert_eq!(module.imports[1].name, "audit_log");
@@ -967,7 +967,7 @@ mod tests {
         };
 
         let mut backend = WasmBackend::new();
-        let module = backend.generate(&program).unwrap();
+        let module = backend.generate(&program).expect("TODO: handle error");
         assert_eq!(module.functions.len(), 1);
         assert_eq!(module.functions[0].name, "age_check");
         assert!(!module.functions[0].is_composite);
@@ -1030,7 +1030,7 @@ mod tests {
         };
 
         let mut backend = WasmBackend::new();
-        let module = backend.generate(&program).unwrap();
+        let module = backend.generate(&program).expect("TODO: handle error");
         assert_eq!(module.functions.len(), 3);
         assert!(module.functions[2].is_composite);
     }
@@ -1043,7 +1043,7 @@ mod tests {
         };
 
         let mut backend = WasmBackend::new();
-        let module = backend.generate(&program).unwrap();
+        let module = backend.generate(&program).expect("TODO: handle error");
         let bytes = module.to_bytes();
         assert_eq!(&bytes[0..4], b"\0asm");
         assert!(bytes.len() > 20);
