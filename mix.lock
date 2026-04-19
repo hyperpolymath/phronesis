@@ -1,8 +1,8 @@
 %{
   "aten": {:hex, :aten, "0.6.0", "7a57b275a6daf515ac3683fb9853e280b4d0dcdd74292fd66ac4a01c8694f8c7", [:rebar3], [], "hexpm", "5f39a164206ae3f211ef5880b1f7819415686436e3229d30b6a058564fbaa168"},
-  "gen_batch_server": {:hex, :gen_batch_server, "0.8.9", "1c6bc0f530bf8c17e8b4acc20c2cc369ffa5bee2b46de01e21410745f24b1bc9", [:rebar3], [], "hexpm", "c8581fe4a4b6bccf91e53ce6a8c7e6c27c8c591bab5408b160166463f5579c22"},
+  "gen_batch_server": {:hex, :gen_batch_server, "0.10.0", "db99f8d7032ee961bd77f20d8937652aaed27f9d2872b9ccea5a2aeb06d648c2", [:rebar3], [], "hexpm", "391e2e634abec00f9229f766bcff736e07cc66530495dfd4a164724ecaf7008f"},
   "jason": {:hex, :jason, "1.4.4", "b9226785a9aa77b6857ca22832cffa5d5011a667207eb2a0ad56adb5db443b8a", [:mix], [{:decimal, "~> 1.0 or ~> 2.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm", "c5eb0cab91f094599f94d55bc63409236a8ec69a21a67814529e8d5f6cc90b3b"},
-  "ra": {:hex, :ra, "2.17.2", "86c17fc3072ca3516a46316b9ecd4e887da06c0d52d79d84281bcf20476ec6cd", [:rebar3], [{:aten, "0.6.0", [hex: :aten, repo: "hexpm", optional: false]}, {:gen_batch_server, "0.8.9", [hex: :gen_batch_server, repo: "hexpm", optional: false]}, {:seshat, "1.0.1", [hex: :seshat, repo: "hexpm", optional: false]}], "hexpm", "5c6019d8aeb7f6850360f94ff4dc3a96dfbfa7c3fbffd2df29392f258950856c"},
+  "ra": {:hex, :ra, "3.1.5", "6ed0f7f5306300db3f08d9fab42a9a749c3b1c7a410dbf820af554cee4ec3d5f", [:rebar3], [{:aten, "0.6.0", [hex: :aten, repo: "hexpm", optional: false]}, {:gen_batch_server, "0.10.0", [hex: :gen_batch_server, repo: "hexpm", optional: false]}, {:seshat, "1.0.1", [hex: :seshat, repo: "hexpm", optional: false]}], "hexpm", "802aeaaf8df092d95179e4e992439653aa127d2856b518b5acc2f73809f23092"},
   "seshat": {:hex, :seshat, "1.0.1", "fa7a8e89218d19394f7ddc47ba6725471103d654cd0bd0a98e5fdd922a943eac", [:rebar3], [], "hexpm", "38324fe8c5782c69d73b334dd00b20e16c0d99eef3e7b4005c519fe9bc0e34fc"},
   "stream_data": {:hex, :stream_data, "1.3.0", "bde37905530aff386dea1ddd86ecbf00e6642dc074ceffc10b7d4e41dfd6aac9", [:mix], [], "hexpm", "3cc552e286e817dca43c98044c706eec9318083a1480c52ae2688b08e2936e3c"},
 }
