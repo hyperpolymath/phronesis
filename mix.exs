@@ -35,7 +35,7 @@ defmodule Phronesis.MixProject do
       {:jason, "~> 1.4"},
 
       # Raft consensus library for distributed consensus
-      {:ra, "~> 2.7"},
+      {:ra, "~> 3.1"},
 
       # Property-based testing with StreamData (CRG Grade C requirement)
       {:stream_data, "~> 1.0", only: :test}
