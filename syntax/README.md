@@ -172,7 +172,7 @@ To add support for a new editor:
 
 ## License
 
-PMPL-1.0-or-later
+MPL-2.0
 
 ## Maintainer
 

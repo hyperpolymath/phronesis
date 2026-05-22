@@ -1,6 +1,6 @@
 # Cryptographic Proofs for Phronesis Consensus
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document provides cryptographic security proofs for the Phronesis consensus protocol, including digital signatures, commitment schemes, and Byzantine agreement.
 

@@ -1,6 +1,6 @@
 # Category Theory Foundations for Phronesis
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document provides the categorical semantics of the Phronesis type system and language constructs.
 

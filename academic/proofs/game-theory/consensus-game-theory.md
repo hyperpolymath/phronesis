@@ -1,6 +1,6 @@
 # Game Theory Analysis of Phronesis Consensus
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document provides game-theoretic analysis of the Phronesis consensus protocol, proving incentive compatibility, Nash equilibrium properties, and mechanism design guarantees.
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env elixir
 
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # End-to-end test of phronesis policy execution
 
 Mix.install([])

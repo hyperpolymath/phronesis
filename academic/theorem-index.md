@@ -1,6 +1,6 @@
 # Theorem Index for Phronesis Academic Documentation
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document provides a comprehensive index of all theorems, lemmas, and key definitions across Phronesis academic documentation with cross-references.
 

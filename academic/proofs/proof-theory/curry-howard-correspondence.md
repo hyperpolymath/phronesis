@@ -1,6 +1,6 @@
 # Proof Theory and Curry-Howard Correspondence for Phronesis
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document establishes the proof-theoretic foundations of Phronesis, including the Curry-Howard correspondence between types and propositions, and proof normalization properties.
 

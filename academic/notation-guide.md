@@ -1,6 +1,6 @@
 # Unified Notation Guide for Phronesis Academic Documentation
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document provides a comprehensive notation reference for all Phronesis academic documentation, ensuring consistency across proofs, specifications, and formal models.
 

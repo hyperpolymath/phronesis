@@ -1,6 +1,6 @@
 # Algebraic Semantics for Phronesis
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document provides algebraic semantics for Phronesis using initial algebras, F-algebras, and universal algebra, enabling compositional reasoning about program structure.
 

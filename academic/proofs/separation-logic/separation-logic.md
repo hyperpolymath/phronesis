@@ -1,6 +1,6 @@
 # Separation Logic for Phronesis Capabilities
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document develops separation logic semantics for Phronesis, providing formal reasoning about resource ownership, capability isolation, and safe concurrent access in the consensus protocol.
 

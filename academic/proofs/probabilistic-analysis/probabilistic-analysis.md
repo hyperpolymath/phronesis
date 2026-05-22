@@ -1,6 +1,6 @@
 # Probabilistic Analysis for Phronesis
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document provides rigorous probabilistic analysis of Phronesis, including consensus probability bounds, reliability analysis, and randomized algorithm guarantees.
 

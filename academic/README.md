@@ -1,6 +1,6 @@
 # Phronesis Academic Documentation
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This directory contains comprehensive academic documentation for Phronesis, including formal proofs, white papers, and mechanized verification. The documentation is designed to withstand rigorous academic scrutiny across multiple fields of mathematics and computer science.
 

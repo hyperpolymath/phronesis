@@ -1,5 +1,5 @@
 # @taxonomy: compiler/parser
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # SPDX-FileCopyrightText: 2025 Phronesis Contributors
 
 defmodule Phronesis.Parser do

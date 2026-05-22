@@ -474,4 +474,4 @@ cd /opt/phronesis
 ---
 
 **Maintainer:** Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
-**License:** PMPL-1.0-or-later
+**License:** MPL-2.0

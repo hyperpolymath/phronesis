@@ -1,6 +1,6 @@
 # Automata Theory Proofs for Phronesis Lexer and Parser
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document provides formal automata-theoretic analysis of the Phronesis lexer (finite automata) and parser (pushdown automata), proving correctness and complexity bounds.
 

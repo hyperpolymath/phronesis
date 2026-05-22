@@ -3,7 +3,7 @@
 **Authors:** Phronesis Development Team
 **Version:** 1.0
 **Date:** December 2025
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 ---
 

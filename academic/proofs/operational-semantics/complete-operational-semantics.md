@@ -1,6 +1,6 @@
 # Complete Operational Semantics for Phronesis
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document provides exhaustive operational semantics for Phronesis, covering all language constructs with both small-step and big-step rules.
 

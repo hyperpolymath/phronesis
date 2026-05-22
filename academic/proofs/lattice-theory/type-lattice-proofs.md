@@ -1,6 +1,6 @@
 # Lattice Theory Proofs for Phronesis Type System
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document establishes the lattice-theoretic foundations of the Phronesis type system, proving that types form a bounded lattice under the subtyping relation.
 

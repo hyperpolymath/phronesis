@@ -149,4 +149,4 @@ POLICY default_accept:
 
 ## License
 
-Phronesis is licensed under [PMPL-1.0-or-later](../LICENSE).
+Phronesis is licensed under [MPL-2.0](../LICENSE).

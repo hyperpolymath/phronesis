@@ -1,6 +1,6 @@
 # Set-Theoretic Foundations for Phronesis
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document provides rigorous set-theoretic foundations for Phronesis, establishing the mathematical basis for type theory, semantics, and formal verification.
 

@@ -1,6 +1,6 @@
 # Number Theory Foundations for Phronesis
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document provides number-theoretic foundations for Phronesis, including IP address arithmetic, prefix matching, AS number properties, and modular arithmetic for cryptographic operations.
 

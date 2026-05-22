@@ -132,7 +132,7 @@ vsce package
 
 ## License
 
-PMPL-1.0-or-later
+MPL-2.0
 
 ## Links
 

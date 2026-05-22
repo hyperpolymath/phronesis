@@ -1,6 +1,6 @@
 # Denotational Semantics for Phronesis
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document provides the denotational semantics for Phronesis, giving mathematical meaning to programs as functions between semantic domains.
 

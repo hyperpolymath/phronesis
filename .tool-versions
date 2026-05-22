@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # asdf version manager configuration
 elixir 1.16.0
 erlang 26.2.1

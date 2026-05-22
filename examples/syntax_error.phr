@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # File with syntax errors to test diagnostics
 
 CONST threshold = 0.75

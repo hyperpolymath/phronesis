@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 defmodule Phronesis.AnalyzerTest do
   use ExUnit.Case, async: true
   alias Phronesis.Analyzer
@@ -217,7 +217,7 @@ defmodule Phronesis.AnalyzerTest do
       File.write!(
         temp_file,
         """
-        # SPDX-License-Identifier: PMPL-1.0-or-later
+        # SPDX-License-Identifier: MPL-2.0
         CONST consensus_threshold = 1.5
 
         POLICY test:

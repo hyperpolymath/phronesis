@@ -1,6 +1,6 @@
 #!/usr/bin/env elixir
 
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Test script for phronesis standard library
 
 Mix.install([])

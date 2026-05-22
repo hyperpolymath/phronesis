@@ -1,6 +1,6 @@
 # Protocol Verification for Phronesis: Dolev-Yao Model
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document provides formal protocol verification for Phronesis using the Dolev-Yao attacker model, symbolic analysis, and automated verification techniques.
 

@@ -1,6 +1,6 @@
 # Order Theory Foundations for Phronesis
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document provides order-theoretic foundations for Phronesis, including well-founded orders for termination proofs, well-quasi-orders for decidability, and lattice structures for type systems.
 

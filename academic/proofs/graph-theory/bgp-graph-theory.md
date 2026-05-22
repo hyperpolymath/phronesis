@@ -1,6 +1,6 @@
 # Graph Theory Proofs for BGP/AS Path Validation
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document provides graph-theoretic analysis of BGP AS paths, route validation, and network topology as used in Phronesis policies.
 

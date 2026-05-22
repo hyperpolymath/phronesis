@@ -1,6 +1,6 @@
 # Domain Theory Foundations for Phronesis
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document establishes the domain-theoretic foundations for Phronesis semantics, including complete partial orders, continuity, and fixed-point theory.
 

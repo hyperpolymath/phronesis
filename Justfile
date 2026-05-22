@@ -1,6 +1,6 @@
 import? "contractile.just"
 
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # SPDX-FileCopyrightText: 2025 Phronesis Contributors
 #
 # Justfile for Phronesis - ethical reasoning language/runtime on BEAM

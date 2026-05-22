@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # bench_lexer.exs -- Lexer performance benchmark for Phronesis
 #
 # Measures:

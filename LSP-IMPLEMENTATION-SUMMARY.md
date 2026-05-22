@@ -269,4 +269,4 @@ Based on TOOLCHAIN-WISHLIST.md, the next sequential items are:
 
 **Author:** Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 **Co-Authored-By:** Claude Sonnet 4.5 <noreply@anthropic.com>
-**License:** PMPL-1.0-or-later
+**License:** MPL-2.0

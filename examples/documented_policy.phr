@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Example policy file with documentation comments
 
 # CONST: threshold - Risk threshold above which routes are rejected

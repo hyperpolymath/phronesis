@@ -1,6 +1,6 @@
 # Information Flow Analysis for Phronesis
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document provides information flow analysis for Phronesis, ensuring confidentiality and integrity properties through noninterference proofs.
 

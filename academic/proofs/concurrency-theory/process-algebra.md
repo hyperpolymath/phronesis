@@ -1,6 +1,6 @@
 # Process Algebra and Concurrency Theory for Phronesis
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document provides formal concurrency semantics for Phronesis using process algebra (CSP, CCS, π-calculus), enabling rigorous analysis of the consensus protocol and multi-agent interactions.
 

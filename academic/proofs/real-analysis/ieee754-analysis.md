@@ -1,6 +1,6 @@
 # Real Analysis for IEEE 754 Floating-Point in Phronesis
 
-**SPDX-License-Identifier: PMPL-1.0-or-later
+**SPDX-License-Identifier: MPL-2.0
 
 This document provides rigorous real analysis foundations for floating-point arithmetic in Phronesis, including IEEE 754 semantics, error bounds, and numerical stability analysis.
 

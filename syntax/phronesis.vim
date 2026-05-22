@@ -2,7 +2,7 @@
 " Language: Phronesis Policy Language
 " Maintainer: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 " Latest Revision: 2026-01-30
-" SPDX-License-Identifier: PMPL-1.0-or-later
+" SPDX-License-Identifier: MPL-2.0
 
 if exists("b:current_syntax")
   finish

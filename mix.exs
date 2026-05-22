@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # SPDX-FileCopyrightText: 2025 Phronesis Contributors
 
 defmodule Phronesis.MixProject do
@@ -59,7 +59,7 @@ defmodule Phronesis.MixProject do
   defp package do
     [
       name: "phronesis",
-      licenses: ["PMPL-1.0-or-later"],
+      licenses: ["MPL-2.0"],
       links: %{"GitHub" => @source_url}
     ]
   end
