@@ -1,0 +1,57 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+//
+// Phronesis VS Code extension — AffineScript port of editors/vscode/src/extension.ts.
+//
+// Step 1 of the estate-wide TypeScript → AffineScript migration campaign
+// (hyperpolymath/standards#239 umbrella, #240 seed-port issue).
+//
+// Build pipeline integration follows the affinescript dogfood pattern at
+// `affinescript/editors/vscode/src/extension.affine`:
+//
+//   affinescript compile editors/vscode/src/extension.affine \
+//                        -o editors/vscode/out/extension.cjs
+//
+// `package.json` `main` will be updated to `./out/extension.cjs` in the
+// follow-up build-chain integration PR. extension.ts remains in place
+// alongside this file until that PR lands; the live extension still
+// loads `out/extension.js` from the TS build path.
+//
+// Behavioural notes vs the TS original:
+//  - `path` import was unused in TS; omitted.
+//  - `serverOptions.options.env: process.env` is the Node child_process
+//    default behaviour, so the AffineScript binding (which doesn't take
+//    env) preserves it implicitly.
+//  - `synchronize.fileEvents: createFileSystemWatcher('**/.phr')` —
+//    collapsed in `VscodeLanguageClient::newLanguageClient`; the host
+//    shim derives the synchronize record from primitives.
+//  - The TS port held the client in a top-level `let client`; the
+//    AffineScript port follows the dogfood (process-exit closes the
+//    server pipe; the held-client pattern adds nothing).
+
+use Vscode::{ getConfiguration, workspaceConfigGetString, consoleLog };
+use VscodeLanguageClient::{ newLanguageClient, languageClientStart };
+
+fn start_lsp() -> Int {
+  let cfg = getConfiguration("phronesis");
+  let server_path = workspaceConfigGetString(cfg, "serverPath", "phronesis");
+  let client = newLanguageClient(
+    "phronesis",                       // id (host shim derives documentSelector.language)
+    "Phronesis Language Server",
+    server_path,
+    "lsp",                              // single arg (newline-separated list)
+    0                                   // 0 = stdio transport
+  );
+  let _ = languageClientStart(client);
+  return 0;
+}
+
+pub fn activate(ctx: ExtensionContext) -> Int {
+  let _ = consoleLog("Phronesis extension activated");
+  let _ = start_lsp();
+  return 0;
+}
+
+pub fn deactivate() -> Int {
+  return 0;
+}
