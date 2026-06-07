@@ -1,3 +1,7 @@
+<!--
+SPDX-License-Identifier: MPL-2.0
+Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+-->
 # Automata Theory Proofs for Phronesis Lexer and Parser
 
 **SPDX-License-Identifier: MPL-2.0
