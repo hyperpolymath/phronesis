@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: MPL-2.0
+// Owner: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 # Kubernetes StatefulSet for Phronesis consensus cluster
 
 apiVersion: v1
