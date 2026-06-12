@@ -35,20 +35,118 @@ data PhrType : Set where
 -- 2. Type Equality Decidability
 -- ═══════════════════════════════════════════════════════════════════════════
 
--- Decidable equality for types (needed for type checking)
-_≟ᵗ_ : (τ₁ τ₂ : PhrType) → Dec (τ₁ ≡ τ₂)
-TInt ≟ᵗ TInt = yes refl
-TBool ≟ᵗ TBool = yes refl
-TString ≟ᵗ TString = yes refl
-TNull ≟ᵗ TNull = yes refl
-TFloat ≟ᵗ TFloat = yes refl
-TIP ≟ᵗ TIP = yes refl
-TDateTime ≟ᵗ TDateTime = yes refl
-TList τ₁ ≟ᵗ TList τ₂ with τ₁ ≟ᵗ τ₂
-... | yes refl = yes refl
-... | no ¬p = no (λ { refl → ¬p refl })
--- ... other cases omitted for brevity
-_ ≟ᵗ _ = no (λ ())
+-- Decidable equality for types — COMPLETE and SOUND.
+--
+-- Decidability of type equality belongs to an extrinsic / gradual checking
+-- layer.  The intrinsic `Expr Γ τ` below does not consume it (types are static
+-- indices there), but we provide a *total, sound* decision procedure in full
+-- rather than the earlier incomplete stub whose catch-all `_ ≟ᵗ _ = no (λ ())`
+-- was unsound (it claimed every pair of types unequal, incl. `TInt ≟ᵗ TInt`).
+--
+-- The off-diagonal (distinct head constructors) must be enumerated: Agda
+-- cannot refute `τ₁ ≡ τ₂` under wildcard patterns, so a single catch-all is
+-- impossible here.  Recursive cases (`TList`, `TRecord`) go via constructor
+-- injectivity, structurally, mutually with the record-field-list decider `_≟ᶠ_`.
+open import Relation.Nullary.Decidable using (map′)
+open import Data.String using () renaming (_≟_ to _≟ˢ_)
+
+mutual
+  _≟ᵗ_ : (τ₁ τ₂ : PhrType) → Dec (τ₁ ≡ τ₂)
+  -- diagonal: nullary heads
+  TInt       ≟ᵗ TInt       = yes refl
+  TFloat     ≟ᵗ TFloat     = yes refl
+  TString    ≟ᵗ TString    = yes refl
+  TBool      ≟ᵗ TBool      = yes refl
+  TIP        ≟ᵗ TIP        = yes refl
+  TDateTime  ≟ᵗ TDateTime  = yes refl
+  TNull      ≟ᵗ TNull      = yes refl
+  -- diagonal: recursive heads, via constructor injectivity (structural)
+  TList σ    ≟ᵗ TList ρ    = map′ (cong TList)   (λ { refl → refl }) (σ ≟ᵗ ρ)
+  TRecord fs ≟ᵗ TRecord gs = map′ (cong TRecord) (λ { refl → refl }) (fs ≟ᶠ gs)
+  -- off-diagonal: distinct head constructors are unequal
+  TInt       ≟ᵗ TFloat     = no λ()
+  TInt       ≟ᵗ TString    = no λ()
+  TInt       ≟ᵗ TBool      = no λ()
+  TInt       ≟ᵗ TIP        = no λ()
+  TInt       ≟ᵗ TDateTime  = no λ()
+  TInt       ≟ᵗ TNull      = no λ()
+  TInt       ≟ᵗ TList _    = no λ()
+  TInt       ≟ᵗ TRecord _  = no λ()
+  TFloat     ≟ᵗ TInt       = no λ()
+  TFloat     ≟ᵗ TString    = no λ()
+  TFloat     ≟ᵗ TBool      = no λ()
+  TFloat     ≟ᵗ TIP        = no λ()
+  TFloat     ≟ᵗ TDateTime  = no λ()
+  TFloat     ≟ᵗ TNull      = no λ()
+  TFloat     ≟ᵗ TList _    = no λ()
+  TFloat     ≟ᵗ TRecord _  = no λ()
+  TString    ≟ᵗ TInt       = no λ()
+  TString    ≟ᵗ TFloat     = no λ()
+  TString    ≟ᵗ TBool      = no λ()
+  TString    ≟ᵗ TIP        = no λ()
+  TString    ≟ᵗ TDateTime  = no λ()
+  TString    ≟ᵗ TNull      = no λ()
+  TString    ≟ᵗ TList _    = no λ()
+  TString    ≟ᵗ TRecord _  = no λ()
+  TBool      ≟ᵗ TInt       = no λ()
+  TBool      ≟ᵗ TFloat     = no λ()
+  TBool      ≟ᵗ TString    = no λ()
+  TBool      ≟ᵗ TIP        = no λ()
+  TBool      ≟ᵗ TDateTime  = no λ()
+  TBool      ≟ᵗ TNull      = no λ()
+  TBool      ≟ᵗ TList _    = no λ()
+  TBool      ≟ᵗ TRecord _  = no λ()
+  TIP        ≟ᵗ TInt       = no λ()
+  TIP        ≟ᵗ TFloat     = no λ()
+  TIP        ≟ᵗ TString    = no λ()
+  TIP        ≟ᵗ TBool      = no λ()
+  TIP        ≟ᵗ TDateTime  = no λ()
+  TIP        ≟ᵗ TNull      = no λ()
+  TIP        ≟ᵗ TList _    = no λ()
+  TIP        ≟ᵗ TRecord _  = no λ()
+  TDateTime  ≟ᵗ TInt       = no λ()
+  TDateTime  ≟ᵗ TFloat     = no λ()
+  TDateTime  ≟ᵗ TString    = no λ()
+  TDateTime  ≟ᵗ TBool      = no λ()
+  TDateTime  ≟ᵗ TIP        = no λ()
+  TDateTime  ≟ᵗ TNull      = no λ()
+  TDateTime  ≟ᵗ TList _    = no λ()
+  TDateTime  ≟ᵗ TRecord _  = no λ()
+  TNull      ≟ᵗ TInt       = no λ()
+  TNull      ≟ᵗ TFloat     = no λ()
+  TNull      ≟ᵗ TString    = no λ()
+  TNull      ≟ᵗ TBool      = no λ()
+  TNull      ≟ᵗ TIP        = no λ()
+  TNull      ≟ᵗ TDateTime  = no λ()
+  TNull      ≟ᵗ TList _    = no λ()
+  TNull      ≟ᵗ TRecord _  = no λ()
+  TList _    ≟ᵗ TInt       = no λ()
+  TList _    ≟ᵗ TFloat     = no λ()
+  TList _    ≟ᵗ TString    = no λ()
+  TList _    ≟ᵗ TBool      = no λ()
+  TList _    ≟ᵗ TIP        = no λ()
+  TList _    ≟ᵗ TDateTime  = no λ()
+  TList _    ≟ᵗ TNull      = no λ()
+  TList _    ≟ᵗ TRecord _  = no λ()
+  TRecord _  ≟ᵗ TInt       = no λ()
+  TRecord _  ≟ᵗ TFloat     = no λ()
+  TRecord _  ≟ᵗ TString    = no λ()
+  TRecord _  ≟ᵗ TBool      = no λ()
+  TRecord _  ≟ᵗ TIP        = no λ()
+  TRecord _  ≟ᵗ TDateTime  = no λ()
+  TRecord _  ≟ᵗ TNull      = no λ()
+  TRecord _  ≟ᵗ TList _    = no λ()
+
+  -- Decidable equality on record field lists (mutual with _≟ᵗ_), structural.
+  _≟ᶠ_ : (fs gs : List (String × PhrType)) → Dec (fs ≡ gs)
+  []             ≟ᶠ []             = yes refl
+  []             ≟ᶠ (_ ∷ _)        = no λ()
+  (_ ∷ _)        ≟ᶠ []             = no λ()
+  ((x , σ) ∷ fs) ≟ᶠ ((y , ρ) ∷ gs) with x ≟ˢ y | σ ≟ᵗ ρ | fs ≟ᶠ gs
+  ... | yes refl | yes refl | yes refl = yes refl
+  ... | no  x≢y  | _        | _        = no λ { refl → x≢y refl }
+  ... | _        | no  σ≢ρ  | _        = no λ { refl → σ≢ρ refl }
+  ... | _        | _        | no fs≢gs = no λ { refl → fs≢gs refl }
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- 3. Semantic Domain (Values indexed by Type)
@@ -72,15 +170,19 @@ _ ≟ᵗ _ = no (λ ())
 -- ═══════════════════════════════════════════════════════════════════════════
 
 data Ctx : Set where
-  ∅   : Ctx
-  _,_ : Ctx → String × PhrType → Ctx
+  ∅    : Ctx
+  _,,_ : Ctx → String × PhrType → Ctx
 
-infixl 5 _,_
+-- NOTE: context extension is `_,,_` (not `_,_`) to stay unambiguous from
+-- Data.Product._,_ used for the (name × type) pair it stores.  With a
+-- single `_,_` in scope the mixfix parser cannot disambiguate
+-- `Γ , (x , τ)` (the two operators have different fixities).
+infixl 5 _,,_
 
 -- Variable lookup (de Bruijn style would be cleaner, but using names for clarity)
 data _∋_∶_ : Ctx → String → PhrType → Set where
-  here  : ∀ {Γ x τ} → (Γ , (x , τ)) ∋ x ∶ τ
-  there : ∀ {Γ x y τ τ'} → Γ ∋ x ∶ τ → (Γ , (y , τ')) ∋ x ∶ τ
+  here  : ∀ {Γ x τ} → (Γ ,, (x , τ)) ∋ x ∶ τ
+  there : ∀ {Γ x y τ τ'} → Γ ∋ x ∶ τ → (Γ ,, (y , τ')) ∋ x ∶ τ
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- 5. Intrinsically Typed Expressions
@@ -130,7 +232,7 @@ infix 5 _==ᵉ_ _<ᵉ_
 
 data Env : Ctx → Set where
   ε   : Env ∅
-  _▷_ : ∀ {Γ x τ} → Env Γ → ⟦ τ ⟧ → Env (Γ , (x , τ))
+  _▷_ : ∀ {Γ x τ} → Env Γ → ⟦ τ ⟧ → Env (Γ ,, (x , τ))
 
 infixl 5 _▷_
 
@@ -143,13 +245,13 @@ lookupEnv (there x) (ρ ▷ _) = lookupEnv x ρ
 -- 7. Denotational Semantics (Evaluation)
 -- ═══════════════════════════════════════════════════════════════════════════
 
-open import Data.Integer using (_+_; _-_; _*_; _≤ᵇ_) renaming (_+_ to _+ℤ_; _-_ to _-ℤ_; _*_ to _*ℤ_)
+open import Data.Integer using (_≤ᵇ_) renaming (_+_ to _+ℤ_; _-_ to _-ℤ_; _*_ to _*ℤ_)
 
 -- Value equality (for comparison operators)
 -- Implemented via decidable equality per type, not postulated.
 
-open import Data.Integer using (_≟_) renaming (_≟_ to _≟ℤ_)
-open import Data.String using () renaming (_≟_ to _≟ˢ_)
+open import Data.Integer using () renaming (_≟_ to _≟ℤ_)
+-- (_≟ˢ_ for String is imported earlier, alongside _≟ᵗ_)
 open import Data.Nat using () renaming (_≟_ to _≟ⁿ_)
 open import Data.Bool using () renaming (_≟_ to _≟ᵇ_)
 
@@ -198,7 +300,7 @@ mutual
 
 -- Integer less-than via the standard library ordering.
 _<ᵛ_ : ℤ → ℤ → Bool
-a <ᵛ b = a ≤ᵇ b ∧ not (a ≡ᵛ b)
+a <ᵛ b = (a ≤ᵇ b) ∧ not (_≡ᵛ_ {TInt} a b)
   where open import Data.Integer using (_≤ᵇ_)
 
 -- List membership via value equality.
