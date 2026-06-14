@@ -748,6 +748,109 @@ theorem bestMatch_maximal (m : PhrPolicy → Situation → Bool) :
 
 end Arbitration
 
+/-! # 19c. Byzantine Fault Tolerance — quorum intersection
+    (companion to `formal/PhronesisConsensus.tla`)
+
+  The TLA+ spec model-checks Agreement (no two honest agents commit different
+  values) for the instance N = 4, F = 1. Here the underlying combinatorial
+  invariant is proved for ALL N, F: with `N ≤ 3F+1` and a quorum threshold of
+  `2F+1`, two distinct values cannot both reach a quorum — because honest
+  agents vote at most once and any two quorums overlap in more than F agents
+  (hence in ≥ 1 honest agent).
+
+  Agents and votes are modelled by a universe list and `Bool` predicates; every
+  cardinality fact (inclusion–exclusion, union bound, monotonicity) is *proved*
+  here via `countP` inductions — nothing about finite sets is assumed. -/
+
+section BFT
+
+variable {Agent : Type}
+
+/-- Inclusion–exclusion for `countP`: counting `p` and `q` separately equals
+    counting their disjunction and their conjunction. -/
+theorem countP_incl_excl (p q : Agent → Bool) :
+    ∀ l : List Agent,
+      l.countP (fun a => p a || q a) + l.countP (fun a => p a && q a)
+        = l.countP p + l.countP q := by
+  intro l
+  induction l with
+  | nil => rfl
+  | cons a l ih =>
+    simp only [List.countP_cons]
+    cases hpa : p a <;> cases hqa : q a <;> simp [hpa, hqa] <;> omega
+
+/-- A disjunction is counted no more than the size of the whole universe. -/
+theorem countP_or_le_length (p q : Agent → Bool) (l : List Agent) :
+    l.countP (fun a => p a || q a) ≤ l.length :=
+  List.countP_le_length _
+
+/-- Monotonicity of `countP` under pointwise implication. -/
+theorem countP_mono (p q : Agent → Bool) (h : ∀ a, p a = true → q a = true) :
+    ∀ l : List Agent, l.countP p ≤ l.countP q := by
+  intro l
+  induction l with
+  | nil => exact Nat.zero_le _
+  | cons a l ih =>
+    simp only [List.countP_cons]
+    cases hpa : p a with
+    | false => cases hqa : q a <;> simp [hpa, hqa] <;> omega
+    | true  => have hqa := h a hpa; simp [hpa, hqa] <;> omega
+
+/-- **BFT Safety (quorum intersection).** With `n = agents.length` agents of
+    whom `f = agents.countP byz` are Byzantine, a quorum threshold of `2f+1`,
+    and `n ≤ 3f+1`, two *distinct* values cannot both reach a quorum. The two
+    values are represented by vote predicates `vote1`, `vote2`; their
+    distinctness is encoded by `honestVoteOnce` — any agent voting for both is
+    Byzantine (an honest agent votes at most once). The contradiction is
+    `f+1 ≤ |overlap| ≤ f`. -/
+theorem bft_no_two_quorums
+    (agents : List Agent) (byz vote1 vote2 : Agent → Bool)
+    (honestVoteOnce : ∀ a, vote1 a = true → vote2 a = true → byz a = true)
+    (hn  : agents.length ≤ 3 * agents.countP byz + 1)
+    (hq1 : 2 * agents.countP byz + 1 ≤ agents.countP vote1)
+    (hq2 : 2 * agents.countP byz + 1 ≤ agents.countP vote2) :
+    False := by
+  have hincl := countP_incl_excl vote1 vote2 agents
+  have hunion := countP_or_le_length vote1 vote2 agents
+  have hinter : agents.countP (fun a => vote1 a && vote2 a) ≤ agents.countP byz :=
+    countP_mono (fun a => vote1 a && vote2 a) byz
+      (by intro a h
+          cases hv1 : vote1 a with
+          | false => simp [hv1] at h
+          | true =>
+            cases hv2 : vote2 a with
+            | false => simp [hv1, hv2] at h
+            | true => exact honestVoteOnce a hv1 hv2)
+      agents
+  omega
+
+/-- **BFT Agreement.** Any two *committed* values are equal. A value `v` is
+    committed when its vote set reaches the `2f+1` threshold. Honest agents vote
+    for at most one value (`honestSingleVote`); Byzantine agents may equivocate.
+    Under `n ≤ 3f+1` two committed values must coincide — the safety invariant
+    that `formal/PhronesisConsensus.tla` model-checks, here proved for all N, F. -/
+theorem bft_agreement
+    {Value : Type} (agents : List Agent) (byz : Agent → Bool)
+    (voteFor : Value → Agent → Bool)
+    (honestSingleVote :
+      ∀ a v₁ v₂, byz a = false → voteFor v₁ a = true → voteFor v₂ a = true → v₁ = v₂)
+    (hn : agents.length ≤ 3 * agents.countP byz + 1)
+    (v₁ v₂ : Value)
+    (hc1 : 2 * agents.countP byz + 1 ≤ agents.countP (voteFor v₁))
+    (hc2 : 2 * agents.countP byz + 1 ≤ agents.countP (voteFor v₂)) :
+    v₁ = v₂ := by
+  cases Classical.em (v₁ = v₂) with
+  | inl heq => exact heq
+  | inr hne =>
+    exact (bft_no_two_quorums agents byz (voteFor v₁) (voteFor v₂)
+            (by intro a h1 h2
+                cases hb : byz a with
+                | true  => rfl
+                | false => exact absurd (honestSingleVote a v₁ v₂ hb h1 h2) hne)
+            hn hc1 hc2).elim
+
+end BFT
+
 /-! # 20. Summary
 
   Main theorems (all machine-checked on Lean 4 core; no `sorry`, only Lean's
@@ -768,6 +871,12 @@ end Arbitration
   13. bestMatch_maximal       — the deciding policy has maximal priority among
                                 matches (higher-priority override; a high-priority
                                 REJECT is never undercut by a lower ACCEPT)
+  14. bft_no_two_quorums      — with n ≤ 3f+1 and threshold 2f+1, two distinct
+                                values cannot both reach a quorum (quorum
+                                intersection; all cardinality facts proved)
+  15. bft_agreement           — any two committed values are equal
+                                (BFT Agreement for all N, F; companion to
+                                formal/PhronesisConsensus.tla's model-check)
   Mirrors ../coq/Phronesis.v (preservation, eval_deterministic, totality).
 -/
 

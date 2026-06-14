@@ -368,6 +368,21 @@ Therefore, only valid actions can commit. ∎
 
 **QED: Byzantine Safety holds.** ∎
 
+**Verified two ways:**
+
+- **Model-checked (TLA+/TLC):** [`../formal/PhronesisConsensus.tla`](../formal/PhronesisConsensus.tla)
+  exhaustively checks `Agreement`/`Validity`/`ByzantineSafety` for the instance
+  N = 4, F = 1, with a negative test confirming the `2F+1` threshold is
+  load-bearing (Agreement fails below it).
+- **Mechanized (Lean 4):** [`../academic/formal-verification/lean4/Phronesis.lean`](../academic/formal-verification/lean4/Phronesis.lean)
+  proves the quorum-intersection argument for **all** N, F:
+  `bft_no_two_quorums` (with `n ≤ 3f+1` and threshold `2f+1`, two distinct
+  values cannot both reach a quorum) and `bft_agreement` (any two committed
+  values are equal). Every cardinality fact — inclusion–exclusion
+  (`countP_incl_excl`), the union bound, and monotonicity — is *proved* over
+  `countP`, not assumed. All `sorry`-free (Lean's standard
+  `propext`/`Quot.sound`/`Classical.choice`; confirm with `#print axioms`).
+
 ### 3.5 Liveness Under Partial Synchrony
 
 **Theorem 4 (Eventual Liveness):**
@@ -437,7 +452,7 @@ Layer 5: Audit Log
 | Sandbox Isolation | Mechanized (Lean 4) | `academic/formal-verification/lean4/Phronesis.lean` |
 | Capability Soundness | Mechanized (Lean 4) | `academic/formal-verification/lean4/Phronesis.lean` |
 | Ethical Verdict Consistency | Mechanized (Lean 4) | `academic/formal-verification/lean4/Phronesis.lean` |
-| BFT Safety | Model-checked (TLA+/TLC) | `formal/PhronesisConsensus.tla` |
+| BFT Safety | Model-checked (TLA+/TLC) + Mechanized (Lean 4) | `formal/PhronesisConsensus.tla`, `academic/formal-verification/lean4/Phronesis.lean` |
 | BFT Liveness | Manual proof | This document |
 | Termination | Proven | Semantics doc |
 | Type Safety | Sketch | Semantics doc |
