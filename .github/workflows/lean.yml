@@ -1,0 +1,46 @@
+# SPDX-License-Identifier: MPL-2.0
+# lean.yml — build + verify the Phronesis Lean 4 metatheory on every push/PR.
+#
+# Guards the mechanized proofs against regression. `lake build` typechecks the
+# whole development (a broken proof fails the build):
+#   * type safety       — progress / preservation / determinism
+#   * Sandbox Isolation  (safety_proofs.md Theorem 1)
+#   * Capability Soundness (Theorem 2) + Ethical Verdict Consistency
+#   * BFT quorum-intersection safety (Theorem 3)
+# Core Lean only (no Mathlib): the toolchain pinned in
+# academic/formal-verification/lean4/lean-toolchain is all CI needs.
+name: Lean Proofs
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+# Estate guardrail: cancel superseded runs (read-only check, safe to cancel).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lean:
+    name: Build Lean metatheory (lake build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Installs elan + the toolchain from lean-toolchain, then runs `lake build`.
+      # No test/lint targets and no Mathlib in this project, so those are off.
+      - name: Build + verify Lean proofs
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9 # v1.5.0
+        with:
+          lake-package-directory: academic/formal-verification/lean4
+          build: "true"
+          test: "false"
+          lint: "false"
+          use-mathlib-cache: "false"
