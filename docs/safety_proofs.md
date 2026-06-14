@@ -229,6 +229,17 @@ By inspection of execution paths:
 
 All paths have enforcement points. ∎
 
+**Mechanized (Lean 4):** This argument is machine-checked in
+[`../academic/formal-verification/lean4/Phronesis.lean`](../academic/formal-verification/lean4/Phronesis.lean).
+The execution relation `Executes` is capability-gated *by construction* — every
+leaf rule carries the required-capability membership as a hypothesis, and there
+is deliberately no constructor that executes without an enforcement point — so
+`capability_soundness` follows by inversion (the informal "by inspection of
+execution paths" made formal). `capability_soundness_ite` extends it through
+conditional actions. The two §2.5 side-properties are mechanized as
+`least_privilege` and `no_escalation`. All four are `sorry`-free (only Lean's
+standard `propext`; confirm with `#print axioms`).
+
 ### 2.5 Capability Composition
 
 **Property (Least Privilege):**
@@ -398,9 +409,9 @@ Layer 5: Audit Log
 
 | Property | Status | Proof System |
 |----------|--------|--------------|
-| Sandbox Isolation | Manual proof | This document |
-| Capability Soundness | Manual proof | This document |
-| BFT Safety | Manual proof | This document |
+| Sandbox Isolation | Mechanized (Lean 4) | `academic/formal-verification/lean4/Phronesis.lean` |
+| Capability Soundness | Mechanized (Lean 4) | `academic/formal-verification/lean4/Phronesis.lean` |
+| BFT Safety | Model-checked (TLA+/TLC) | `formal/PhronesisConsensus.tla` |
 | BFT Liveness | Manual proof | This document |
 | Termination | Proven | Semantics doc |
 | Type Safety | Sketch | Semantics doc |

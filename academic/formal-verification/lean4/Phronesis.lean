@@ -504,14 +504,134 @@ theorem subtype_trans : ∀ τ₁ τ₂ τ₃,
   intro τ₁ τ₂ τ₃ h₁ h₂
   exact Subtype.trans τ₁ τ₂ τ₃ h₁ h₂
 
+/-! # 19. Capability Enforcement (safety_proofs.md §2 — Theorem 2)
+
+  Mechanizes the informal "by inspection of execution paths" argument for
+  **Capability Soundness**: *no operation executes without the required
+  capability*. The execution relation `Executes` is capability-gated by
+  construction — every leaf rule carries its required-capability membership
+  as a hypothesis — so soundness holds by inversion: there is provably no
+  execution path that bypasses an enforcement point.
+
+  Also mechanizes the two stated side-properties (§2.5):
+    * Least Privilege          — a fresh context holds only granted caps.
+    * No Capability Escalation — a step never enlarges the capability set.
+-/
+
+inductive Resource where
+  | routeDecision : Resource
+  | consensusLog  : Resource
+  | moduleRes     : String → Resource
+  deriving DecidableEq, Repr
+
+inductive Operation where
+  | read   : Operation
+  | write  : Operation
+  | append : Operation
+  | exec   : Operation
+  deriving DecidableEq, Repr
+
+structure Capability where
+  resource : Resource
+  op       : Operation
+  deriving DecidableEq, Repr
+
+/-- An execution context carries the set of granted capabilities. -/
+structure Context where
+  capabilities : List Capability
+
+/-- A capability is held iff it is present in the context's capability list. -/
+def Context.holds (ctx : Context) (c : Capability) : Prop :=
+  c ∈ ctx.capabilities
+
+/-- Required capability for the four *leaf* actions (safety_proofs.md §2.3):
+    ACCEPT/REJECT write a route decision, REPORT appends to the consensus log,
+    EXECUTE f invokes module `f`. Conditionals carry no leaf cap of their own. -/
+def requiredCap? : PhrAction → Option Capability
+  | .accept _        => some ⟨Resource.routeDecision, Operation.write⟩
+  | .reject _        => some ⟨Resource.routeDecision, Operation.write⟩
+  | .report _        => some ⟨Resource.consensusLog,  Operation.append⟩
+  | .execute f _     => some ⟨Resource.moduleRes f,   Operation.exec⟩
+  | .iteAction _ _ _ => none
+
+/-- Capability-gated execution. By construction every leaf rule demands the
+    corresponding capability be held; conditionals reduce to a gated branch.
+    There is deliberately **no** constructor that produces an execution
+    without an enforcement point. -/
+inductive Executes : Context → PhrAction → Prop where
+  | accept  : ∀ ctx e,      ctx.holds ⟨Resource.routeDecision, Operation.write⟩  → Executes ctx (.accept e)
+  | reject  : ∀ ctx e,      ctx.holds ⟨Resource.routeDecision, Operation.write⟩  → Executes ctx (.reject e)
+  | report  : ∀ ctx e,      ctx.holds ⟨Resource.consensusLog,  Operation.append⟩ → Executes ctx (.report e)
+  | execute : ∀ ctx f args, ctx.holds ⟨Resource.moduleRes f,   Operation.exec⟩   → Executes ctx (.execute f args)
+  | iteThen : ∀ ctx c a b,  Executes ctx a → Executes ctx (.iteAction c a b)
+  | iteElse : ∀ ctx c a b,  Executes ctx b → Executes ctx (.iteAction c a b)
+
+/-- **Theorem 2 (Capability Soundness).** A leaf action executes only when its
+    required capability is held by the context. Proved by inversion on the
+    gated execution relation: every leaf constructor exposes the membership
+    witness, and the `iteAction` constructors carry no leaf cap (`requiredCap?`
+    is `none`, so the premise `none = some c` is impossible). -/
+theorem capability_soundness :
+    ∀ ctx act c, requiredCap? act = some c → Executes ctx act → ctx.holds c := by
+  intro ctx act c hreq hexec
+  cases hexec <;>
+    first
+      | (simp only [requiredCap?, Option.some.injEq] at hreq; subst hreq; assumption)
+      | simp [requiredCap?] at hreq
+
+/-- Enforcement is preserved through conditionals: if a conditional action
+    executes, the branch that ran is itself a capability-gated execution, so
+    soundness extends to the whole action tree by structural recursion. -/
+theorem capability_soundness_ite :
+    ∀ ctx c a b, Executes ctx (.iteAction c a b) → (Executes ctx a ∨ Executes ctx b) := by
+  intro ctx c a b h
+  cases h
+  · exact Or.inl (by assumption)
+  · exact Or.inr (by assumption)
+
+/-- Least-privilege context constructor: keep only granted capabilities
+    (safety_proofs.md §2.5, `filter_grants`). -/
+def newContext (grants : List Capability) (granted : Capability → Bool) : Context :=
+  ⟨grants.filter granted⟩
+
+/-- **Property (Least Privilege).** A fresh context holds only capabilities
+    drawn from the grant set. -/
+theorem least_privilege :
+    ∀ grants granted c, (newContext grants granted).holds c → c ∈ grants := by
+  intro grants granted c h
+  exact (List.mem_filter.mp h).1
+
+/-- A single execution step on contexts. Execution itself does not change the
+    capability set; revocation keeps only a sub-selection. Neither rule can add
+    a capability — matching "capabilities are only set at context creation and
+    never modified during execution". -/
+inductive Step : Context → Context → Prop where
+  | exec   : ∀ ctx act, Executes ctx act → Step ctx ctx
+  | revoke : ∀ ctx keep, Step ctx ⟨ctx.capabilities.filter keep⟩
+
+/-- **Property (No Capability Escalation).** A step never enlarges the
+    capability set: `S → S' ⟹ S'.caps ⊆ S.caps` (safety_proofs.md §2.5). -/
+theorem no_escalation :
+    ∀ S S', Step S S' → S'.capabilities ⊆ S.capabilities := by
+  intro S S' h
+  cases h
+  · intro x hx; exact hx
+  · intro x hx; exact (List.mem_filter.mp hx).1
+
 /-! # 20. Summary
 
-  Main theorems (all machine-checked on Lean 4 core, no axioms/sorry):
+  Main theorems (all machine-checked on Lean 4 core; no `sorry`, only Lean's
+  standard `propext` where `simp` is used — verify with `#print axioms`):
   1. progress         — well-typed closed expressions are values or step
   2. preservation     — evaluation preserves types          (was a TODO/sorry)
   3. determinism      — evaluation is deterministic          (was a TODO/sorry)
   4. termination/size_pos — expressions have positive bounded size
   5. subtype_trans    — subtyping is transitive
+  6. capability_soundness     — no leaf action executes without the required
+                                capability      (safety_proofs.md §2, Theorem 2)
+  7. capability_soundness_ite — enforcement is preserved through conditionals
+  8. least_privilege          — a fresh context holds only granted capabilities
+  9. no_escalation            — a step never enlarges the capability set
   Mirrors ../coq/Phronesis.v (preservation, eval_deterministic, totality).
 -/
 
