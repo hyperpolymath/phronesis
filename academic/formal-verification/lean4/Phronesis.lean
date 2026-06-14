@@ -618,6 +618,136 @@ theorem no_escalation :
   · intro x hx; exact hx
   · intro x hx; exact (List.mem_filter.mp hx).1
 
+/-! # 19b. Ethical Verdict Consistency (policy-arbitration soundness)
+
+  Phronesis resolves conflicting policies by *priority-ordered first match*
+  (`lib/phronesis/state.ex` `policies_by_priority` + the first-match evaluation
+  in `spec/SPEC.core.scm`). That arbitration was previously only informal. Here
+  it is made a function `bestMatch` — the highest-priority *matching* policy,
+  ties broken in favour of the earlier policy — and proved:
+
+    * `bestMatch_sound`    — a verdict is produced only by a policy that really
+                             matches the situation and is in the policy set
+                             (no spurious verdicts);
+    * `bestMatch_none`     — if no verdict is produced, no policy matched; hence
+    * `bestMatch_decisive` — whenever some policy applies, a verdict is produced;
+    * `bestMatch_maximal`  — the deciding policy has maximal priority among all
+                             matching policies, so a higher-priority verdict is
+                             never overridden by a lower-priority one (e.g. a
+                             high-priority REJECT cannot be undercut by a
+                             lower-priority ACCEPT — the core ethical override).
+
+  `matches` abstracts condition evaluation (does a policy apply at a situation),
+  decoupling arbitration soundness from the expression semantics in `Eval`. -/
+
+section Arbitration
+
+variable {Situation : Type}
+
+/-- Keep the higher-priority of a policy `p` and an optional incumbent. Ties
+    (equal priority) go to `p` (the earlier policy in a left fold). -/
+def pickMax (p : PhrPolicy) : Option PhrPolicy → PhrPolicy
+  | none   => p
+  | some q => if q.priority ≤ p.priority then p else q
+
+/-- Priority-ordered first-match arbitration as a fold: the highest-priority
+    matching policy, ties resolved in favour of the earlier policy. -/
+def bestMatch (m : PhrPolicy → Situation → Bool) :
+    List PhrPolicy → Situation → Option PhrPolicy
+  | [],      _ => none
+  | p :: ps, s =>
+    match m p s with
+    | true  => some (pickMax p (bestMatch m ps s))
+    | false => bestMatch m ps s
+
+/-- **Soundness.** A verdict is produced only by a policy that genuinely matches
+    the situation and belongs to the policy set — no spurious verdicts. -/
+theorem bestMatch_sound (m : PhrPolicy → Situation → Bool) :
+    ∀ ps s r, bestMatch m ps s = some r → m r s = true ∧ r ∈ ps := by
+  intro ps
+  induction ps with
+  | nil => intro s r h; simp [bestMatch] at h
+  | cons p ps ih =>
+    intro s r h
+    simp only [bestMatch] at h
+    split at h
+    · case _ hp =>
+      cases hb : bestMatch m ps s with
+      | none => rw [hb] at h; simp only [pickMax] at h; injection h with h; subst h
+                exact ⟨hp, List.mem_cons_self _ _⟩
+      | some q =>
+        rw [hb] at h; simp only [pickMax] at h; injection h with h
+        by_cases hpr : q.priority ≤ p.priority
+        · rw [if_pos hpr] at h; subst h; exact ⟨hp, List.mem_cons_self _ _⟩
+        · rw [if_neg hpr] at h; subst h
+          exact ⟨(ih s q hb).1, List.mem_cons_of_mem _ (ih s q hb).2⟩
+    · case _ _hp =>
+      exact ⟨(ih s r h).1, List.mem_cons_of_mem _ (ih s r h).2⟩
+
+/-- If no verdict is produced, no policy in the set matched. -/
+theorem bestMatch_none (m : PhrPolicy → Situation → Bool) :
+    ∀ ps s, bestMatch m ps s = none → ∀ q ∈ ps, m q s = false := by
+  intro ps
+  induction ps with
+  | nil => intro s _ q hq; cases hq
+  | cons p ps ih =>
+    intro s hnone q hq
+    simp only [bestMatch] at hnone
+    split at hnone
+    · case _ _hp => exact absurd hnone (by simp)
+    · case _ hp =>
+      cases hq with
+      | head => exact Bool.not_eq_true _ |>.mp (by simp [hp])
+      | tail _ hq' => exact ih s hnone q hq'
+
+/-- **Decisiveness.** Whenever some policy in the set applies, a verdict is
+    produced (the decision procedure never silently abstains on a live case). -/
+theorem bestMatch_decisive (m : PhrPolicy → Situation → Bool) :
+    ∀ ps s q, q ∈ ps → m q s = true → ∃ r, bestMatch m ps s = some r := by
+  intro ps s q hq hm
+  cases hb : bestMatch m ps s with
+  | some r => exact ⟨r, rfl⟩
+  | none   => exact absurd hm (by rw [bestMatch_none m ps s hb q hq]; simp)
+
+/-- **Priority-maximal override.** The deciding policy has maximal priority among
+    all matching policies: no matching policy outranks the verdict. Hence a
+    higher-priority verdict (e.g. a REJECT) is never overridden by a
+    lower-priority one (e.g. an ACCEPT). -/
+theorem bestMatch_maximal (m : PhrPolicy → Situation → Bool) :
+    ∀ ps s r, bestMatch m ps s = some r →
+      ∀ q ∈ ps, m q s = true → q.priority ≤ r.priority := by
+  intro ps
+  induction ps with
+  | nil => intro s r h; simp [bestMatch] at h
+  | cons p ps ih =>
+    intro s r h q hq hqm
+    simp only [bestMatch] at h
+    split at h
+    · case _ _hp =>
+      cases hb : bestMatch m ps s with
+      | none =>
+        rw [hb] at h; simp only [pickMax] at h; injection h with h; subst h
+        cases hq with
+        | head => exact Int.le_refl _
+        | tail _ hq' => exact absurd hqm (by rw [bestMatch_none m ps s hb q hq']; simp)
+      | some t =>
+        rw [hb] at h; simp only [pickMax] at h; injection h with h
+        by_cases hpr : t.priority ≤ p.priority
+        · rw [if_pos hpr] at h; subst h
+          cases hq with
+          | head => exact Int.le_refl _
+          | tail _ hq' => exact Int.le_trans (ih s t hb q hq' hqm) hpr
+        · rw [if_neg hpr] at h; subst h
+          cases hq with
+          | head => omega
+          | tail _ hq' => exact ih s t hb q hq' hqm
+    · case _ hp =>
+      cases hq with
+      | head => simp [hp] at hqm
+      | tail _ hq' => exact ih s r h q hq' hqm
+
+end Arbitration
+
 /-! # 20. Summary
 
   Main theorems (all machine-checked on Lean 4 core; no `sorry`, only Lean's
@@ -632,6 +762,12 @@ theorem no_escalation :
   7. capability_soundness_ite — enforcement is preserved through conditionals
   8. least_privilege          — a fresh context holds only granted capabilities
   9. no_escalation            — a step never enlarges the capability set
+  10. bestMatch_sound         — policy arbitration yields no spurious verdict
+  11. bestMatch_none          — no verdict ⇒ no policy matched
+  12. bestMatch_decisive      — a verdict is produced whenever a policy applies
+  13. bestMatch_maximal       — the deciding policy has maximal priority among
+                                matches (higher-priority override; a high-priority
+                                REJECT is never undercut by a lower ACCEPT)
   Mirrors ../coq/Phronesis.v (preservation, eval_deterministic, totality).
 -/
 
