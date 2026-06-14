@@ -20,7 +20,7 @@ if [[ -n "${1:-}" ]]; then
     # shellcheck disable=SC2206 # deliberate word-splitting of caller's string
     PARSER_CMD=(${1})
 else
-    PARSER_CMD=(mix run -e 'Phronesis.CLI.parse(System.argv())' --)
+    PARSER_CMD=(mix run --no-start -e 'System.halt(case Phronesis.parse(File.read!(Enum.at(System.argv(), 0))) do {:ok, _} -> 0; _ -> 1 end)' --)
 fi
 
 PASS=0

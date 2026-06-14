@@ -1,11 +1,9 @@
 # SPDX-License-Identifier: MPL-2.0
-# Conformance: IF/THEN/ELSE conditional in policy
+# Conformance: IF/THEN/ELSE conditional action (grammar §5 conditional_action)
 
 POLICY conditional_check:
-  IF status == :valid THEN
-    ACCEPT "Status is valid"
-  ELSE
-    REJECT "Status is invalid"
-PRIORITY 50
-EXPIRES "2030-12-31"
-CREATED_BY "test_suite"
+  value > 0
+  THEN IF value > 100 THEN ACCEPT("High value") ELSE REJECT("Low value")
+  PRIORITY: 50
+  EXPIRES: never
+  CREATED_BY: test_suite

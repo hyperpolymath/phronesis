@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: MPL-2.0
-# Conformance: compound conditions with AND/OR
+# Conformance: compound conditions with AND/OR (grammar §6 logical_expr)
+# AND/OR are equal-precedence, left-associative, so this parses as
+#   ((score > 50 AND status == "active") OR override == true).
 
 POLICY compound_logic:
-  IF (score > 50 AND status == :active) OR override == true THEN
-    ACCEPT "Conditions met"
-  ELSE
-    REJECT "Conditions not met"
-PRIORITY 75
-EXPIRES "2030-12-31"
-CREATED_BY "test_suite"
+  score > 50 AND status == "active" OR override == true
+  THEN ACCEPT("Conditions met")
+  PRIORITY: 75
+  EXPIRES: never
+  CREATED_BY: test_suite
