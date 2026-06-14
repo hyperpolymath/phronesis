@@ -402,6 +402,93 @@ def containsDangerousArgs : List PhrExpr → Bool
   | e :: es => containsDangerous e || containsDangerousArgs es
 end
 
+-- The function names a policy would invoke via `call` (the ONLY effectful
+-- constructor — there is no fs/network/syscall node in the grammar).
+mutual
+def callNames : PhrExpr → List String
+  | .lit _ => []
+  | .var _ => []
+  | .binOp _ e₁ e₂ => callNames e₁ ++ callNames e₂
+  | .unOp _ e => callNames e
+  | .ite e₁ e₂ e₃ => callNames e₁ ++ callNames e₂ ++ callNames e₃
+  | .field e _ => callNames e
+  | .mem e₁ e₂ => callNames e₁ ++ callNames e₂
+  | .call f args => f :: callNamesArgs args
+def callNamesArgs : List PhrExpr → List String
+  | [] => []
+  | e :: es => callNames e ++ callNamesArgs es
+end
+
+-- SANDBOX (operational): the evaluator is incapable of executing an external
+-- call. `Eval` has no rule for `call` — the only constructor that could reach
+-- a module/host operation — so policy evaluation performs NO external effect.
+-- This is the core "no I/O escape" guarantee of Theorem 1 in the pure model.
+theorem sandbox_no_call_executes : ∀ ρ f args v,
+    ¬ Eval ρ (PhrExpr.call f args) v := by
+  intro ρ f args v h; cases h
+
+-- SANDBOX (static, mechanises Theorem 1.1): a statically-clean policy invokes
+-- no dangerous function. If `containsDangerous e = false` then every name in
+-- `callNames e` is non-dangerous. Proved by mutual structural recursion over
+-- the expression tree and its argument lists.
+mutual
+theorem sandbox_clean : ∀ (e : PhrExpr),
+    containsDangerous e = false → ∀ f, f ∈ callNames e → isDangerousCall f = false
+  | .lit _ => by intro _ f hf; simp [callNames] at hf
+  | .var _ => by intro _ f hf; simp [callNames] at hf
+  | .binOp _ e₁ e₂ => by
+      intro h f hf
+      simp only [containsDangerous, Bool.or_eq_false_iff] at h
+      simp only [callNames, List.mem_append] at hf
+      cases hf with
+      | inl hf => exact sandbox_clean e₁ h.1 f hf
+      | inr hf => exact sandbox_clean e₂ h.2 f hf
+  | .unOp _ e => by
+      intro h f hf
+      simp only [containsDangerous] at h
+      simp only [callNames] at hf
+      exact sandbox_clean e h f hf
+  | .ite e₁ e₂ e₃ => by
+      intro h f hf
+      simp only [containsDangerous, Bool.or_eq_false_iff] at h
+      simp only [callNames, List.mem_append] at hf
+      cases hf with
+      | inl hf =>
+          cases hf with
+          | inl hf => exact sandbox_clean e₁ h.1.1 f hf
+          | inr hf => exact sandbox_clean e₂ h.1.2 f hf
+      | inr hf => exact sandbox_clean e₃ h.2 f hf
+  | .field e _ => by
+      intro h f hf
+      simp only [containsDangerous] at h
+      simp only [callNames] at hf
+      exact sandbox_clean e h f hf
+  | .mem e₁ e₂ => by
+      intro h f hf
+      simp only [containsDangerous, Bool.or_eq_false_iff] at h
+      simp only [callNames, List.mem_append] at hf
+      cases hf with
+      | inl hf => exact sandbox_clean e₁ h.1 f hf
+      | inr hf => exact sandbox_clean e₂ h.2 f hf
+  | .call g args => by
+      intro h f hf
+      simp only [containsDangerous, Bool.or_eq_false_iff] at h
+      simp only [callNames, List.mem_cons] at hf
+      cases hf with
+      | inl hf => subst hf; exact h.1
+      | inr hf => exact sandbox_cleanArgs args h.2 f hf
+theorem sandbox_cleanArgs : ∀ (args : List PhrExpr),
+    containsDangerousArgs args = false → ∀ f, f ∈ callNamesArgs args → isDangerousCall f = false
+  | [] => by intro _ f hf; simp [callNamesArgs] at hf
+  | e :: es => by
+      intro h f hf
+      simp only [containsDangerousArgs, Bool.or_eq_false_iff] at h
+      simp only [callNamesArgs, List.mem_append] at hf
+      cases hf with
+      | inl hf => exact sandbox_clean e h.1 f hf
+      | inr hf => exact sandbox_cleanArgs es h.2 f hf
+end
+
 /-! # 19. Subtyping -/
 
 inductive Subtype : PhrType → PhrType → Prop where
