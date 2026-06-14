@@ -1,0 +1,56 @@
+# SPDX-License-Identifier: MPL-2.0
+# tla-consensus.yml — model-check the Byzantine consensus spec with TLC.
+#
+# Validates formal/PhronesisConsensus.tla (per-agent commit views, equivocating
+# proposer + Byzantine voters). Two gates:
+#   * positive — at Threshold = 2F+1 all safety invariants hold (TypeOK,
+#     Agreement, Validity, ByzantineSafety);
+#   * negative — below the quorum bound (Threshold = 2) TLC MUST report an
+#     Agreement violation, proving the quorum threshold is load-bearing.
+name: TLA+ Consensus
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+# Estate guardrail: cancel superseded runs (read-only check, safe to cancel).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  tlc:
+    name: TLC model-check (BFT safety)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Fetch tla2tools (pinned version + sha256-verified)
+        run: |
+          curl -fsSL -o tla2tools.jar \
+            https://github.com/tlaplus/tlaplus/releases/download/v1.8.0/tla2tools.jar
+          echo "237332bdcc79a35c7d26efa7b82c77c85c2744591c5598673a8a45085ff2a4fb  tla2tools.jar" \
+            | sha256sum -c -
+
+      - name: TLC positive — all safety invariants hold at Threshold = 2F+1
+        working-directory: formal
+        run: |
+          java -XX:+UseParallelGC -cp "${GITHUB_WORKSPACE}/tla2tools.jar" \
+            tlc2.TLC -config PhronesisConsensus.cfg PhronesisConsensus.tla
+
+      - name: TLC negative — Agreement must fail below the quorum bound
+        working-directory: formal
+        run: |
+          if java -cp "${GITHUB_WORKSPACE}/tla2tools.jar" \
+               tlc2.TLC -config PhronesisConsensus_neg.cfg PhronesisConsensus.tla; then
+            echo "::error::Agreement held at Threshold < 2F+1 — the quorum bound is not load-bearing (invariant vacuous)."
+            exit 1
+          fi
+          echo "Negative test OK: Agreement correctly violated below the quorum bound."
