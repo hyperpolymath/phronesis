@@ -1,14 +1,9 @@
 # SPDX-License-Identifier: MPL-2.0
-# Conformance: nested conditions
+# Conformance: nested conditional actions (grammar §5 conditional_action)
 
 POLICY nested_check:
-  IF level > 1 THEN
-    IF score > 80 THEN
-      ACCEPT "High score at high level"
-    ELSE
-      REJECT "Low score at high level"
-  ELSE
-    ACCEPT "Any score at base level"
-PRIORITY 150
-EXPIRES "2030-12-31"
-CREATED_BY "test_suite"
+  level > 1
+  THEN IF score > 80 THEN ACCEPT("High score at high level") ELSE REJECT("Low score at high level")
+  PRIORITY: 150
+  EXPIRES: never
+  CREATED_BY: test_suite
