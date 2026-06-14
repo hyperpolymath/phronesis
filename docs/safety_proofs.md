@@ -264,6 +264,31 @@ A policy cannot acquire capabilities it wasn't granted:
 This holds because capabilities are only set at context creation
 and never modified during execution. ∎
 
+### 2.6 Ethical Verdict Consistency
+
+**Theorem (Policy-Arbitration Soundness):**
+Phronesis resolves conflicting policies by *priority-ordered first match*
+(`lib/phronesis/state.ex` `policies_by_priority` + the first-match evaluation in
+`spec/SPEC.core.scm`). The decision procedure is sound, decisive, and respects
+priority:
+
+1. **Soundness** — a verdict is produced only by a policy that genuinely matches
+   the situation and is in the policy set (no spurious verdicts).
+2. **Decisiveness** — whenever some policy applies, a verdict is produced.
+3. **Priority-maximal override** — the deciding policy has maximal priority among
+   all matching policies; hence a higher-priority verdict is never overridden by
+   a lower-priority one (e.g. a high-priority `REJECT` cannot be undercut by a
+   lower-priority `ACCEPT` — the core ethical override). ∎
+
+**Mechanized (Lean 4):** Machine-checked in
+[`../academic/formal-verification/lean4/Phronesis.lean`](../academic/formal-verification/lean4/Phronesis.lean)
+as `bestMatch_sound`, `bestMatch_none`, `bestMatch_decisive`, and
+`bestMatch_maximal` over the real `PhrPolicy` record. Arbitration is modelled as
+the `bestMatch` fold (highest-priority matching policy, ties to the earlier
+policy); `matches` abstracts condition evaluation, decoupling arbitration
+soundness from the expression semantics. All four are `sorry`-free (only Lean's
+standard `propext`/`Quot.sound`; confirm with `#print axioms`).
+
 ---
 
 ## 3. Byzantine Fault Tolerance
@@ -411,6 +436,7 @@ Layer 5: Audit Log
 |----------|--------|--------------|
 | Sandbox Isolation | Mechanized (Lean 4) | `academic/formal-verification/lean4/Phronesis.lean` |
 | Capability Soundness | Mechanized (Lean 4) | `academic/formal-verification/lean4/Phronesis.lean` |
+| Ethical Verdict Consistency | Mechanized (Lean 4) | `academic/formal-verification/lean4/Phronesis.lean` |
 | BFT Safety | Model-checked (TLA+/TLC) | `formal/PhronesisConsensus.tla` |
 | BFT Liveness | Manual proof | This document |
 | Termination | Proven | Semantics doc |
