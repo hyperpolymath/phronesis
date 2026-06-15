@@ -28,7 +28,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - language: javascript-typescript
+          # Phronesis is Elixir/Erlang (BEAM) — not a CodeQL-supported source
+          # language, so `javascript-typescript` made `analyze` exit
+          # "no source files" on every run. `actions` scans the workflow YAML
+          # (always present), giving real SAST coverage. (Hypatia: SAST check.)
+          - language: actions
             build-mode: none
     steps:
       - name: Checkout

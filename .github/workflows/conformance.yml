@@ -1,0 +1,52 @@
+# SPDX-License-Identifier: MPL-2.0
+# conformance.yml — parser conformance gate for the Phronesis grammar.
+#
+# Runs the real parser (Phronesis.parse/1 = Lexer.tokenize |> Parser.parse) over
+# the conformance corpus:
+#   * conformance/valid/*.phr   MUST parse  (exit 0)
+#   * conformance/invalid/*.phr MUST fail   (exit non-zero)
+# The corpus is the executable contract for spec/grammar.ebnf (v0.2.0). Any drift
+# between the parser and the documented grammar turns this gate red.
+name: Conformance
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+# Estate guardrail: cancel superseded runs (read-only check, safe to cancel).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  conformance:
+    name: Grammar conformance (parser vs corpus)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Match the project toolchain (.tool-versions: elixir 1.16.0 / erlang 26.2.1).
+      # Pinned to the estate-vetted setup-beam SHA already used by hypatia-scan.yml.
+      - name: Setup Elixir
+        uses: erlef/setup-beam@fc68ffb90438ef2936bbb3251622353b3dcb2f93 # v1.18.2
+        with:
+          elixir-version: '1.16'
+          otp-version: '26'
+
+      - name: Fetch dependencies
+        run: mix deps.get
+
+      # Compile without --warnings-as-errors: the gate measures conformance, not
+      # lint. A genuine compile break still fails here (mix compile exits non-zero).
+      - name: Compile
+        run: mix compile
+
+      - name: Run conformance corpus
+        run: ./conformance/run_conformance.sh

@@ -229,6 +229,17 @@ By inspection of execution paths:
 
 All paths have enforcement points. ∎
 
+**Mechanized (Lean 4):** This argument is machine-checked in
+[`../academic/formal-verification/lean4/Phronesis.lean`](../academic/formal-verification/lean4/Phronesis.lean).
+The execution relation `Executes` is capability-gated *by construction* — every
+leaf rule carries the required-capability membership as a hypothesis, and there
+is deliberately no constructor that executes without an enforcement point — so
+`capability_soundness` follows by inversion (the informal "by inspection of
+execution paths" made formal). `capability_soundness_ite` extends it through
+conditional actions. The two §2.5 side-properties are mechanized as
+`least_privilege` and `no_escalation`. All four are `sorry`-free (only Lean's
+standard `propext`; confirm with `#print axioms`).
+
 ### 2.5 Capability Composition
 
 **Property (Least Privilege):**
@@ -252,6 +263,31 @@ A policy cannot acquire capabilities it wasn't granted:
 
 This holds because capabilities are only set at context creation
 and never modified during execution. ∎
+
+### 2.6 Ethical Verdict Consistency
+
+**Theorem (Policy-Arbitration Soundness):**
+Phronesis resolves conflicting policies by *priority-ordered first match*
+(`lib/phronesis/state.ex` `policies_by_priority` + the first-match evaluation in
+`spec/SPEC.core.scm`). The decision procedure is sound, decisive, and respects
+priority:
+
+1. **Soundness** — a verdict is produced only by a policy that genuinely matches
+   the situation and is in the policy set (no spurious verdicts).
+2. **Decisiveness** — whenever some policy applies, a verdict is produced.
+3. **Priority-maximal override** — the deciding policy has maximal priority among
+   all matching policies; hence a higher-priority verdict is never overridden by
+   a lower-priority one (e.g. a high-priority `REJECT` cannot be undercut by a
+   lower-priority `ACCEPT` — the core ethical override). ∎
+
+**Mechanized (Lean 4):** Machine-checked in
+[`../academic/formal-verification/lean4/Phronesis.lean`](../academic/formal-verification/lean4/Phronesis.lean)
+as `bestMatch_sound`, `bestMatch_none`, `bestMatch_decisive`, and
+`bestMatch_maximal` over the real `PhrPolicy` record. Arbitration is modelled as
+the `bestMatch` fold (highest-priority matching policy, ties to the earlier
+policy); `matches` abstracts condition evaluation, decoupling arbitration
+soundness from the expression semantics. All four are `sorry`-free (only Lean's
+standard `propext`/`Quot.sound`; confirm with `#print axioms`).
 
 ---
 
@@ -332,6 +368,21 @@ Therefore, only valid actions can commit. ∎
 
 **QED: Byzantine Safety holds.** ∎
 
+**Verified two ways:**
+
+- **Model-checked (TLA+/TLC):** [`../formal/PhronesisConsensus.tla`](../formal/PhronesisConsensus.tla)
+  exhaustively checks `Agreement`/`Validity`/`ByzantineSafety` for the instance
+  N = 4, F = 1, with a negative test confirming the `2F+1` threshold is
+  load-bearing (Agreement fails below it).
+- **Mechanized (Lean 4):** [`../academic/formal-verification/lean4/Phronesis.lean`](../academic/formal-verification/lean4/Phronesis.lean)
+  proves the quorum-intersection argument for **all** N, F:
+  `bft_no_two_quorums` (with `n ≤ 3f+1` and threshold `2f+1`, two distinct
+  values cannot both reach a quorum) and `bft_agreement` (any two committed
+  values are equal). Every cardinality fact — inclusion–exclusion
+  (`countP_incl_excl`), the union bound, and monotonicity — is *proved* over
+  `countP`, not assumed. All `sorry`-free (Lean's standard
+  `propext`/`Quot.sound`/`Classical.choice`; confirm with `#print axioms`).
+
 ### 3.5 Liveness Under Partial Synchrony
 
 **Theorem 4 (Eventual Liveness):**
@@ -398,9 +449,10 @@ Layer 5: Audit Log
 
 | Property | Status | Proof System |
 |----------|--------|--------------|
-| Sandbox Isolation | Manual proof | This document |
-| Capability Soundness | Manual proof | This document |
-| BFT Safety | Manual proof | This document |
+| Sandbox Isolation | Mechanized (Lean 4) | `academic/formal-verification/lean4/Phronesis.lean` |
+| Capability Soundness | Mechanized (Lean 4) | `academic/formal-verification/lean4/Phronesis.lean` |
+| Ethical Verdict Consistency | Mechanized (Lean 4) | `academic/formal-verification/lean4/Phronesis.lean` |
+| BFT Safety | Model-checked (TLA+/TLC) + Mechanized (Lean 4) | `formal/PhronesisConsensus.tla`, `academic/formal-verification/lean4/Phronesis.lean` |
 | BFT Liveness | Manual proof | This document |
 | Termination | Proven | Semantics doc |
 | Type Safety | Sketch | Semantics doc |

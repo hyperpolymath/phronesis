@@ -1,203 +1,127 @@
 -------------------------------- MODULE PhronesisConsensus --------------------------------
 (*
- * TLA+ Specification for Phronesis Consensus Protocol
+ * SPDX-License-Identifier: MPL-2.0
+ * Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
  *
- * This module specifies the consensus mechanism used for action execution
- * in the Phronesis policy language. It models a simplified PBFT-style
- * protocol with the following properties:
+ * TLA+ specification of the Phronesis action-commit consensus, modelled as a
+ * single-round Byzantine quorum protocol (PBFT-style core).
  *
- * Safety:
- *   - Agreement: All honest agents agree on committed actions
- *   - Validity: Only valid actions (passing policy checks) can commit
- *   - Non-repudiation: All commits are logged immutably
+ * KEY MODELLING CHOICES (design decision 2026-06-14):
+ *   - Agents have INDIVIDUAL commit views (committed[agent][round]), so
+ *     "Agreement" is the genuine BFT property: no two HONEST agents commit
+ *     different values for the same round.
+ *   - The adversary is strong: a subset `Byzantine` may EQUIVOCATE (vote for
+ *     several conflicting values), AND honest agents may receive different
+ *     values for the same round (modelling a faulty/equivocating PROPOSER) —
+ *     each honest agent still votes at most ONCE per round.
  *
- * Liveness:
- *   - Termination: Every proposed action eventually commits or aborts
+ * Safety then rests on QUORUM INTERSECTION (not on a trusted proposer): with
+ * N = |Agents|, F = |Byzantine|, N >= 3F+1 and Threshold = 2F+1, any two
+ * Threshold-quorums share >= F+1 agents, hence >= 1 honest agent; since an
+ * honest agent votes at most once per round, two conflicting values cannot
+ * both reach a quorum. The threshold is LOAD-BEARING: lowering it below 2F+1
+ * makes TLC report an Agreement violation (see the negative test in CI).
  *
- * Model Parameters:
- *   - N: Total number of agents
- *   - F: Maximum number of Byzantine (faulty) agents
- *   - Constraint: N >= 3*F + 1
+ * Run:  tlc PhronesisConsensus.tla -config PhronesisConsensus.cfg
  *)
-
-EXTENDS Integers, Sequences, FiniteSets, TLC
+EXTENDS Integers, FiniteSets, TLC
 
 CONSTANTS
-    Agents,           \* Set of all agents
-    Actions,          \* Set of possible actions
-    MaxRounds,        \* Bound for model checking
-    Threshold         \* Voting threshold (typically 2/3 + 1)
+    Agents,       \* set of all agents (N = Cardinality(Agents))
+    Actions,      \* set of proposable actions
+    MaxRounds,    \* number of consensus rounds modelled (rounds are independent)
+    Threshold,    \* quorum size (intended 2F+1)
+    Byzantine,    \* subset of Agents that may equivocate (|Byzantine| <= F)
+    NULL          \* "no value" marker
+
+ASSUME ByzantineSubsetOfAgents == Byzantine \subseteq Agents
+
+Honest == Agents \ Byzantine
+Rounds == 1..MaxRounds
 
 VARIABLES
-    proposed,         \* The currently proposed action (or NULL)
-    votes,            \* Function: Agent -> {APPROVE, REJECT, NONE}
-    committed,        \* Sequence of committed actions
-    round,            \* Current consensus round
-    agentState,       \* Function: Agent -> {IDLE, VOTING, COMMITTED}
-    log               \* Immutable consensus log
+    msgs,       \* [Rounds -> SUBSET (Agents \X Actions)] : vote messages cast
+    committed   \* [Agents -> [Rounds -> Actions \cup {NULL}]] : per-agent commit view
 
-\* Type invariant
+vars == <<msgs, committed>>
+
+\* Distinct senders who voted for action v in round r.
+Senders(r, v) == { a \in Agents : <<a, v>> \in msgs[r] }
+
+\* Has honest agent a already voted in round r?
+HonestVoted(a, r) == \E v \in Actions : <<a, v>> \in msgs[r]
+
+------------------------------------------------------------------------------
 TypeOK ==
-    /\ proposed \in Actions \cup {NULL}
-    /\ votes \in [Agents -> {"APPROVE", "REJECT", "NONE"}]
-    /\ committed \in Seq(Actions)
-    /\ round \in Nat
-    /\ agentState \in [Agents -> {"IDLE", "VOTING", "COMMITTED"}]
-    /\ log \in Seq([action: Actions, votes: [Agents -> {"APPROVE", "REJECT"}], timestamp: Nat])
+    /\ msgs \in [Rounds -> SUBSET (Agents \X Actions)]
+    /\ committed \in [Agents -> [Rounds -> Actions \cup {NULL}]]
 
-\* Initial state
 Init ==
-    /\ proposed = NULL
-    /\ votes = [a \in Agents |-> "NONE"]
-    /\ committed = <<>>
-    /\ round = 0
-    /\ agentState = [a \in Agents |-> "IDLE"]
-    /\ log = <<>>
+    /\ msgs = [r \in Rounds |-> {}]
+    /\ committed = [a \in Agents |-> [r \in Rounds |-> NULL]]
 
-\* Helper: Count approvals
-ApprovalCount == Cardinality({a \in Agents : votes[a] = "APPROVE"})
-
-\* Helper: Count rejections
-RejectionCount == Cardinality({a \in Agents : votes[a] = "REJECT"})
-
-\* Helper: All votes cast
-AllVotesCast == \A a \in Agents : votes[a] # "NONE"
-
-\* Helper: Consensus reached
-ConsensusReached == ApprovalCount >= Threshold
-
-\* Helper: Consensus failed
-ConsensusFailed == RejectionCount > Cardinality(Agents) - Threshold
-
------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 \* Actions
 
-\* Leader proposes an action
-Propose(action) ==
-    /\ proposed = NULL
-    /\ round < MaxRounds
-    /\ proposed' = action
-    /\ agentState' = [a \in Agents |-> "VOTING"]
-    /\ round' = round + 1
-    /\ UNCHANGED <<votes, committed, log>>
+\* An HONEST agent votes ONCE per round, for the value it was delivered. The
+\* delivered value is chosen over all Actions to model a faulty/equivocating
+\* proposer that may split the vote across honest agents.
+HonestVote(a, r, v) ==
+    /\ a \in Honest
+    /\ v \in Actions
+    /\ ~HonestVoted(a, r)
+    /\ msgs' = [msgs EXCEPT ![r] = @ \cup {<<a, v>>}]
+    /\ UNCHANGED committed
 
-\* Agent casts a vote
-Vote(agent, vote) ==
-    /\ proposed # NULL
-    /\ agentState[agent] = "VOTING"
-    /\ votes[agent] = "NONE"
-    /\ vote \in {"APPROVE", "REJECT"}
-    /\ votes' = [votes EXCEPT ![agent] = vote]
-    /\ UNCHANGED <<proposed, committed, round, agentState, log>>
+\* A BYZANTINE agent may vote for ANY action (equivocation: possibly several).
+ByzVote(a, r, v) ==
+    /\ a \in Byzantine
+    /\ v \in Actions
+    /\ msgs' = [msgs EXCEPT ![r] = @ \cup {<<a, v>>}]
+    /\ UNCHANGED committed
 
-\* Commit action if consensus reached
-Commit ==
-    /\ proposed # NULL
-    /\ ConsensusReached
-    /\ committed' = Append(committed, proposed)
-    /\ log' = Append(log, [
-         action |-> proposed,
-         votes |-> [a \in Agents |-> votes[a]],
-         timestamp |-> round
-       ])
-    /\ proposed' = NULL
-    /\ votes' = [a \in Agents |-> "NONE"]
-    /\ agentState' = [a \in Agents |-> "IDLE"]
-    /\ UNCHANGED round
-
-\* Abort action if consensus failed
-Abort ==
-    /\ proposed # NULL
-    /\ ConsensusFailed
-    /\ proposed' = NULL
-    /\ votes' = [a \in Agents |-> "NONE"]
-    /\ agentState' = [a \in Agents |-> "IDLE"]
-    /\ UNCHANGED <<committed, round, log>>
-
-\* Timeout (all votes cast but no decision)
-Timeout ==
-    /\ proposed # NULL
-    /\ AllVotesCast
-    /\ ~ConsensusReached
-    /\ ~ConsensusFailed
-    /\ proposed' = NULL
-    /\ votes' = [a \in Agents |-> "NONE"]
-    /\ agentState' = [a \in Agents |-> "IDLE"]
-    /\ UNCHANGED <<committed, round, log>>
-
------------------------------------------------------------------------------
-\* Specification
+\* An honest agent commits v for round r once it observes a Threshold-quorum.
+Commit(a, r, v) ==
+    /\ a \in Honest
+    /\ committed[a][r] = NULL
+    /\ Cardinality(Senders(r, v)) >= Threshold
+    /\ committed' = [committed EXCEPT ![a][r] = v]
+    /\ UNCHANGED msgs
 
 Next ==
-    \/ \E action \in Actions : Propose(action)
-    \/ \E agent \in Agents, vote \in {"APPROVE", "REJECT"} : Vote(agent, vote)
-    \/ Commit
-    \/ Abort
-    \/ Timeout
+    \/ \E a \in Agents, r \in Rounds, v \in Actions : HonestVote(a, r, v)
+    \/ \E a \in Agents, r \in Rounds, v \in Actions : ByzVote(a, r, v)
+    \/ \E a \in Agents, r \in Rounds, v \in Actions : Commit(a, r, v)
 
-Spec == Init /\ [][Next]_<<proposed, votes, committed, round, agentState, log>>
+Spec == Init /\ [][Next]_vars
 
------------------------------------------------------------------------------
-\* Safety Properties
+------------------------------------------------------------------------------
+\* Safety properties
 
-\* Agreement: No conflicting commits
+\* AGREEMENT (the genuine BFT property): no two honest agents commit different
+\* values for the same round. Holds by quorum intersection iff Threshold >= 2F+1.
 Agreement ==
-    \A i, j \in 1..Len(committed) :
-        i = j \/ committed[i] # committed[j]
+    \A a, b \in Honest, r \in Rounds :
+        (committed[a][r] # NULL /\ committed[b][r] # NULL)
+            => committed[a][r] = committed[b][r]
 
-\* Validity: Only properly voted actions commit
+\* VALIDITY: an honest agent only commits a value backed by a Threshold-quorum.
 Validity ==
-    \A i \in 1..Len(log) :
-        Cardinality({a \in Agents : log[i].votes[a] = "APPROVE"}) >= Threshold
+    \A a \in Honest, r \in Rounds :
+        committed[a][r] # NULL =>
+            Cardinality(Senders(r, committed[a][r])) >= Threshold
 
-\* Non-repudiation: Every committed action is in the log
-NonRepudiation ==
-    \A i \in 1..Len(committed) :
-        \E j \in 1..Len(log) : log[j].action = committed[i]
-
-\* Log is append-only (no modifications)
-LogAppendOnly ==
-    [][Len(log') >= Len(log)]_log
-
-\* Combined safety property
-Safety == Agreement /\ Validity /\ NonRepudiation
-
------------------------------------------------------------------------------
-\* Liveness Properties (under fairness)
-
-\* Every proposal eventually commits or aborts
-EventualDecision ==
-    proposed # NULL ~> (proposed = NULL)
-
-\* The system makes progress
-Progress ==
-    <>(Len(committed) > 0)
-
------------------------------------------------------------------------------
-\* Byzantine Fault Tolerance
-
-\* Assuming F Byzantine agents (modeled as arbitrary voters)
-\* With N >= 3F + 1 and Threshold = 2F + 1:
-\*   - Byzantine agents cannot commit invalid actions alone
-\*   - Honest agents (>= 2F + 1) can always reach consensus
-
+\* BYZANTINE SAFETY (state-level): a committed value cannot be forged by the
+\* Byzantine minority alone. Every honest commit is backed by at least
+\* (Threshold - |Byzantine|) HONEST senders, provided Threshold > |Byzantine|.
 ByzantineSafety ==
-    \* Even if F agents vote arbitrarily, safety holds
-    \A subset \in SUBSET Agents :
-        Cardinality(subset) <= (Cardinality(Agents) - 1) \div 3 =>
-            \* These agents cannot force a commit without honest majority
-            Cardinality(subset) < Threshold
+    /\ Threshold > Cardinality(Byzantine)
+    /\ \A a \in Honest, r \in Rounds :
+         committed[a][r] # NULL =>
+             Cardinality(Senders(r, committed[a][r]) \cap Honest)
+                 >= Threshold - Cardinality(Byzantine)
 
------------------------------------------------------------------------------
-\* Model Checking Configuration
-
-\* For TLC model checker, use these constants:
-\* Agents = {a1, a2, a3, a4}  (N = 4)
-\* Actions = {act1, act2}
-\* MaxRounds = 3
-\* Threshold = 3  (for N=4, F=1, need 2F+1 = 3)
-
-\* Check: Safety, Validity, NonRepudiation
-\* Check with fairness: EventualDecision, Progress
+\* Combined safety.
+Safety == TypeOK /\ Agreement /\ Validity /\ ByzantineSafety
 
 =============================================================================
