@@ -2,6 +2,8 @@
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 // SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell
 
+#![forbid(unsafe_code)]
+
 //! Abstract syntax tree definitions for the Phronesis policy language.
 //!
 //! Phronesis is a provably-terminating policy DSL for ethical/agentic reasoning.
@@ -31,7 +33,6 @@
 /// Byte offsets are `u32` because Phronesis policy files are expected to be
 /// well under 4 GiB. The `synthetic` constructor produces a zero-length span
 /// for compiler-generated nodes that have no corresponding source text.
-#![forbid(unsafe_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Span {
