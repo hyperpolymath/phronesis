@@ -642,27 +642,101 @@ Fixpoint free_vars (e : phr_expr) : list string :=
   | EIn e1 e2 => free_vars e1 ++ free_vars e2
   end.
 
-(** Totality / progress-to-a-value.
+(** Totality / progress-to-a-value: a well-typed closed expression always
+    evaluates to a value (the language has no loops or recursion).
 
-    NOTE (honesty): this is the one safety obligation in this file that is NOT
-    yet mechanized. It is stated here as an explicit [Admitted] obligation, not
-    a hidden gap. The ORIGINAL statement (closedness of the value environment
-    alone implies evaluation) is FALSE — e.g. [EBinOp OpAdd (ELit (VBool true))
+    NOTE: the ORIGINAL statement required only that the value environment cover
+    [free_vars e], which is FALSE — e.g. [EBinOp OpAdd (ELit (VBool true))
     (ELit (VInt 1))] is closed but has no applicable evaluation rule. The
-    correct statement requires WELL-TYPEDNESS: a closed, well-typed expression
-    evaluates to a value (the language has no loops or recursion). The full
-    proof is an induction on the typing derivation using the canonical-forms
-    lemmas to pin each operand's value shape; it is left open here.
-
-    Nothing below depends on [totality]; the safety core ([preservation],
-    [eval_deterministic], [type_safety], [phr_type_eq_dec], [subtype_trans],
-    [no_system_calls]) is fully proved and axiom-free. *)
+    correct hypothesis is WELL-TYPEDNESS; and since [[] ⊢ e ∈ τ] already forces
+    [e] to be closed (there is no binding form, so [EVar] is untypable here),
+    the value-environment hypothesis is redundant and dropped. The proof is an
+    induction on [e] that uses [preservation] + the canonical value shapes to
+    pin each operand. [ρ] is arbitrary precisely because [e] is closed. *)
 Theorem totality : forall e τ ρ,
-  [] ⊢ e ∈ τ ->
-  (forall x, In x (free_vars e) -> exists v, val_lookup x ρ = Some v) ->
-  exists v, ρ ⊢ e ⇓ v.
+  [] ⊢ e ∈ τ -> exists v, ρ ⊢ e ⇓ v.
 Proof.
-Admitted.
+  intros e; induction e as
+    [ p | s | b e1 IHe1 e2 IHe2 | u e IHe
+    | e1 IHe1 e2 IHe2 e3 IHe3 | e IHe f | e1 IHe1 e2 IHe2 ];
+    intros τ ρ Ht.
+  - (* ELit *) exists p. constructor.
+  - (* EVar: untypable in the empty context *)
+    inversion Ht; subst.
+    match goal with H : lookup _ [] = Some _ |- _ => simpl in H; discriminate H end.
+  - (* EBinOp: evaluate the left operand once, up front *)
+    inversion Ht; subst;
+    match goal with Ha : has_type [] e1 _ |- _ =>
+      destruct (IHe1 _ ρ Ha) as [v1 Hv1];
+      pose proof (preservation _ _ _ _ Ha Hv1) as T1
+    end.
+    + (* Add *) match goal with Hb : has_type [] e2 _ |- _ =>
+        destruct (IHe2 _ ρ Hb) as [v2 Hv2]; pose proof (preservation _ _ _ _ Hb Hv2) as T2 end;
+        inversion T1; subst; inversion T2; subst; eexists; apply E_Add; eassumption.
+    + (* Sub *) match goal with Hb : has_type [] e2 _ |- _ =>
+        destruct (IHe2 _ ρ Hb) as [v2 Hv2]; pose proof (preservation _ _ _ _ Hb Hv2) as T2 end;
+        inversion T1; subst; inversion T2; subst; eexists; apply E_Sub; eassumption.
+    + (* Mul *) match goal with Hb : has_type [] e2 _ |- _ =>
+        destruct (IHe2 _ ρ Hb) as [v2 Hv2]; pose proof (preservation _ _ _ _ Hb Hv2) as T2 end;
+        inversion T1; subst; inversion T2; subst; eexists; apply E_Mul; eassumption.
+    + (* And: short-circuit on the left guard *)
+      inversion T1; subst;
+      match goal with Hg : _ ⊢ e1 ⇓ VBool ?bb |- _ => destruct bb end.
+      * match goal with Hb : has_type [] e2 _ |- _ =>
+          destruct (IHe2 _ ρ Hb) as [v2 Hv2]; pose proof (preservation _ _ _ _ Hb Hv2) as T2 end;
+          inversion T2; subst; eexists; apply E_And_True; eassumption.
+      * eexists; apply E_And_False; eassumption.
+    + (* Or: short-circuit on the left guard *)
+      inversion T1; subst;
+      match goal with Hg : _ ⊢ e1 ⇓ VBool ?bb |- _ => destruct bb end.
+      * eexists; apply E_Or_True; eassumption.
+      * match goal with Hb : has_type [] e2 _ |- _ =>
+          destruct (IHe2 _ ρ Hb) as [v2 Hv2]; pose proof (preservation _ _ _ _ Hb Hv2) as T2 end;
+          inversion T2; subst; eexists; apply E_Or_False; eassumption.
+    + (* Eq: no value-shape constraint *)
+      match goal with Hb : has_type [] e2 _ |- _ =>
+        destruct (IHe2 _ ρ Hb) as [v2 Hv2] end;
+        eexists; apply E_Eq; eassumption.
+    + (* Lt *) match goal with Hb : has_type [] e2 _ |- _ =>
+        destruct (IHe2 _ ρ Hb) as [v2 Hv2]; pose proof (preservation _ _ _ _ Hb Hv2) as T2 end;
+        inversion T1; subst; inversion T2; subst; eexists; apply E_Lt; eassumption.
+  - (* EUnOp *)
+    inversion Ht; subst;
+    match goal with Ha : has_type [] e _ |- _ =>
+      destruct (IHe _ ρ Ha) as [v Hv]; pose proof (preservation _ _ _ _ Ha Hv) as T end;
+      inversion T; subst.
+    + eexists; apply E_Not; eassumption.
+    + eexists; apply E_Neg; eassumption.
+  - (* EIf: branch on the guard value *)
+    inversion Ht; subst.
+    match goal with Hc : has_type [] e1 _ |- _ =>
+      destruct (IHe1 _ ρ Hc) as [v1 Hv1]; pose proof (preservation _ _ _ _ Hc Hv1) as T1 end.
+    inversion T1; subst.
+    match goal with Hg : _ ⊢ e1 ⇓ VBool ?bb |- _ => destruct bb end.
+    + match goal with Ht2 : has_type [] e2 _ |- _ =>
+        destruct (IHe2 _ ρ Ht2) as [v2 Hv2] end; exists v2; apply E_If_True; assumption.
+    + match goal with Ht3 : has_type [] e3 _ |- _ =>
+        destruct (IHe3 _ ρ Ht3) as [v3 Hv3] end; exists v3; apply E_If_False; assumption.
+  - (* EField: the field exists in the (well-typed) record value *)
+    inversion Ht; subst.
+    match goal with Hr : has_type [] e (TRecord ?ff), Hin : In (f, τ) ?ff |- _ =>
+      destruct (IHe _ ρ Hr) as [v Hv]; pose proof (preservation _ _ _ _ Hr Hv) as T;
+      inversion T; subst;
+      match goal with Hbody : forall a t, In (a, t) ff -> _ |- _ =>
+        destruct (Hbody f τ Hin) as [w [Hlk Hwt]]
+      end
+    end.
+    exists w. eapply E_Field; eassumption.
+  - (* EIn: the right operand is a list value *)
+    inversion Ht; subst.
+    match goal with
+      Ha : has_type [] e1 _, Hb : has_type [] e2 (TList _) |- _ =>
+        destruct (IHe1 _ ρ Ha) as [v1 Hv1];
+        destruct (IHe2 _ ρ Hb) as [v2 Hv2];
+        pose proof (preservation _ _ _ _ Hb Hv2) as T2
+    end.
+    inversion T2; subst. eexists. apply E_In; eassumption.
+Qed.
 
 (** * 16. Type Safety Corollary *)
 
