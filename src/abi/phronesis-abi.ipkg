@@ -1,0 +1,8 @@
+-- SPDX-License-Identifier: MPL-2.0
+-- Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+-- Minimal Idris 2 package for the Phronesis ABI type-safety module.
+-- No external dependencies (Prelude + base only). Check with:
+--   idris2 --typecheck phronesis-abi.ipkg
+package phronesis-abi
+sourcedir = "."
+modules = Types
