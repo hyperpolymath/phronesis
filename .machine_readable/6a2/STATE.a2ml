@@ -5,56 +5,45 @@
 [metadata]
 project = "phronesis"
 version = "0.9.0"
-last-updated = "2026-03-14"
+last-updated = "2026-06-18"
 status = "active"
-session = "converted from scheme — 2026-04-11"
+session = "reflexion design layer + docs/metadata/licence sync — 2026-06-18"
 
 [project-context]
 name = "Phronesis"
-purpose = """Scale testing, edge case handling, production deployment"""
-completion-percentage = 95
+purpose = """Neuro-symbolic policy language for provably-safe agentic ethical reasoning on the BEAM."""
+completion-percentage = 80
 
 [position]
-phase = "production-ready"   # design | implementation | testing | maintenance | archived
+phase = "implementation"   # design | implementation | testing | maintenance | archived
 maturity = "experimental"  # experimental | alpha | beta | production | lts
 
 [route-to-mvp]
 milestones = [
-  # No milestones recorded
+  { name = "Lexer / parser / AST", completion = 100 },
+  { name = "Type checker + analyzer", completion = 100 },
+  { name = "Interpreter + tracing + decision traces", completion = 100 },
+  { name = "LSP / debugger / profiler / doc-generator", completion = 100 },
+  { name = "Consensus (Raft via :ra) runtime + TLA+ spec", completion = 80 },
+  { name = "Reflexion design layer (claims / JEG / invariant-path / revaluation)", completion = 70 },
+  { name = "Rust to WASM production compiler", completion = 20 },
+  { name = "Idris2 ABI + Zig FFI boundary", completion = 30 },
 ]
 
 [blockers-and-issues]
 issues = [
-  # No blockers recorded
+  { id = "pre-existing-test-failures", note = "DebuggerTest (Trace.merge/2 undefined; State.variables), DocGeneratorTest, IncrementalLexerTest, ConformanceTest 04_boolean_logic — predate the reflexion work" },
+  { id = "compiler-backend", note = "Rust to WASM codegen is still AST scaffolding only" },
 ]
 
 [critical-next-actions]
 actions = [
-  "Write comprehensive tests for lexer, parser, interpreter, consensus, RPKI",
-  "8-12 hours",
-  "Scale test and real-world BGP feed testing",
-  "15-20 hours",
-  "Add Idris2 ABI definitions and Zig FFI layer",
-  "15-20 hours",
-  ")
-    (achieved ",
-  ")
-    (evidence
-      (unit ",
-  ")
-      (smoke ",
-  ")
-      (p2p ",
-  ")
-      (e2e ",
-  ")
-      (aspect ",
-  ")
-      (contract ",
-  ")
-      (benchmarks ",
+  "Repair pre-existing test failures (Trace.merge/2 in debugger; State.variables field)",
+  "Wire reflexion claim ingest for the compiler, formal/proof, and benchmark sources",
+  "Advance the Rust to WASM production compiler beyond AST scaffolding",
+  "Add Idris2 ABI definitions and the Zig FFI layer",
 ]
 
 [maintenance-status]
-last-run-utc = "2026-03-14T00:00:00Z"
-last-result = "unknown"  # unknown | pass | warn | fail
+last-run-utc = "2026-06-18T00:00:00Z"
+last-result = "warn"  # unknown | pass | warn | fail  (reflexion suite green; pre-existing failures remain)

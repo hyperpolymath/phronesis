@@ -14,11 +14,15 @@ Phronesis is a provably safe language for agentic ethical reasoning, combining s
 
 ```
 phronesis/
-├── compiler/            # Core Phronesis compiler (OCaml/analysis)
-├── academic/            # Academic papers and formal proofs
+├── lib/phronesis/       # Reference implementation (Elixir/BEAM): lexer, parser,
+│                        #   type checker, interpreter, consensus, LSP, reflexion
+├── compiler/            # Rust → WASM compiler (phronesis-ast, phronesis-wasm)
+├── spec/                # Grammar (EBNF) + formal semantics
+├── formal/              # TLA+ consensus specification
+├── academic/            # Formal proofs (Lean4 / Agda / Coq)
 ├── conformance/         # Conformance test suites and validation
 ├── bench/               # Performance benchmarking
-├── _build/              # Build artifacts (OCaml dune)
+├── docs/                # AsciiDoc design docs (incl. REFLEXION.adoc)
 └── .github/workflows/   # CI/CD (hypatia-scan, codeql, etc.)
 ```
 

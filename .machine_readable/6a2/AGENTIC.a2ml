@@ -4,7 +4,7 @@
 # AGENTIC.a2ml — AI agent constraints and capabilities
 [metadata]
 version = "0.1.0"
-last-updated = "2026-04-11"
+last-updated = "2026-06-18"
 
 [agent-permissions]
 can-edit-source = true
@@ -27,6 +27,12 @@ require-evidence-per-step = true
 allow-silent-skip = false
 require-rerun-after-fix = true
 release-claim-requires-hard-pass = true
+
+[reflexion]
+# The reflexion design layer is advisory: it emits design obligations that gate
+# changes to the language, but never auto-mutates the AST, compiler, or runtime.
+obligations-are-advisory = true
+never-auto-mutate-semantics = true
 
 [automation-hooks]
 # on-enter: Read 0-AI-MANIFEST.a2ml, then STATE.a2ml

@@ -4,7 +4,7 @@
 # PLAYBOOK.a2ml — Operational playbook
 [metadata]
 version = "0.1.0"
-last-updated = "2026-04-11"
+last-updated = "2026-06-18"
 
 [deployment]
 # method = "gitops"  # gitops | manual | ci-triggered

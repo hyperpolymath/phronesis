@@ -235,15 +235,17 @@ Per LSP spec, the server advertises:
 - **Hover latency:** <5ms
 - **Diagnostics:** Real-time on document change
 
-## Next Steps (Not Implemented)
+## Status of Follow-on Tooling
 
-Based on TOOLCHAIN-WISHLIST.md, the next sequential items are:
+The items that were "next" at the time of the LSP work have since landed:
 
-1. **Debugger** (1-2 weeks) - Set breakpoints, inspect state, step execution
-2. **Profiler** (1 week) - Performance analysis
-3. **Documentation Generator** (1 week) - Extract docs from policies
-4. **REPL Enhancements** (1 week) - Auto-completion, history, multi-line
-5. **Package Manager** (2-3 weeks) - Dependency resolution, registry
+1. **Debugger** — IMPLEMENTED (`lib/phronesis/debugger.ex` + `debugger/repl.ex`)
+2. **Profiler** — IMPLEMENTED (`lib/phronesis/profiler.ex` + `profiler/reporter.ex`)
+3. **Documentation Generator** — IMPLEMENTED (`lib/phronesis/doc_generator.ex`)
+4. **Package Manager** — IMPLEMENTED (`lib/phronesis/package_manager/`)
+5. **REPL Enhancements** — partial (interactive REPL via the debugger)
+
+Newer work: the **reflexion** design layer (`lib/phronesis/reflexion/`) — see `docs/REFLEXION.adoc`.
 
 ## Commits
 
@@ -252,7 +254,7 @@ Based on TOOLCHAIN-WISHLIST.md, the next sequential items are:
 
 ## Metrics
 
-- **Overall Completion:** 50% → 60%
+- **Overall Completion:** ~80% (LSP, debugger, profiler, doc-generator, package manager, reflexion all landed)
 - **Files Added:** 18
 - **Lines Added:** 2,162
 - **Tests:** 10/10 passing

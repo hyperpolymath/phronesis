@@ -4,17 +4,25 @@
 # ECOSYSTEM.a2ml — Phronesis ecosystem position
 [metadata]
 version = "1.0"
-last-updated = "2026-04-11"
+last-updated = "2026-06-18"
 
 [project]
 name = "Phronesis"
-purpose = ""
-role = ""
+purpose = "Neuro-symbolic policy language for provably-safe agentic ethical reasoning on the BEAM."
+role = "language-and-runtime"
 
 [position-in-ecosystem]
-category = ""
+category = "nextgen-language"
 
 [related-projects]
 projects = [
-  # No related projects recorded
+  { name = "phronesiser", relation = "sibling", note = "The -iser that adds provably-safe ethical constraints to AI agents via Phronesis deontic logic." },
+  { name = "standards", relation = "depends-on", note = "Estate standards: RSR template, A2ML format family, licence policy." },
+  { name = "rsr-template-repo", relation = "templated-from", note = "Rhodium Standard Repository template (.machine_readable/6a2 layout, contractiles)." },
+  { name = "hypatia", relation = "ci", note = "Neurosymbolic CI scanning (report-format = logtalk)." },
+  { name = "gitbot-fleet", relation = "ci", note = "Learning / feedback submission." },
+  { name = "a2ml-validate-action", relation = "ci", note = "Validates the .machine_readable A2ML artefacts." },
 ]
+
+[boundaries]
+note = "A reflexion design-self-relation layer (claims / judgement-evidence graph / invariant-path equivalence / revaluation) was added 2026-06; it observes the toolchain and gates design changes but never auto-mutates semantics."
