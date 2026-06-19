@@ -69,6 +69,11 @@ defmodule Phronesis.IncrementalLexer do
   @spec edit(t(), edit()) :: t()
   def edit(state, %{start: start, old_end: old_end, new_text: new_text}) do
     old_source = state.source
+    size = byte_size(old_source)
+    # Clamp the edit window into the source so an out-of-bounds delta (e.g. an old_end
+    # past end-of-buffer) can't drive binary_part/3 with a negative length.
+    start = start |> max(0) |> min(size)
+    old_end = old_end |> max(start) |> min(size)
 
     # Apply the text edit.
     prefix = binary_part(old_source, 0, start)

@@ -343,7 +343,9 @@ defmodule Phronesis.Parser do
   end
 
   defp parse_factor([{:lparen, _, _, _} | rest]) do
-    with {:ok, expr, rest} <- parse_expression(rest),
+    # A parenthesised group resets to the top of the expression grammar so it can
+    # contain comparisons and logical operators, e.g. (is_valid == true AND enabled).
+    with {:ok, expr, rest} <- parse_logical_expr(rest),
          {:ok, rest} <- expect(:rparen, rest) do
       {:ok, expr, rest}
     end
