@@ -160,5 +160,5 @@ cryptographic signing for packages yet.
 | `Containerfile` | Podman container definition (Chainguard base)
 | `.machine_readable/` | A2ML state, meta, ecosystem files
 | `TESTING-REPORT.adoc` | Test results narrative
-| `LSP-IMPLEMENTATION-SUMMARY.md` | LSP feature coverage summary
+| `LSP-IMPLEMENTATION-SUMMARY.adoc` | LSP feature coverage summary
 |===
