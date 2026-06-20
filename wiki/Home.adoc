@@ -1,0 +1,170 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+
+== Phronesis Wiki
+
+____
+*Phronesis* - A consensus-gated policy language for network configuration
+____
+
+Welcome to the Phronesis documentation wiki. This comprehensive resource covers everything from getting started to advanced deployment scenarios.
+
+'''''
+
+=== Quick Navigation
+
+==== Getting Started
+
+* link:Installation.adoc[Installation] - Install Phronesis on your system
+* link:Quick-Start.adoc[Quick Start] - Your first policy in 5 minutes
+* link:Hello-World.adoc[Hello World] - Basic examples explained
+* link:Project-Structure.adoc[Project Structure] - Organizing policy projects
+
+==== Language Guide
+
+* link:Language-Overview.adoc[Language Overview] - Core concepts
+* link:Syntax-Reference.adoc[Syntax Reference] - Complete syntax guide
+* link:Types.adoc[Types] - Type system documentation
+* link:Operators.adoc[Operators] - All operators explained
+* link:Expressions.adoc[Expressions] - Expression evaluation
+* link:Policies.adoc[Policies] - Policy declarations
+* link:Actions.adoc[Actions] - ACCEPT, REJECT, REPORT, EXECUTE
+* link:Modules.adoc[Modules] - Module system and imports
+
+==== Standard Library
+
+* link:Stdlib-RPKI.adoc[Std.RPKI] - RPKI validation
+* link:Stdlib-BGP.adoc[Std.BGP] - BGP operations
+* link:Stdlib-Consensus.adoc[Std.Consensus] - Distributed consensus
+* link:Stdlib-Temporal.adoc[Std.Temporal] - Temporal constraints
+* link:Stdlib-IP.adoc[Std.IP] - IP address utilities
+* link:Stdlib-ASN.adoc[Std.ASN] - AS number utilities
+
+==== Tooling
+
+* link:CLI-Reference.adoc[CLI Reference] - Command-line interface
+* link:REPL-Guide.adoc[REPL Guide] - Interactive mode
+* link:Formatter.adoc[Formatter] - Code formatting
+* link:Linter.adoc[Linter] - Static analysis
+* link:Testing.adoc[Testing] - Test framework
+* link:Debugging.adoc[Debugging] - Debug tools
+
+==== Architecture
+
+* link:Architecture-Overview.adoc[System Overview] - High-level design
+* link:Architecture-Lexer.adoc[Lexer] - Tokenization
+* link:Architecture-Parser.adoc[Parser] - Parsing & AST
+* link:Architecture-Interpreter.adoc[Interpreter] - Execution model
+* link:Architecture-Compiler.adoc[Compiler] - Compilation pipeline
+* link:Architecture-Consensus.adoc[Consensus] - Raft implementation
+* link:Architecture-State.adoc[State Model] - State management
+
+==== Tutorials
+
+* link:Tutorial-BGP-Security.adoc[Tutorial: BGP Security] - Secure BGP policies
+* link:Tutorial-RPKI.adoc[Tutorial: RPKI Validation] - ROA validation
+* link:Tutorial-Consensus.adoc[Tutorial: Consensus Routing] - Multi-party approval
+* link:Tutorial-Traffic-Engineering.adoc[Tutorial: Traffic Engineering] - TE policies
+* link:Tutorial-Testing.adoc[Tutorial: Testing Policies] - Test your policies
+
+==== Advanced Topics
+
+* link:Formal-Semantics.adoc[Formal Semantics] - Operational semantics
+* link:Advanced-Types.adoc[Type System] - Type theory
+* link:Security-Model.adoc[Security Model] - Security guarantees
+* link:Performance.adoc[Performance Tuning] - Optimization guide
+* link:Production.adoc[Production Deployment] - Deployment guide
+* link:High-Availability.adoc[High Availability] - HA configuration
+
+==== Integration
+
+* link:Integration-RPKI.adoc[RPKI Validators] - Routinator, rpki-client
+* link:Integration-Routers.adoc[Router Integration] - Cisco, Juniper, Arista
+* link:Integration-Kubernetes.adoc[Kubernetes] - K8s NetworkPolicy
+* link:Integration-Terraform.adoc[Terraform] - IaC integration
+* link:Integration-Prometheus.adoc[Prometheus] - Metrics & monitoring
+
+==== Developer Guide
+
+* link:Contributing.adoc[Contributing] - How to contribute
+* link:Development-Setup.adoc[Development Setup] - Dev environment
+* link:Code-Style.adoc[Code Style] - Style guidelines
+* link:Testing-Guide.adoc[Testing Guide] - Writing tests
+* link:Release-Process.adoc[Release Process] - Release workflow
+* link:RFC-Process.adoc[RFC Process] - Feature proposals
+
+==== Reference
+
+* link:Reference-Grammar.adoc[Grammar (EBNF)] - Formal grammar
+* link:Reference-AST.adoc[AST Reference] - AST node types
+* link:Reference-Errors.adoc[Error Codes] - Error reference
+* link:Glossary.adoc[Glossary] - Terms & definitions
+* link:FAQ.adoc[FAQ] - Frequently asked questions
+* link:Changelog.adoc[Changelog] - Version history
+
+'''''
+
+=== Feature Status
+
+[cols=",,",options="header",]
+|===
+|Feature |Status |Version
+|Core Language |✅ Stable |0.1.x
+|Lexer |✅ Stable |0.1.x
+|Parser |✅ Stable |0.1.x
+|Interpreter |✅ Stable |0.1.x
+|CLI |✅ Stable |0.1.x
+|REPL |✅ Stable |0.1.x
+|Std.RPKI |✅ Stable |0.1.x
+|Std.BGP |✅ Stable |0.1.x
+|Std.Consensus |✅ Stable |0.1.x
+|Std.Temporal |✅ Stable |0.1.x
+|Raft Consensus |✅ Stable |0.1.x
+|TLA+ Spec |✅ Complete |0.1.x
+|Formatter |🔄 In Progress |0.2.x
+|LSP Server |📋 Planned |0.3.x
+|Bytecode Compiler |📋 Planned |0.4.x
+|===
+
+'''''
+
+=== Quick Example
+
+[source,phronesis]
+----
+# BGP Security Policy
+IMPORT Std.RPKI
+IMPORT Std.BGP
+
+CONST bogon_prefixes = ["0.0.0.0/8", "10.0.0.0/8", "127.0.0.0/8"]
+
+POLICY rpki_validation:
+  Std.RPKI.validate(route) == "invalid"
+  THEN REJECT("RPKI validation failed")
+  PRIORITY: 200
+
+POLICY bogon_filter:
+  route.prefix IN bogon_prefixes
+  THEN REJECT("Bogon prefix not allowed")
+  PRIORITY: 190
+
+POLICY default_accept:
+  true
+  THEN ACCEPT(route)
+  PRIORITY: 1
+----
+
+'''''
+
+=== Getting Help
+
+* *Documentation*: You're here!
+* *GitHub Issues*: https://github.com/hyperpolymath/phronesis/issues[Report bugs]
+* *Discussions*: https://github.com/hyperpolymath/phronesis/discussions[Ask questions]
+* *Discord*: link:#[Community chat]
+
+'''''
+
+=== License
+
+Phronesis is licensed under link:../LICENSE[MPL-2.0].
