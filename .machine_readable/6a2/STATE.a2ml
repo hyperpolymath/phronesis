@@ -5,9 +5,9 @@
 [metadata]
 project = "phronesis"
 version = "0.9.0"
-last-updated = "2026-06-18"
+last-updated = "2026-06-20"
 status = "active"
-session = "reflexion design layer + docs/metadata/licence sync — 2026-06-18"
+session = "docs refresh + RSR/bot-doc compliance + root cleanup — 2026-06-20"
 
 [project-context]
 name = "Phronesis"
@@ -32,18 +32,16 @@ milestones = [
 
 [blockers-and-issues]
 issues = [
-  { id = "pre-existing-test-failures", note = "DebuggerTest (Trace.merge/2 undefined; State.variables), DocGeneratorTest, IncrementalLexerTest, ConformanceTest 04_boolean_logic — predate the reflexion work" },
   { id = "compiler-backend", note = "Rust to WASM codegen is still AST scaffolding only" },
 ]
 
 [critical-next-actions]
 actions = [
-  "Repair pre-existing test failures (Trace.merge/2 in debugger; State.variables field)",
   "Wire reflexion claim ingest for the compiler, formal/proof, and benchmark sources",
   "Advance the Rust to WASM production compiler beyond AST scaffolding",
   "Add Idris2 ABI definitions and the Zig FFI layer",
 ]
 
 [maintenance-status]
-last-run-utc = "2026-06-18T00:00:00Z"
-last-result = "warn"  # unknown | pass | warn | fail  (reflexion suite green; pre-existing failures remain)
+last-run-utc = "2026-06-20T00:00:00Z"
+last-result = "pass"  # unknown | pass | warn | fail  (full ExUnit suite green; consensus/Raft cases skipped pending :ra)

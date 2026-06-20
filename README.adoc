@@ -5,7 +5,7 @@ image:https://img.shields.io/badge/OpenSSF-Best_Practices-green?logo=openssource
 
 :license: MPL-2.0 (code) and CC-BY-SA-4.0 (documentation)
 :author: Jonathan D. A. Jewell
-:version: Standard Candidate 1.0
+:version: 0.9.0
 :repo: https://github.com/hyperpolymath/phronesis
 :toc:
 :toclevels: 3
@@ -52,7 +52,7 @@ Phronesis uses a *dual-licensing* model:
 | Guarantees trustworthiness and auditability
 
 | Probabilistic Types
-| `BeliefFunction`, `ProbabilityDistribution` as statically checked types
+| `BeliefFunction`, `ProbabilityDistribution` as first-class types (runtime-represented; static checking on the roadmap)
 | Solves symbol grounding between neural and symbolic layers
 
 | Metaiconic API
@@ -62,6 +62,10 @@ Phronesis uses a *dual-licensing* model:
 | Map-Territory Mandate
 | Mandatory `REPORT` action flags model-reality inconsistencies
 | Enforces epistemological safety
+
+| Reflexion Design Layer
+| Judgement-Evidence Graph + Invariant-Path Equivalence Engine that records *why* a design is valid and gates regressions
+| Surfaces design obligations on safety-weakening changes without auto-mutating language semantics
 
 | BEAM/Raft Architecture
 | BEAM VM + Raft consensus for ethical loop execution
@@ -115,13 +119,13 @@ Phronesis uses a *dual-licensing* model:
 | Erlang / Elixir (BEAM VM)
 
 | Containerization
-| Podman
+| Podman (Containerfile, Chainguard base)
 
-| Database
-| ArangoDB / Virtuoso
+| Consensus
+| Raft (TLA+ specification in `formal/`, Elixir scaffold in `lib/phronesis/consensus/`)
 
-| Automation
-| Salt (Deployment & Configuration)
+| Formal verification
+| TLA+ (consensus), proof corpus in `academic/` (lattice / order / type theory)
 |===
 
 ---

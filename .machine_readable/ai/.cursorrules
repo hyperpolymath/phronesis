@@ -1,0 +1,54 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+# Phronesis — Cursor AI rules. Kept in sync with .clinerules / .windsurfrules.
+# Authoritative AI instructions: 0-AI-MANIFEST.a2ml (root) and .claude/CLAUDE.md.
+
+# STARTUP (read in this order)
+# 1. 0-AI-MANIFEST.a2ml          — canonical file locations + invariants
+# 2. .machine_readable/6a2/anchors/ANCHOR.a2ml — identity + golden path
+# 3. .machine_readable/6a2/STATE.a2ml          — current status + blockers
+# 4. .claude/CLAUDE.md           — full language / licence policy
+
+# LICENSE (per-file, REUSE-style; SPDX header required on EVERY file)
+# Code (*.ex/*.exs/*.rs/*.idr/*.tla/*.zig, mix.exs, Justfile, Mustfile, *.a2ml,
+#   Guix *.scm): MPL-2.0.
+# Documentation (narrative *.adoc, wiki/, academic/ prose): CC-BY-SA-4.0.
+# GitHub community files (SECURITY.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md,
+#   CHANGELOG.md): MPL-2.0.
+# Never AGPL-3.0. Copyright: Jonathan D.A. Jewell (hyperpolymath)
+#   <j.d.a.jewell@open.ac.uk>.
+
+# STATE FILES (.machine_readable/6a2/ ONLY)
+# The 6 core A2ML files — STATE, META, ECOSYSTEM, AGENTIC, NEUROSYM, PLAYBOOK —
+# live in .machine_readable/6a2/ and NOWHERE else. Never create *.a2ml metadata
+# in the repo root; the root copy is always treated as stale drift.
+
+# LANGUAGES (this repo)
+# Reference implementation: Elixir/BEAM (lib/phronesis/).
+# Production compiler: Rust -> WASM (compiler/phronesis-ast, compiler/phronesis-wasm).
+# Formal: TLA+ (formal/); proof corpus in academic/ (lattice/order/type theory).
+# Estate-allowed elsewhere: AffineScript, Rust/SPARK, Zig, Idris2, Agda, Gleam, Elixir.
+# BANNED: Python, Go, TypeScript, ReScript, V-lang, Java/Kotlin/Swift, Node.js, npm.
+
+# BANNED UNSAFE PATTERNS
+# Elixir: no bare `raise` without a rescue strategy; use {:ok,_}/{:error,_} tuples;
+#   supervisors need explicit restart strategies.
+# Rust: no `transmute` (unless FFI with a // SAFETY: comment); no `.unwrap()`/
+#   `.expect()`/`panic!` in library code without justification.
+# Idris2: no believe_me/assert_total/assert_smaller. Coq: no Admitted. Lean: no sorry.
+
+# CONTAINERS
+# Runtime: Podman (never Docker). File: Containerfile (never Dockerfile).
+
+# BUILD SYSTEM
+# Use `just` (Justfile) for build/test/lint/format. No Makefiles (use Mustfile/
+# Justfile). `just test` is the definitive correctness gate.
+
+# DOCUMENTATION
+# AsciiDoc (.adoc) for all docs. Markdown only for GitHub-required files
+# (SECURITY.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md, CHANGELOG.md, .github/**).
+# README is .adoc here.
+
+# CODE STYLE
+# British English in user-facing strings and docs. Descriptive names. No
+# commented-out code (git has history). Must pass `mix format` / `rustfmt`.

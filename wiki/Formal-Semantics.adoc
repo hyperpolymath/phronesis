@@ -415,4 +415,4 @@ state ∈ {Follower, Candidate, Leader}
 * link:Reference-Grammar.adoc[Reference-Grammar] - Formal grammar
 * link:Architecture-Interpreter.adoc[Architecture-Interpreter] - Implementation
 * link:Testing.adoc[Testing] - Verification via testing
-* link:../docs/safety_proofs.adoc[docs/safety_proofs.md] - Safety proofs document
+* link:../docs/safety_proofs.adoc[docs/safety_proofs.adoc] - Safety proofs document

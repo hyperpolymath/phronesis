@@ -393,7 +393,7 @@ What needs to be resolved?
 
 Contributors are recognized in:
 
-* link:../CONTRIBUTORS.adoc[CONTRIBUTORS.md]
+* link:../MAINTAINERS.adoc[MAINTAINERS.adoc]
 * Release notes
 * Project website
 
@@ -401,4 +401,4 @@ Contributors are recognized in:
 
 === License
 
-By contributing, you agree that your contributions will be licensed under the link:../LICENSE[AGPL-3.0] license.
+By contributing, you agree that your contributions will be licensed under the project's licences: link:../LICENSE[MPL-2.0] for code and CC-BY-SA-4.0 for documentation.

@@ -23,3 +23,6 @@ Thumbs.db
 # Temporary
 *.tmp
 *.log
+
+# Built escript binary (mix escript.build)
+/phronesis

@@ -218,7 +218,7 @@ phronesis repl --load policy.phr
 *REPL Session:*
 
 ....
-Phronesis v0.1.0 REPL
+Phronesis v0.9.0 REPL
 Type :help for commands, :quit to exit
 
 phr> 1 + 2
