@@ -45,7 +45,7 @@ Last audited: 2026-06-20. Version: 0.9.0 (see `mix.exs`).
 
 | Test suite
 | Green. The full ExUnit suite passes (consensus/Raft cases are skipped — see
-  `TESTING-REPORT.adoc`). `just test` is the gate.
+  `docs/TESTING-REPORT.adoc`). `just test` is the gate.
 |===
 
 == What is scaffold, stub, or roadmap

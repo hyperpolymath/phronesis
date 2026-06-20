@@ -18,7 +18,7 @@
 
 * ☒ `SPEC.core.a2ml` - Operational semantics specification
 * ☒ `docs/draft-phronesis-policy-language.txt` - IETF RFC draft
-* ☒ `docs/safety_proofs.md` - Safety guarantees (isolation, capabilities, BFT)
+* ☒ `docs/safety_proofs.adoc` - Safety guarantees (isolation, capabilities, BFT)
 * ☒ Grammar definition
 * ☒ Type system specification
 * ☒ Termination proof (by structural induction)

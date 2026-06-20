@@ -1,0 +1,165 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+== Phronesis VSCode Extension
+
+VSCode extension for Phronesis policy language with LSP support.
+
+=== Features
+
+* *Syntax Highlighting* - Full language support
+* *Auto-Completion* - Keywords, stdlib functions, variables
+* *Hover Documentation* - Inline docs for functions and keywords
+* *Go to Definition* - Jump to policy/constant definitions
+* *Real-time Diagnostics* - Syntax errors and warnings
+* *Code Formatting* - Auto-format on save
+
+=== Installation
+
+==== From Source
+
+[arabic]
+. *Build the extension:*
++
+[source,bash]
+----
+cd editors/vscode
+npm install
+npm run compile
+----
+. *Install phronesis CLI:*
++
+[source,bash]
+----
+mix escript.build
+# Add to PATH or configure extension
+----
+. *Install extension:*
++
+[source,bash]
+----
+code --install-extension phronesis-0.2.0.vsix
+----
++
+Or copy to extensions directory:
++
+[source,bash]
+----
+cp -r . ~/.vscode/extensions/phronesis-0.2.0/
+----
+
+==== Configuration
+
+Open VSCode settings and configure:
+
+[source,json]
+----
+{
+  "phronesis.serverPath": "/path/to/phronesis",
+  "phronesis.trace.server": "off"
+}
+----
+
+=== Usage
+
+[arabic]
+. Open a `.phr` file
+. LSP server starts automatically
+. Auto-completion: Type `Std.` to see stdlib modules
+. Hover over keywords/functions for documentation
+. F12 / Cmd+Click for go-to-definition
+
+=== Features in Detail
+
+==== Auto-Completion
+
+* *Keywords*: `POLICY`, `CONST`, `IMPORT`, `ACCEPT`, `REJECT`, etc.
+* *Standard Library*: `Std.RPKI.*`, `Std.BGP.*`, `Std.Consensus.*`,
+`Std.Temporal.*`
+* *Functions*: All stdlib functions with signatures
+
+Example:
+
+[source,phronesis]
+----
+Std.R  # Auto-complete shows: Std.RPKI
+Std.RPKI.  # Shows: validate, check_origin, validation_status
+----
+
+==== Hover Documentation
+
+Hover over any keyword or function to see:
+
+* Syntax
+* Parameters
+* Return type
+* Examples
+
+==== Diagnostics
+
+Real-time error checking:
+
+* Syntax errors (lexer/parser)
+* Linter warnings
+* Type issues
+
+==== Formatting
+
+Format document: `Shift+Alt+F` or save with format-on-save enabled.
+
+=== Troubleshooting
+
+==== LSP server not starting
+
+[arabic]
+. Check phronesis is installed:
++
+[source,bash]
+----
+which phronesis
+phronesis --version
+----
+. Check server path in settings
+. View LSP logs: `Output` → `Phronesis Language Server`
+
+==== No auto-completion
+
+[arabic]
+. Ensure `.phr` file is recognized as Phronesis language
+. Restart LSP: `Cmd+Shift+P` → "Restart Language Server"
+
+=== Development
+
+==== Build
+
+[source,bash]
+----
+npm install
+npm run compile
+----
+
+==== Watch Mode
+
+[source,bash]
+----
+npm run watch
+----
+
+==== Package
+
+[source,bash]
+----
+npm install -g vsce
+vsce package
+----
+
+=== License
+
+MPL-2.0
+
+=== Links
+
+* https://github.com/hyperpolymath/phronesis[Phronesis Repository]
+* link:../../docs/draft-phronesis-policy-language.txt[Language
+Specification]
+* https://microsoft.github.io/language-server-protocol/[LSP
+Specification]

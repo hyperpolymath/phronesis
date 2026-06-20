@@ -44,7 +44,7 @@ smoke-test-command = [
   "just test",
 ]
 success-criteria = [
-  "Full ExUnit suite passes (consensus/Raft cases skipped — see TESTING-REPORT.adoc)",
+  "Full ExUnit suite passes (consensus/Raft cases skipped — see docs/TESTING-REPORT.adoc)",
   "just build is clean under --warnings-as-errors",
   "No unresolved critical security findings",
 ]

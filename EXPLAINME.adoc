@@ -189,14 +189,14 @@ called library (like `Analyzer`), not part of the OTP supervision tree.
 | `test/interpreter_test.exs` | Interpreter execution tests
 | `test/conformance_test.exs` | Mandatory ethical scenario suite
 | `test/lsp_integration_test.exs` | LSP integration tests
-| `test/e2e_test.exs`, `test_e2e.exs` | End-to-end pipeline tests
+| `test/e2e_test.exs`, `examples/test_e2e.exs` | End-to-end pipeline tests
 | `src/` | Supplementary source assets (non-Elixir)
 | `spec/` | Language specification documents
 | `syntax/` | Syntax highlighting definitions
 | `editors/` | Editor plugin scaffolds
 | `Containerfile` | Podman container definition (Chainguard base)
 | `.machine_readable/` | A2ML state, meta, ecosystem files
-| `TESTING-REPORT.adoc` | Test results narrative
-| `LSP-IMPLEMENTATION-SUMMARY.adoc` | LSP feature coverage summary
+| `docs/TESTING-REPORT.adoc` | Test results narrative
+| `docs/LSP-IMPLEMENTATION-SUMMARY.adoc` | LSP feature coverage summary
 | `docs/REFLEXION.adoc` | Reflexion design-layer architecture and 8-class equivalence taxonomy
 |===

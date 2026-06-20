@@ -1,0 +1,213 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+== Phronesis Syntax Highlighting
+
+This directory contains syntax highlighting definitions for various
+editors.
+
+=== Installation
+
+[[vscode--vscodium]]
+==== VSCode / VSCodium
+
+[arabic]
+. Create extension directory:
++
+[source,bash]
+----
+mkdir -p ~/.vscode/extensions/phronesis-lang
+----
+. Copy files:
++
+[source,bash]
+----
+cp phronesis.tmLanguage.json ~/.vscode/extensions/phronesis-lang/
+----
+. Create `package.json`:
++
+[source,json]
+----
+{
+  "name": "phronesis",
+  "displayName": "Phronesis Policy Language",
+  "description": "Syntax highlighting for Phronesis (.phr files)",
+  "version": "0.2.0",
+  "engines": { "vscode": "^1.60.0" },
+  "categories": ["Programming Languages"],
+  "contributes": {
+    "languages": [{
+      "id": "phronesis",
+      "aliases": ["Phronesis", "phronesis"],
+      "extensions": [".phr"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "phronesis",
+      "scopeName": "source.phronesis",
+      "path": "./phronesis.tmLanguage.json"
+    }]
+  }
+}
+----
+. Reload VSCode
+
+[[vim--neovim]]
+==== Vim / Neovim
+
+[arabic]
+. Copy to syntax directory:
++
+[source,bash]
+----
+mkdir -p ~/.vim/syntax
+cp phronesis.vim ~/.vim/syntax/
+----
+. Add to `~/.vim/ftdetect/phronesis.vim`:
++
+[source,vim]
+----
+autocmd BufNewFile,BufRead *.phr set filetype=phronesis
+----
+. (Optional) Add to `~/.vim/ftplugin/phronesis.vim`:
++
+[source,vim]
+----
+setlocal commentstring=#\ %s
+setlocal tabstop=2
+setlocal shiftwidth=2
+setlocal expandtab
+----
+
+==== Emacs
+
+[arabic]
+. Copy to Emacs config:
++
+[source,bash]
+----
+cp phronesis-mode.el ~/.emacs.d/lisp/
+----
+. Add to `~/.emacs` or `~/.emacs.d/init.el`:
++
+[source,elisp]
+----
+(add-to-list 'load-path "~/.emacs.d/lisp")
+(require 'phronesis-mode)
+----
+. Reload Emacs or evaluate: `M-x eval-buffer`
+
+==== Sublime Text
+
+TextMate grammars (`.tmLanguage.json`) work in Sublime Text:
+
+[arabic]
+. Open Sublime Text
+. `Preferences` → `Browse Packages`
+. Create directory: `Phronesis/`
+. Copy `phronesis.tmLanguage.json` to
+`Phronesis/Phronesis.tmLanguage.json`
+. Restart Sublime Text
+
+[[kate--kwrite]]
+==== Kate / KWrite
+
+TODO: Create `phronesis.xml` syntax file for KDE editors.
+
+[[github--gitlab]]
+==== GitHub / GitLab
+
+For syntax highlighting on GitHub:
+
+[arabic]
+. Submit `linguist.yml` definition to
+https://github.com/github/linguist[github/linguist]
+. Or add `.gitattributes` to your repo:
++
+....
+*.phr linguist-language=Phronesis
+....
+
+=== Features
+
+All syntax definitions support:
+
+* *Keywords*: `POLICY`, `CONST`, `IMPORT`, `IF`, `THEN`, `ELSE`, `AND`,
+`OR`, `NOT`, `IN`
+* *Actions*: `ACCEPT`, `REJECT`, `REPORT`, `EXECUTE`, `BLOCK`
+* *Metadata*: `PRIORITY`, `EXPIRES`, `CREATED_BY`
+* *Test keywords*: `TEST`, `SCENARIO`, `GIVEN`, `EXPECT`
+* *Types*: `Integer`, `String`, `Boolean`, `Float`, `List`, `Map`,
+`Route`
+* *Constants*: `true`, `false`, `nil`, `null`, `never`, `always`
+* *Standard library*: `Std.RPKI.*`, `Std.BGP.*`, `Std.Consensus.*`,
+`Std.Temporal.*`
+* *Comments*: `# line comments`, `## block comments ##`
+* *Strings*: `"double quoted"`, `'single quoted'`, `"${interpolation}"`
+* *Numbers*: Integers, floats, hex (`0xFF`)
+* *Operators*: `==`, `!=`, `>=`, `<=`, `>`, `<`, `+`, `-`, `*`, `/`,
+`%`, `&&`, `||`, `!`, `.`, `?.`
+
+=== Editor-Specific Features
+
+==== VSCode
+
+* Bracket matching
+* Auto-indentation
+* Code folding
+
+==== Vim
+
+* Syntax highlighting
+* `commentstring` for comment toggling
+* Indentation settings
+
+==== Emacs
+
+* Major mode with keybindings:
+** `C-c C-c` - Run file
+** `C-c C-k` - Check syntax
+** `C-c C-p` - Parse and show AST
+** `C-c C-r` - Start REPL
+* Auto-indentation
+* Comment support
+
+=== Example
+
+[source,phronesis]
+----
+# BGP Security Policy
+IMPORT Std.RPKI
+IMPORT Std.BGP
+
+CONST my_asn = 64512
+
+POLICY rpki_validation:
+  Std.RPKI.validate(route) == :invalid
+  THEN REJECT("RPKI validation failed")
+  PRIORITY: 200
+  EXPIRES: never
+  CREATED_BY: security_team
+
+POLICY as_path_loop:
+  my_asn IN Std.BGP.extract_as_path(route)
+  THEN REJECT("AS path loop detected")
+  PRIORITY: 300
+----
+
+=== Contributing
+
+To add support for a new editor:
+
+[arabic]
+. Create syntax definition file
+. Test with sample `.phr` files
+. Document installation in this README
+. Submit PR
+
+=== License
+
+MPL-2.0
+
+=== Maintainer
+
+Jonathan D.A. Jewell j.d.a.jewell@open.ac.uk
