@@ -655,7 +655,7 @@ We achieve strong guarantees that network policies are safe, correct, and audita
 
 === Appendix A: Complete Grammar
 
-See `/wiki/Reference-Grammar.md` for the full EBNF specification.
+See `/wiki/Reference-Grammar.adoc` for the full EBNF specification.
 
 === Appendix B: TLA+ Specification
 
@@ -663,4 +663,4 @@ See `/formal/PhronesisConsensus.tla` for the consensus protocol specification.
 
 === Appendix C: Safety Proofs
 
-See `/docs/safety_proofs.md` for detailed safety proofs.
+See `/docs/safety_proofs.adoc` for detailed safety proofs.

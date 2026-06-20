@@ -32,9 +32,8 @@ RSR layout — see https://github.com/hyperpolymath/standards):
 | **Gleam** | Backend services | Runs on BEAM or compiles to JS |
 | **Bash/POSIX Shell** | Scripts, automation | Keep minimal |
 | **JavaScript** | Only where AffineScript cannot | MCP protocol glue, Deno APIs |
-| **Python** | SaltStack only | No other Python permitted |
 | **Nickel** | Configuration language | For complex configs |
-| **Guile Scheme** | State/meta files | STATE.scm, META.scm, ECOSYSTEM.scm |
+| **A2ML** | State/meta files | STATE.a2ml, META.a2ml, ECOSYSTEM.a2ml (TOML-like) |
 | **Julia** | Batch scripts, data processing | Per RSR |
 | **OCaml** | AffineScript compiler | Language-specific |
 | **Ada** | Safety-critical systems | Where required |
@@ -71,7 +70,7 @@ Both are FOSS with independent governance (no Big Tech).
 2. **No package.json - use deno.json deps** - Use deno.json imports
 3. **No node_modules in production** - Deno caches deps automatically
 4. **No Go code** - Use Rust instead
-5. **Python only for SaltStack** - All other Python must be rewritten
+5. **No Python** - Python is fully banned (no exceptions); rewrite in AffineScript/Rust
 6. **No Kotlin/Swift for mobile** - Use Tauri 2.0+ or Dioxus
 
 ### Package Management

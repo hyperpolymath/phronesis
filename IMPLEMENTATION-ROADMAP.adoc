@@ -16,7 +16,7 @@
 
 ==== Formal Semantics
 
-* ☒ `SPEC.core.scm` - Operational semantics in Guile Scheme
+* ☒ `SPEC.core.a2ml` - Operational semantics specification
 * ☒ `docs/draft-phronesis-policy-language.txt` - IETF RFC draft
 * ☒ `docs/safety_proofs.md` - Safety guarantees (isolation, capabilities, BFT)
 * ☒ Grammar definition
@@ -220,7 +220,7 @@ phronesis trace policy.beam  # Show decision trace
 * *Proven:* Used in etcd, Consul, CockroachDB
 * *Simple:* Leader election + log replication
 * *Available on BEAM:* `ra` library by RabbitMQ team
-* *Matches spec:* SPEC.core.scm assumes consensus voting
+* *Matches spec:* SPEC.core.a2ml assumes consensus voting
 
 ==== Deferred (Not on Shortest Path)
 
@@ -339,7 +339,7 @@ Focus on working compiler first, formal proofs later.
 [[-references]]
 === 📚 References
 
-* *SPEC.core.scm* - Formal semantics (ground truth)
+* *SPEC.core.a2ml* - Formal semantics (ground truth)
 * *draft-phronesis-policy-language.txt* - Language specification
 * *priv/examples/* - Example policies (test cases)
 * *lib/phronesis/demo.ex* - Working interpreter (reference implementation)
@@ -364,8 +364,8 @@ Focus on working compiler first, formal proofs later.
 ==== Phronesis Philosophy
 
 * README.adoc - High-level vision
-* META.scm - Architectural decisions
-* ECOSYSTEM.scm - Related projects
+* META.a2ml - Architectural decisions
+* ECOSYSTEM.a2ml - Related projects
 
 '''''
 
