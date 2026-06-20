@@ -1,0 +1,548 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+
+== Cryptographic Proofs for Phronesis Consensus
+
+
+This document provides cryptographic security proofs for the Phronesis consensus protocol, including digital signatures, commitment schemes, and Byzantine agreement.
+
+'''''
+
+[[1-cryptographic-primitives]]
+=== 1. Cryptographic Primitives
+
+[[11-digital-signatures]]
+==== 1.1 Digital Signatures
+
+*Definition 1.1 (Signature Scheme):*
+
+....
+Σ = (Gen, Sign, Verify)
+
+Gen(1^κ) → (pk, sk)         -- Key generation
+Sign(sk, m) → σ              -- Signature
+Verify(pk, m, σ) → {0, 1}    -- Verification
+....
+
+*Security (EUF-CMA):*
+Existential unforgeability under chosen message attack.
+
+....
+∀ PPT A:
+  Pr[Forge_A^Σ(κ) = 1] ≤ negl(κ)
+
+where Forge:
+  1. (pk, sk) ← Gen(1^κ)
+  2. (m*, σ*) ← A^{Sign(sk,·)}(pk)
+  3. Return 1 iff Verify(pk, m*, σ*) = 1 ∧ m* not queried
+....
+
+[[12-hash-functions]]
+==== 1.2 Hash Functions
+
+*Definition 1.2 (Collision-Resistant Hash):*
+
+....
+H : {0,1}* → {0,1}^n
+
+Collision Resistance:
+  ∀ PPT A: Pr[A finds x ≠ x' with H(x) = H(x')] ≤ negl(κ)
+....
+
+[[13-commitment-schemes]]
+==== 1.3 Commitment Schemes
+
+*Definition 1.3:*
+
+....
+Commit = (Com, Open)
+
+Com(m; r) → c           -- Commitment with randomness r
+Open(c, m, r) → {0, 1}  -- Opening verification
+....
+
+*Properties:*
+
+* *Hiding:* Com(m₀; r₀) ≈_c Com(m₁; r₁)
+* *Binding:* Cannot open to different messages
+
+'''''
+
+[[2-consensus-protocol]]
+=== 2. Consensus Protocol
+
+[[21-protocol-description]]
+==== 2.1 Protocol Description
+
+*Participants:* N agents \{A₁, ..., Aₙ}
+*Threshold:* t = ⌈(2N + 1)/3⌉
+*Assumption:* At most f < N/3 Byzantine agents
+
+*Protocol Phases:*
+
+....
+Phase 1: PROPOSE
+  Leader L selects action a
+  L broadcasts (PROPOSE, a, Sign(sk_L, (epoch, a)))
+
+Phase 2: VOTE
+  Each Aᵢ verifies proposal
+  Aᵢ broadcasts (VOTE, v, Sign(sk_i, (epoch, a, v)))
+
+Phase 3: COMMIT
+  If |{APPROVE votes}| ≥ t:
+    Broadcast (COMMIT, a, {signatures})
+    Append to log
+....
+
+[[22-message-formats]]
+==== 2.2 Message Formats
+
+....
+Proposal:
+  msg = (PROPOSE, epoch, action)
+  sig = Sign(sk_leader, msg)
+
+Vote:
+  msg = (VOTE, epoch, action, decision)
+  sig = Sign(sk_voter, msg)
+
+Commit Certificate:
+  cert = {(vote_i, sig_i) | i ∈ approvers, |approvers| ≥ t}
+....
+
+'''''
+
+[[3-security-properties]]
+=== 3. Security Properties
+
+[[31-agreement]]
+==== 3.1 Agreement
+
+*Theorem 3.1 (Agreement):*
+If two honest agents commit actions a₁ and a₂ for the same epoch, then a₁ = a₂.
+
+*Proof:*
+Assume a₁ ≠ a₂ both committed in epoch e.
+
+[arabic]
+. Commit requires t votes
+. t = ⌈(2N + 1)/3⌉ ≥ 2f + 1
+. For both a₁ and a₂ to get t votes:
+* votes(a₁) ≥ t
+* votes(a₂) ≥ t
+* Total votes ≥ 2t = 2⌈(2N + 1)/3⌉ > N + f
+. This requires more than N total votes (contradiction)
+OR some honest agent voted for both (impossible by protocol)
+
+Therefore a₁ = a₂. ∎
+
+[[32-validity]]
+==== 3.2 Validity
+
+*Theorem 3.2 (Validity):*
+If action a is committed, then a was proposed by some agent (possibly Byzantine).
+
+*Proof:*
+Commit certificate contains:
+
+[arabic]
+. Action a
+. At least t valid signatures on (VOTE, epoch, a, APPROVE)
+
+Each honest voter only signs after receiving valid (PROPOSE, epoch, a, sig_L).
+
+Since t > f, at least one honest agent voted.
+That honest agent verified the proposal.
+Therefore, proposal existed. ∎
+
+[[33-termination]]
+==== 3.3 Termination
+
+*Theorem 3.3 (Termination under partial synchrony):*
+After GST, if the leader is honest, the protocol terminates.
+
+*Proof:*
+After GST:
+
+[arabic]
+. Leader's proposal reaches all honest agents within Δ
+. Honest agents (≥ 2f + 1) send votes
+. Leader collects t ≤ 2f + 1 approvals
+. Leader broadcasts commit within Δ
+
+Total time: O(Δ). ∎
+
+'''''
+
+[[4-signature-aggregation]]
+=== 4. Signature Aggregation
+
+[[41-multi-signatures]]
+==== 4.1 Multi-Signatures
+
+*Definition 4.1 (Multi-Signature):*
+
+....
+MultiSig = (MGen, MSign, MCombine, MVerify)
+
+MGen() → (pk_i, sk_i) for each agent i
+MSign(sk_i, m) → σ_i
+MCombine({σ_i}) → σ_agg
+MVerify(pk_agg, m, σ_agg) → {0, 1}
+....
+
+*Benefit:* O(1) signature verification instead of O(t).
+
+[[42-bls-signatures-for-phronesis]]
+==== 4.2 BLS Signatures for Phronesis
+
+*Construction:*
+
+....
+Groups: G₁, G₂, G_T with pairing e : G₁ × G₂ → G_T
+Hash: H : {0,1}* → G₁
+
+Gen: sk ←$ Zₚ, pk = g₂^sk
+Sign(sk, m): σ = H(m)^sk
+Verify(pk, m, σ): e(σ, g₂) = e(H(m), pk)
+
+Aggregation:
+  σ_agg = Π σᵢ
+  Verify: e(σ_agg, g₂) = Πᵢ e(H(m), pkᵢ)
+....
+
+[[43-threshold-signatures]]
+==== 4.3 Threshold Signatures
+
+*Definition 4.2 (t-of-n Threshold Signature):*
+Only t of n parties can produce valid signature.
+
+....
+ThresholdSign({sk_i | i ∈ S, |S| = t}, m) → σ
+Verify(pk_agg, m, σ) → {0, 1}
+....
+
+*Application:* Commit certificate is threshold signature by ≥ t voters.
+
+'''''
+
+[[5-non-repudiation]]
+=== 5. Non-Repudiation
+
+[[51-signed-log-entries]]
+==== 5.1 Signed Log Entries
+
+*Theorem 5.1:* Committed actions are non-repudiable.
+
+*Proof:*
+Each log entry contains:
+
+[arabic]
+. Action a
+. Commit certificate with ≥ t signatures
+
+To repudiate, agent would need to:
+
+[arabic]
+. Deny signing → Contradicted by valid signature
+. Claim key compromise → Timestamp before compromise
+
+Signatures provide cryptographic evidence of participation. ∎
+
+[[52-audit-trail]]
+==== 5.2 Audit Trail
+
+....
+LogEntry = {
+  epoch: N
+  action: Action
+  certificate: {
+    votes: [(agent_id, vote, signature)]
+    commit_time: Timestamp
+  }
+  prev_hash: Hash
+}
+....
+
+*Integrity:* Hash chain prevents modification.
+
+'''''
+
+[[6-byzantine-fault-tolerance]]
+=== 6. Byzantine Fault Tolerance
+
+[[61-safety-proof]]
+==== 6.1 Safety Proof
+
+*Theorem 6.1:* With f < N/3 Byzantine agents, safety holds.
+
+*Proof:*
+Byzantine agents can:
+
+* Vote arbitrarily
+* Send conflicting messages
+* Delay messages
+
+Byzantine agents cannot:
+
+* Forge honest agents' signatures (EUF-CMA)
+* Create t votes alone (f < t)
+* Modify committed entries (hash chain)
+
+Two conflicting commits would require:
+
+* t votes for each
+* At least 2t - f > N honest votes
+* Some honest agent voting twice (impossible)
+
+Contradiction. Safety holds. ∎
+
+[[62-liveness-proof]]
+==== 6.2 Liveness Proof
+
+*Theorem 6.2:* With eventual synchrony and honest leader, liveness holds.
+
+*Proof:*
+After GST:
+
+[arabic]
+. Messages delivered within Δ
+. Honest agents respond to honest leader
+. 2f + 1 ≥ t honest votes available
+. Commit achievable
+
+View change ensures eventually honest leader.
+Therefore, progress guaranteed. ∎
+
+'''''
+
+[[7-key-management]]
+=== 7. Key Management
+
+[[71-key-generation]]
+==== 7.1 Key Generation
+
+*Distributed Key Generation (DKG):*
+
+....
+1. Each agent i generates share s_i
+2. Agents exchange commitments
+3. Shares combined for threshold key
+4. No single party knows full secret key
+....
+
+[[72-key-rotation]]
+==== 7.2 Key Rotation
+
+*Protocol:*
+
+....
+1. Generate new keys in epoch e + K
+2. Both old and new keys valid in transition period
+3. Old keys invalidated after confirmation
+....
+
+[[73-revocation]]
+==== 7.3 Revocation
+
+....
+Revocation Certificate:
+  (REVOKE, agent_id, epoch, reason, signatures)
+
+Requirements:
+  - Signed by t agents (threshold revocation)
+  - Or signed by system admin key
+....
+
+'''''
+
+[[8-zero-knowledge-proofs]]
+=== 8. Zero-Knowledge Proofs
+
+[[81-vote-privacy-optional-extension]]
+==== 8.1 Vote Privacy (Optional Extension)
+
+*Σ-Protocol for Vote Validity:*
+
+....
+Prover shows: "I voted APPROVE or REJECT" without revealing which.
+
+Common input: commitment c = Com(v; r)
+Prover input: v ∈ {0, 1}, r
+
+Protocol:
+  P → V: a₀ = Com(w₀; r₀), a₁ = Com(w₁; r₁) (commitments)
+  V → P: e (challenge)
+  P → V: z₀, z₁ (responses)
+
+Verification: Standard Σ-protocol verification
+....
+
+[[82-threshold-decryption]]
+==== 8.2 Threshold Decryption
+
+*Verifiable Secret Sharing:*
+
+....
+Dealer shares secret s among n parties
+Each share s_i with proof π_i of correctness
+Any t parties can reconstruct s
+....
+
+'''''
+
+[[9-security-assumptions]]
+=== 9. Security Assumptions
+
+[[91-computational-assumptions]]
+==== 9.1 Computational Assumptions
+
+[cols=",",options="header",]
+|===
+|Assumption |Used For
+|ECDSA/EdDSA security |Agent signatures
+|Discrete Log (DL) |Key generation
+|Computational Diffie-Hellman |Key agreement
+|Random Oracle Model |Hash functions
+|===
+
+[[92-network-assumptions]]
+==== 9.2 Network Assumptions
+
+[cols=",",options="header",]
+|===
+|Assumption |Guarantee
+|Partial synchrony |Liveness
+|Authenticated channels |Message integrity
+|f < N/3 |Byzantine tolerance
+|===
+
+'''''
+
+[[10-concrete-parameters]]
+=== 10. Concrete Parameters
+
+[[101-recommended-parameters]]
+==== 10.1 Recommended Parameters
+
+....
+Signature: Ed25519 (128-bit security)
+Hash: SHA-256 (256-bit output)
+Key size: 256 bits
+Threshold: t = ⌈(2N + 1)/3⌉
+....
+
+[[102-performance]]
+==== 10.2 Performance
+
+[cols=",",options="header",]
+|===
+|Operation |Time
+|Sign |~50 μs
+|Verify |~100 μs
+|Aggregate (BLS) |~1 ms per signature
+|Verify Aggregate |~3 ms
+|===
+
+'''''
+
+[[11-attack-analysis]]
+=== 11. Attack Analysis
+
+[[111-attack-vectors-and-mitigations]]
+==== 11.1 Attack Vectors and Mitigations
+
+[cols=",",options="header",]
+|===
+|Attack |Mitigation
+|Signature forgery |EUF-CMA secure scheme
+|Replay |Epoch numbers
+|Equivocation |Threshold verification
+|Sybil |Authenticated enrollment
+|Eclipse |Multiple communication paths
+|Long-range |Checkpointing
+|===
+
+[[112-post-quantum-considerations]]
+==== 11.2 Post-Quantum Considerations
+
+*Future Migration:*
+
+....
+Candidates:
+  - SPHINCS+ (stateless hash-based)
+  - CRYSTALS-Dilithium (lattice-based)
+  - FALCON (lattice-based, compact)
+
+Timeline: Pre-deployment before quantum computers
+....
+
+'''''
+
+[[12-formal-security-model]]
+=== 12. Formal Security Model
+
+[[121-uc-framework]]
+==== 12.1 UC Framework
+
+*Ideal Functionality F_CONSENSUS:*
+
+....
+On (PROPOSE, a) from leader:
+  Store a as proposed action
+
+On (VOTE, v) from agent i:
+  Record vote v from i
+
+On (COMMIT) when |{APPROVE}| ≥ t:
+  Output (COMMITTED, a) to all agents
+  Append (a, votes) to log
+
+Guarantees:
+  - Agreement: All outputs same a
+  - Validity: a was proposed
+  - Termination: Eventually outputs
+....
+
+[[122-simulation-proof]]
+==== 12.2 Simulation Proof
+
+*Theorem 12.1:* Protocol π realizes F_CONSENSUS in the F_SIG-hybrid model.
+
+*Proof Sketch:*
+Simulator S:
+
+[arabic]
+. Simulates honest agents' views
+. Extracts Byzantine agents' inputs
+. Relays to F_CONSENSUS
+. Indistinguishable from real execution
+
+Details in extended version. ∎
+
+'''''
+
+[[13-summary]]
+=== 13. Summary
+
+[cols=",",options="header",]
+|===
+|Property |Cryptographic Guarantee
+|Authentication |Digital signatures (EUF-CMA)
+|Integrity |Hash chains
+|Non-repudiation |Signed log entries
+|Agreement |Threshold signatures
+|Privacy (optional) |Zero-knowledge proofs
+|Post-quantum |Migration path defined
+|===
+
+'''''
+
+=== References
+
+[arabic]
+. Castro, M., & Liskov, B. (1999). _Practical Byzantine Fault Tolerance_.
+. Boneh, D., et al. (2001). _Short Signatures from the Weil Pairing_.
+. Canetti, R. (2001). _Universally Composable Security_.
+. Cachin, C., et al. (2011). _Introduction to Reliable and Secure Distributed Programming_.

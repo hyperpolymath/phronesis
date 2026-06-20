@@ -1,0 +1,573 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+
+== Axiomatic Semantics for Phronesis
+
+
+This document provides axiomatic (Hoare logic) semantics for Phronesis, enabling formal reasoning about program correctness through preconditions and postconditions.
+
+'''''
+
+[[1-hoare-triples]]
+=== 1. Hoare Triples
+
+[[11-syntax]]
+==== 1.1 Syntax
+
+*Definition 1.1 (Hoare Triple):*
+
+....
+{P} S {Q}
+
+where:
+  P = precondition (assertion before execution)
+  S = statement/expression
+  Q = postcondition (assertion after execution)
+....
+
+[[12-partial-vs-total-correctness]]
+==== 1.2 Partial vs Total Correctness
+
+*Partial Correctness:* \{P} S \{Q}
+
+* If P holds and S terminates, then Q holds
+
+*Total Correctness:* [P] S [Q]
+
+* If P holds, then S terminates and Q holds
+
+*For Phronesis:* Partial = Total (all programs terminate)
+
+[[13-assertion-language]]
+==== 1.3 Assertion Language
+
+....
+φ ::= true | false              -- Boolean constants
+    | e₁ = e₂                   -- Equality
+    | e₁ < e₂                   -- Comparison
+    | φ₁ ∧ φ₂                   -- Conjunction
+    | φ₁ ∨ φ₂                   -- Disjunction
+    | ¬φ                        -- Negation
+    | φ₁ → φ₂                   -- Implication
+    | ∀x:τ. φ                   -- Universal quantification
+    | ∃x:τ. φ                   -- Existential quantification
+....
+
+'''''
+
+[[2-axioms-and-rules]]
+=== 2. Axioms and Rules
+
+[[21-skipvalue-axiom]]
+==== 2.1 Skip/Value Axiom
+
+....
+─────────────── [Skip]
+{P} skip {P}
+
+─────────────────────── [Value]
+{P[e/result]} e {P}
+....
+
+[[22-assignment-axiom]]
+==== 2.2 Assignment Axiom
+
+For constant binding:
+
+....
+───────────────────────────── [Const]
+{P[e/x]} CONST x = e {P}
+....
+
+[[23-sequence-rule]]
+==== 2.3 Sequence Rule
+
+....
+{P} S₁ {Q}    {Q} S₂ {R}
+─────────────────────────── [Seq]
+     {P} S₁; S₂ {R}
+....
+
+[[24-conditional-rule]]
+==== 2.4 Conditional Rule
+
+....
+{P ∧ b} S₁ {Q}    {P ∧ ¬b} S₂ {Q}
+─────────────────────────────────── [If]
+   {P} IF b THEN S₁ ELSE S₂ {Q}
+....
+
+[[25-consequence-rule]]
+==== 2.5 Consequence Rule
+
+....
+P' → P    {P} S {Q}    Q → Q'
+───────────────────────────────── [Conseq]
+        {P'} S {Q'}
+....
+
+[[26-conjunction-rule]]
+==== 2.6 Conjunction Rule
+
+....
+{P₁} S {Q₁}    {P₂} S {Q₂}
+────────────────────────────── [Conj]
+   {P₁ ∧ P₂} S {Q₁ ∧ Q₂}
+....
+
+[[27-disjunction-rule]]
+==== 2.7 Disjunction Rule
+
+....
+{P₁} S {Q₁}    {P₂} S {Q₂}
+────────────────────────────── [Disj]
+   {P₁ ∨ P₂} S {Q₁ ∨ Q₂}
+....
+
+'''''
+
+[[3-expression-rules]]
+=== 3. Expression Rules
+
+[[31-arithmetic-expressions]]
+==== 3.1 Arithmetic Expressions
+
+....
+───────────────────────────────────────── [Add]
+{P[(x + y)/result]} x + y {P}
+
+───────────────────────────────────────── [Mul]
+{P[(x * y)/result]} x * y {P}
+....
+
+[[32-boolean-expressions]]
+==== 3.2 Boolean Expressions
+
+....
+───────────────────────────────────────── [And]
+{P[(x ∧ y)/result]} x AND y {P}
+
+───────────────────────────────────────── [Or]
+{P[(x ∨ y)/result]} x OR y {P}
+
+───────────────────────────────────────── [Not]
+{P[(¬x)/result]} NOT x {P}
+....
+
+[[33-comparison-expressions]]
+==== 3.3 Comparison Expressions
+
+....
+───────────────────────────────────────── [Eq]
+{P[(x = y)/result]} x == y {P}
+
+───────────────────────────────────────── [Lt]
+{P[(x < y)/result]} x < y {P}
+....
+
+[[34-field-access]]
+==== 3.4 Field Access
+
+....
+────────────────────────────────────────────── [Field]
+{P[r.f/result]} r.f {P}
+
+where r : Record{..., f:τ, ...}
+....
+
+[[35-list-membership]]
+==== 3.5 List Membership
+
+....
+────────────────────────────────────────────── [In]
+{P[(x ∈ L)/result]} x IN L {P}
+....
+
+'''''
+
+[[4-policy-rules]]
+=== 4. Policy Rules
+
+[[41-policy-evaluation]]
+==== 4.1 Policy Evaluation
+
+....
+{P ∧ cond} action {Q}
+{P ∧ ¬cond} else_action {Q}
+──────────────────────────────────────────────── [Policy]
+{P} POLICY name: cond THEN action ELSE else_action {Q}
+....
+
+[[42-accept-action]]
+==== 4.2 Accept Action
+
+....
+{P} ACCEPT(msg) {result = Accept(msg) ∧ P}
+....
+
+[[43-reject-action]]
+==== 4.3 Reject Action
+
+....
+{P} REJECT(msg) {result = Reject(msg) ∧ P}
+....
+
+[[44-report-action]]
+==== 4.4 Report Action
+
+....
+{P ∧ log = L} REPORT(msg) {log = L ++ [msg] ∧ P}
+....
+
+'''''
+
+[[5-weakest-precondition]]
+=== 5. Weakest Precondition
+
+[[51-definition]]
+==== 5.1 Definition
+
+*Definition 5.1 (Weakest Precondition):*
+
+....
+wp(S, Q) = weakest P such that {P} S {Q}
+....
+
+[[52-weakest-precondition-calculus]]
+==== 5.2 Weakest Precondition Calculus
+
+....
+wp(skip, Q) = Q
+
+wp(CONST x = e, Q) = Q[e/x]
+
+wp(S₁; S₂, Q) = wp(S₁, wp(S₂, Q))
+
+wp(IF b THEN S₁ ELSE S₂, Q) = (b → wp(S₁, Q)) ∧ (¬b → wp(S₂, Q))
+                             = (b ∧ wp(S₁, Q)) ∨ (¬b ∧ wp(S₂, Q))
+
+wp(e₁ + e₂, Q) = Q[(e₁ + e₂)/result]
+
+wp(x == y, Q) = Q[(x = y)/result]
+
+wp(ACCEPT(msg), Q) = Q[Accept(msg)/result]
+....
+
+[[53-healthiness-conditions]]
+==== 5.3 Healthiness Conditions
+
+*Theorem 5.1:* wp satisfies:
+
+[arabic]
+. *Monotonicity:* Q → Q' implies wp(S, Q) → wp(S, Q')
+. *Conjunctivity:* wp(S, Q₁ ∧ Q₂) = wp(S, Q₁) ∧ wp(S, Q₂)
+. *Excluded Miracle:* wp(S, false) = false (for terminating S)
+
+'''''
+
+[[6-strongest-postcondition]]
+=== 6. Strongest Postcondition
+
+[[61-definition]]
+==== 6.1 Definition
+
+*Definition 6.1:*
+
+....
+sp(P, S) = strongest Q such that {P} S {Q}
+....
+
+[[62-strongest-postcondition-calculus]]
+==== 6.2 Strongest Postcondition Calculus
+
+....
+sp(P, skip) = P
+
+sp(P, CONST x = e) = ∃x₀. P[x₀/x] ∧ x = e[x₀/x]
+
+sp(P, S₁; S₂) = sp(sp(P, S₁), S₂)
+
+sp(P, IF b THEN S₁ ELSE S₂) = sp(P ∧ b, S₁) ∨ sp(P ∧ ¬b, S₂)
+....
+
+[[63-duality]]
+==== 6.3 Duality
+
+*Theorem 6.1:*
+
+....
+P → wp(S, Q)  ⟺  sp(P, S) → Q
+....
+
+'''''
+
+[[7-verification-conditions]]
+=== 7. Verification Conditions
+
+[[71-generation]]
+==== 7.1 Generation
+
+*Definition 7.1 (Verification Condition):*
+Given \{P} S \{Q}, the VC is:
+
+....
+VC(P, S, Q) = P → wp(S, Q)
+....
+
+[[72-example-policy-verification]]
+==== 7.2 Example: Policy Verification
+
+....
+Policy:
+  POLICY reject_bogons:
+    route.prefix IN bogon_list
+    THEN REJECT("bogon detected")
+    PRIORITY: 100
+
+Precondition: route.prefix ∈ bogon_list
+Postcondition: result = Reject("bogon detected")
+
+VC:
+  route.prefix ∈ bogon_list
+  → wp(REJECT("bogon detected"), result = Reject("bogon detected"))
+  = route.prefix ∈ bogon_list
+  → result = Reject("bogon detected")
+  = true  ✓
+....
+
+[[73-automated-verification]]
+==== 7.3 Automated Verification
+
+....
+Algorithm VerifyPolicy(policy):
+  P = policy.condition
+  action = policy.thenAction
+  Q = expected_postcondition(action)
+
+  vc = P → wp(action, Q)
+  return SMT_check(vc)
+....
+
+'''''
+
+[[8-program-logic-for-consensus]]
+=== 8. Program Logic for Consensus
+
+[[81-distributed-hoare-logic]]
+==== 8.1 Distributed Hoare Logic
+
+*Notation:*
+
+....
+{P}ᵢ Sᵢ {Q}ᵢ
+
+Agent i: if Pᵢ holds locally, after Sᵢ, Qᵢ holds
+....
+
+[[82-consensus-rules]]
+==== 8.2 Consensus Rules
+
+*Vote Rule:*
+
+....
+{proposed(a) ∧ valid(a)}ᵢ Vote(APPROVE) {voted(i, a, APPROVE)}ᵢ
+{proposed(a) ∧ ¬valid(a)}ᵢ Vote(REJECT) {voted(i, a, REJECT)}ᵢ
+....
+
+*Commit Rule:*
+
+....
+{|{i | voted(i, a, APPROVE)}| ≥ t} Commit(a) {committed(a) ∧ logged(a)}
+....
+
+[[83-agreement-proof]]
+==== 8.3 Agreement Proof
+
+*Theorem 8.1:*
+
+....
+{proposed(a₁) ∧ proposed(a₂)}
+Protocol
+{committed(a₁) ∧ committed(a₂) → a₁ = a₂}
+....
+
+*Proof:*
+
+....
+Assume committed(a₁) ∧ committed(a₂).
+By Commit rule: |{i | voted(i, a₁, APPROVE)}| ≥ t
+               |{i | voted(i, a₂, APPROVE)}| ≥ t
+
+Since t > N/2: These sets overlap.
+Some honest agent voted APPROVE for both.
+Contradiction with single-vote invariant.
+Therefore a₁ = a₂. ∎
+....
+
+'''''
+
+[[9-invariants]]
+=== 9. Invariants
+
+[[91-type-invariants]]
+==== 9.1 Type Invariants
+
+....
+Inv_Int(x) ≡ x ∈ ℤ
+Inv_Bool(x) ≡ x ∈ {true, false}
+Inv_List(τ)(L) ≡ ∀i. L[i] : τ
+Inv_IP(x) ≡ 0 ≤ x.addr < 2³² ∧ 0 ≤ x.prefix ≤ 32
+....
+
+[[92-state-invariants]]
+==== 9.2 State Invariants
+
+....
+Inv_State ≡
+  ∧ ∀p ∈ PolicyTable. valid_policy(p)
+  ∧ ∀e ∈ ConsensusLog. valid_entry(e)
+  ∧ ConsensusLog is append-only
+  ∧ |pending| ≤ max_pending
+....
+
+[[93-consensus-invariants]]
+==== 9.3 Consensus Invariants
+
+....
+Inv_Consensus ≡
+  ∧ |{i | state(i) = Leader ∧ term(i) = t}| ≤ 1  (Election Safety)
+  ∧ ∀i,j,k. log(i)[k].term = log(j)[k].term → log(i)[1..k] = log(j)[1..k]
+  ∧ ∀e ∈ committed. ∀t' > e.term. e ∈ log(leader(t'))
+....
+
+'''''
+
+[[10-refinement]]
+=== 10. Refinement
+
+[[101-refinement-relation]]
+==== 10.1 Refinement Relation
+
+*Definition 10.1:*
+S₁ ⊑ S₂ (S₂ refines S₁) iff:
+
+....
+∀P, Q. {P} S₁ {Q} → {P} S₂ {Q}
+....
+
+[[102-refinement-calculus]]
+==== 10.2 Refinement Calculus
+
+....
+skip ⊑ S                      (for any terminating S)
+S ⊑ S                         (reflexivity)
+S₁ ⊑ S₂ ∧ S₂ ⊑ S₃ → S₁ ⊑ S₃  (transitivity)
+....
+
+[[103-implementation-refinement]]
+==== 10.3 Implementation Refinement
+
+....
+Spec:    {valid(route)} evaluate_policy {result ∈ {Accept, Reject}}
+Impl:    actual Phronesis implementation
+
+To verify: Impl ⊑ Spec
+....
+
+'''''
+
+[[11-separation-logic-for-capabilities]]
+=== 11. Separation Logic (for Capabilities)
+
+[[111-separating-conjunction]]
+==== 11.1 Separating Conjunction
+
+....
+P * Q = P and Q hold for disjoint resources
+....
+
+[[112-capability-assertions]]
+==== 11.2 Capability Assertions
+
+....
+has_cap(c) = agent holds capability c
+c ↦ v = capability c points to value v
+....
+
+[[113-frame-rule]]
+==== 11.3 Frame Rule
+
+....
+{P} S {Q}    FV(R) ∩ mod(S) = ∅
+──────────────────────────────── [Frame]
+      {P * R} S {Q * R}
+....
+
+[[114-capability-rules]]
+==== 11.4 Capability Rules
+
+....
+{has_cap(c)} use(c) {has_cap(c)}           (capability preserved)
+{has_cap(c)} revoke(c) {¬has_cap(c)}       (capability revoked)
+{has_cap(c) * has_cap(c')} S {Q}           (no capability duplication without *)
+....
+
+'''''
+
+[[12-mechanization]]
+=== 12. Mechanization
+
+[[121-verification-condition-generator]]
+==== 12.1 Verification Condition Generator
+
+....
+vcgen : Stmt × Postcond → Precond
+
+vcgen(skip, Q) = Q
+vcgen(x := e, Q) = Q[e/x]
+vcgen(S₁; S₂, Q) = vcgen(S₁, vcgen(S₂, Q))
+vcgen(if b then S₁ else S₂, Q) =
+  (b → vcgen(S₁, Q)) ∧ (¬b → vcgen(S₂, Q))
+....
+
+[[122-smt-encoding]]
+==== 12.2 SMT Encoding
+
+....
+; SMT-LIB format for VC checking
+(declare-sort Value)
+(declare-fun route_prefix () Value)
+(declare-fun bogon_list () (List Value))
+(declare-fun member (Value (List Value)) Bool)
+
+(assert (=> (member route_prefix bogon_list)
+            (= result (Reject "bogon"))))
+
+(check-sat)  ; Should return UNSAT (VC is valid)
+....
+
+'''''
+
+[[13-summary]]
+=== 13. Summary
+
+[cols=",",options="header",]
+|===
+|Construct |Weakest Precondition
+|skip |Q
+|x := e |Q[e/x]
+|S₁; S₂ |wp(S₁, wp(S₂, Q))
+|if b then S₁ else S₂ |(b → wp(S₁,Q)) ∧ (¬b → wp(S₂,Q))
+|ACCEPT(m) |Q[Accept(m)/result]
+|REJECT(m) |Q[Reject(m)/result]
+|===
+
+'''''
+
+=== References
+
+[arabic]
+. Hoare, C. A. R. (1969). _An Axiomatic Basis for Computer Programming_. CACM.
+. Dijkstra, E. W. (1976). _A Discipline of Programming_. Prentice-Hall.
+. Reynolds, J. C. (2002). _Separation Logic: A Logic for Shared Mutable Data Structures_.
+. Apt, K. R., et al. (2009). _Verification of Sequential and Concurrent Programs_. Springer.
