@@ -1,0 +1,74 @@
+# Canonical root allowlist for phronesis (RSR-templated repository).
+#
+# Lists every entry permitted at the repository root. Anything tracked at root
+# that is not in this list is drift and must be moved into the appropriate
+# subdirectory (or added here with a justification comment).
+#
+# Format: one entry per line; '#' starts a comment; trailing '/' marks a
+# directory. Blank and comment-only lines are ignored.
+
+# ─── Authority files (template-mandated) ─────────────────────────────────────
+README.adoc
+EXPLAINME.adoc
+AUDIT.adoc                 # honest audit of claims vs. reality
+GOVERNANCE.adoc
+MAINTAINERS.adoc
+0-AI-MANIFEST.a2ml         # universal AI entry point -> .machine_readable/
+LICENSE                    # MPL-2.0 (code); docs are CC-BY-SA-4.0 per-file
+CHANGELOG.md               # GitHub-required .md
+CODE_OF_CONDUCT.md         # GitHub-required .md
+CONTRIBUTING.md            # GitHub-required .md
+SECURITY.md                # GitHub-required .md (scorecard/openssf checks: test -f)
+
+# ─── Top-level reference docs ────────────────────────────────────────────────
+IMPLEMENTATION-ROADMAP.adoc
+TOPOLOGY.adoc
+references.bib             # BibTeX for academic/
+
+# ─── Build entry points / manifests (tool-required at root) ──────────────────
+Justfile                   # build recipes (just.systems)
+Mustfile                   # mandatory-checks definition
+mix.exs                    # Elixir project (reference implementation)
+mix.lock
+manifest.scm               # Guix manifest (Scheme is correct here)
+Containerfile              # Podman build (Chainguard base)
+docker-compose.yml         # local multi-service compose
+
+# ─── Conventional dotfiles (tool-required at root) ───────────────────────────
+.conflow.yaml
+.editorconfig
+.formatter.exs             # Elixir formatter config
+.gitattributes
+.gitignore
+.nojekyll                  # GitHub Pages: serve wiki/ verbatim
+.tool-versions             # asdf/mise toolchain pins
+
+# ─── Directories ─────────────────────────────────────────────────────────────
+.claude/                   # Claude-specific AI instructions
+.git/
+.github/                   # workflows, issue templates, copilot-instructions.md
+.machine_readable/          # A2ML metadata, contractiles, ai/, configs/
+LICENSES/                  # REUSE-style licence texts (MPL-2.0, CC-BY-SA-4.0)
+academic/                  # papers + proof corpus
+bench/                     # benchmarks
+compiler/                  # Rust -> WASM compiler crates
+conformance/               # ethical-scenario conformance fixtures
+configs/                   # project config subtree
+deploy/                    # deployment assets
+docs/                      # AsciiDoc design/status docs (incl. REFLEXION.adoc)
+editors/                   # editor plugin scaffolds
+formal/                    # TLA+ specifications
+hooks/                     # git/lifecycle hooks
+lib/                       # Elixir reference implementation
+priv/                      # Elixir private assets
+schemas/                   # data/format schemas
+spec/                      # language specification (grammar, semantics)
+src/                       # supplementary (non-Elixir) source assets
+syntax/                    # syntax-highlighting definitions
+test/                      # ExUnit test suite
+verification/              # unified verification gateway
+wiki/                      # published wiki (AsciiDoc)
+
+# ─── Build output (gitignored; listed so the checker tolerates a dirty tree) ──
+_build/                    # Mix build output — not tracked
+deps/                      # Mix dependencies — not tracked

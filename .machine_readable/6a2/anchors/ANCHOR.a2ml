@@ -1,0 +1,63 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# ANCHOR.a2ml - authoritative anchor for the phronesis repository.
+
+[metadata]
+version = "1.0.0"
+last-updated = "2026-06-20"
+
+[anchor]
+schema = "hyperpolymath.anchor/1"
+repo = "hyperpolymath/phronesis"
+authority = "upstream-canonical"
+
+purpose = [
+  "Define canonical semantics and policy boundaries for Phronesis.",
+  "Declare what downstream/satellite repos can extend but not redefine.",
+  "Provide a stable golden path and invariant contract for release readiness.",
+]
+
+[identity]
+project = "phronesis"
+kind = "language"
+one-sentence = "A neuro-symbolic, provably-safe language for agentic ethical reasoning on the BEAM."
+domain = "ethical AI / policy languages / formal verification"
+
+[semantic-authority]
+policy = "canonical"
+owns = [
+  "Phronesis language semantics and specification (spec/, formal/)",
+  "Invariant definitions and contractiles (.machine_readable/contractiles/)",
+  "Reference implementation behaviour (lib/phronesis/)",
+]
+
+[implementation-policy]
+# Languages actually used in this repo, plus estate-allowed neighbours.
+allowed = ["Elixir", "Rust", "Idris2", "Agda", "Zig", "TLA+", "AsciiDoc", "Just", "Guix Scheme"]
+forbidden = ["Python", "Go", "TypeScript", "ReScript", "V-lang", "Node.js", "npm"]
+
+[golden-path]
+smoke-test-command = [
+  "just deps",
+  "just build",
+  "just test",
+]
+success-criteria = [
+  "Full ExUnit suite passes (consensus/Raft cases skipped — see TESTING-REPORT.adoc)",
+  "just build is clean under --warnings-as-errors",
+  "No unresolved critical security findings",
+]
+
+[satellite-policy]
+must-pin-upstream = true
+must-declare-authority = true
+must-have-anchor = true
+must-have-golden-path = true
+
+[semantic-authority-files]
+language-spec = "spec/grammar.ebnf"
+operational-semantics = ".machine_readable/SPEC.core.a2ml"
+formal-consensus-spec = "formal/PhronesisConsensus.tla"
+proof-corpus = "academic/proofs/"
+claims-vs-reality = "AUDIT.adoc"

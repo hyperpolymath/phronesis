@@ -23,20 +23,20 @@ These 6 A2ML files MUST exist in the `.machine_readable/6a2/` directory ONLY:
 
 **CRITICAL:** If ANY of these files exist in the root directory, this is an ERROR.
 
-### Bot Directives: `.bot_directives/` ONLY
+### AI / Bot Instructions: `.machine_readable/ai/`
 
-Bot-specific instructions for:
-- rhodibot - Git operations
-- echidnabot - Code quality
-- sustainabot - Dependency updates
-- glambot - Documentation
-- seambot - Integration
-- finishbot - Task completion
+Tool-specific assistant rules live in `.machine_readable/ai/`:
+- `.cursorrules`, `.clinerules`, `.windsurfrules` - editor-assistant rules
+- `AI.a2ml` - machine-readable workflow directives
+- `README.adoc` - index + recommended read order
 
 ### Agent Instructions
 
-- `.claude/CLAUDE.md` - Claude-specific patterns (if exists)
 - `0-AI-MANIFEST.a2ml` - THIS FILE (universal entry point)
+- `.claude/CLAUDE.md` - Claude-specific language/licence policy
+- `.machine_readable/ai/` - Cursor / Cline / Windsurf rules + AI.a2ml
+- `.github/copilot-instructions.md` - GitHub Copilot conventions
+- `.machine_readable/6a2/anchors/ANCHOR.a2ml` - identity + golden path
 
 ## CORE INVARIANTS
 
@@ -56,26 +56,28 @@ This repo contains:
 phronesis/
 ├── 0-AI-MANIFEST.a2ml         # THIS FILE (start here)
 ├── README.adoc                 # Project overview
+├── EXPLAINME.adoc              # Receipts for the README's claims
+├── AUDIT.adoc                  # Honest claims-vs-reality ledger
 ├── lib/phronesis/              # Reference implementation (Elixir/BEAM)
-├── compiler/                   # Rust → WASM compiler
+├── compiler/                   # Rust → WASM compiler (Phase 2)
 ├── spec/ formal/ academic/     # Grammar, semantics, proofs
 ├── docs/                       # AsciiDoc design docs (incl. REFLEXION.adoc)
 ├── .machine_readable/
 │   ├── 6a2/                    # The 6 core A2ML files
-│   │   ├── STATE.a2ml
-│   │   ├── META.a2ml
-│   │   ├── ECOSYSTEM.a2ml
-│   │   ├── AGENTIC.a2ml
-│   │   ├── NEUROSYM.a2ml
-│   │   └── PLAYBOOK.a2ml
-│   └── contractiles/           # Mustfile / Trustfile / Justfile / etc.
-└── .github/workflows/          # CI/CD
+│   │   ├── STATE.a2ml  META.a2ml  ECOSYSTEM.a2ml
+│   │   ├── AGENTIC.a2ml  NEUROSYM.a2ml  PLAYBOOK.a2ml
+│   │   └── anchors/ANCHOR.a2ml # identity + golden path
+│   ├── ai/                     # Cursor/Cline/Windsurf rules + AI.a2ml
+│   ├── configs/                # relocated estate *.toml configs
+│   ├── contractiles/           # Mustfile / Trustfile / Justfile / etc.
+│   └── root-allow.txt          # canonical root allowlist
+└── .github/                    # workflows + copilot-instructions.md
 ```
 
 ## SESSION STARTUP CHECKLIST
 
 ✅ Read THIS file (0-AI-MANIFEST.a2ml) first
-✅ Understand canonical locations (.machine_readable/, .bot_directives/)
+✅ Understand canonical locations (.machine_readable/6a2/, .machine_readable/ai/)
 ✅ Know the invariants (no SCM duplication, etc.)
 ✅ Check for MCP enforcement (if applicable)
 ✅ Read `.machine_readable/6a2/STATE.a2ml` for current status
