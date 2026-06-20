@@ -37,6 +37,25 @@ jobs:
         uses: github/codeql-action/upload-sarif@c6f931105cb2c34c8f901cc885ba1e2e259cf745 # v4
         with:
           sarif_file: results.sarif
+      - name: Upload results artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: scorecard-sarif
+          path: results.sarif
+          retention-days: 1
+  # The score gate runs in a separate job so the publish job (which holds the
+  # OIDC id-token) contains no custom run steps.
+  score-gate:
+    needs: scorecard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Download results artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: scorecard-sarif
       - name: Check minimum score
         run: |
           # Parse score from results
