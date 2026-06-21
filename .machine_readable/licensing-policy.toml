@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: MPL-2.0
+# SPDX-License-Identifier: CC-BY-SA-4.0
 # SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell (hyperpolymath)
 #
 # Machine-readable form of LICENSING.adoc. Tools enforce from this; humans read
 # the .adoc (the .adoc is the source of truth — keep in sync, do not diverge).
-# NOT a REUSE per-file dep5 map: this encodes the RULES, not per-file claims.
 
 schema = "hyperpolymath.licensing-policy/1"
 repo = "hyperpolymath/phronesis"
@@ -11,17 +11,12 @@ classification = "sole-owner"            # estate category 1
 revised = "2026-06-21"
 human-source = "LICENSING.adoc"
 upstream-canonical = "hyperpolymath/standards: LICENCE-POLICY.adoc + .claude/CLAUDE.md §License Policy"
-note = "Sole-owner repo: code = MPL-2.0, prose docs = CC-BY-SA-4.0 (owner ruling 2026-06-04). Not a PMPL/AGPL/007 case. No automated/bulk SPDX edits."
+note = "Dual-licensed: every source file carries BOTH MPL-2.0 and CC-BY-SA-4.0 SPDX lines. Root LICENSE is MPL-2.0 (GitHub community-health marker). No automated/bulk SPDX edits."
 
-[default]                                # code/config/scripts/build/metadata/specs
-spdx = "MPL-2.0"
-scope = "*.ex, *.exs, *.rs, *.idr, *.tla, *.scm, mix.exs, Justfile, Mustfile, *.a2ml, *.toml"
-status = "the stated, legally-operative standard for code"
-
-[default_docs]                           # prose documentation
-spdx = "CC-BY-SA-4.0"
-scope = "narrative *.adoc and *.md (README, EXPLAINME, AUDIT, docs/, wiki/, academic/ prose)"
-status = "owner ruling 2026-06-04 — docs are CC-BY-SA-4.0; code stays MPL-2.0"
+[standard]                               # the per-file rule
+spdx = ["MPL-2.0", "CC-BY-SA-4.0"]
+form = "two SPDX-License-Identifier lines per file, in the file's comment syntax"
+scope = "all estate-authored source — code, config, build, workflows, formal specs/proofs, metadata, and prose docs"
 
 [github_marker]                          # GitHub community-health / 'git health'
 file = "LICENSE"
@@ -31,7 +26,6 @@ note = "root LICENSE carries plain MPL-2.0 text; GitHub detects one licence — 
 [platform_exception]                     # registries
 spdx = "MPL-2.0"
 applies = "Hex / crates.io and other OSI-only registries; mix.exs package licenses = [MPL-2.0]"
-note = "explicit MPL-2.0 is compliance, not preference"
 
 [third_party]
 rule = "preserve original SPDX exactly; never relicense; flag-not-edit"
@@ -45,8 +39,8 @@ pmpl_carveout = "PMPL is exactly 3 repos (palimpsest-license, palimpsest-plasma,
 [automation]                             # estate Addendum A2
 allowed = false
 rule = "no bulk/sed/script/agent licence-SPDX changes; remediation is manual, per-file, owner-only"
-exception = "an agent may author NEW files with correct SPDX from birth"
+exception = "an agent may author NEW files with the correct dual header from birth"
 
-[flagged]                                # known deviations — owner-only to resolve, NOT swept
-apache_proofs = "academic/formal-verification/{agda/*.agda, coq/Phronesis.v, lean4/Phronesis.lean, lean4/lakefile.lean} carry Apache-2.0 (Lean/Coq/Agda ecosystem convention vs MPL-2.0 estate default — owner decision)"
-pmpl_workflows = ".github/workflows/{scorecard.yml, secret-scanner.yml} carry PMPL-1.0 — drift (not a carve-out repo); owner-only flip to MPL-2.0"
+[migration]                              # dual-header rollout
+done = "academic/formal-verification/{agda/*.agda, coq/Phronesis.v, lean4/*.lean}; .github/workflows/{scorecard,secret-scanner}.yml (previously Apache-2.0-OR-MIT and PMPL-1.0)"
+pending = "remaining single-SPDX estate files migrate to the dual header incrementally; mixed single/dual is owner-sanctioned during transition"

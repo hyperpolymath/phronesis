@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MPL-2.0
 // SPDX-License-Identifier: CC-BY-SA-4.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 = Phronesis — Licensing
@@ -5,92 +6,69 @@
 :icons: font
 
 The standard, authoritative statement of how Phronesis is licensed. Phronesis is
-a sole-owner hyperpolymath repository, so it follows the estate default: a
-*dual* licence — code under MPL-2.0, prose documentation under CC-BY-SA-4.0.
+a sole-owner hyperpolymath repository, dual-licensed: every source file is
+offered under *both* MPL-2.0 and CC-BY-SA-4.0.
 
 This document is the human source of truth; `.machine_readable/licensing-policy.toml`
-is its machine-readable twin (tools enforce from the TOML, humans read this —
-keep them in sync). The canonical estate policy is
-https://github.com/hyperpolymath/standards[`standards`] `LICENCE-POLICY.adoc`
-and `.claude/CLAUDE.md` §License Policy; this file is the Phronesis-local
-instance of it.
+is its machine-readable twin (keep them in sync). The canonical estate policy is
+https://github.com/hyperpolymath/standards[`standards`] `LICENCE-POLICY.adoc`.
 
-== The standard (dual labelling)
+== The standard — dual SPDX header on every file
 
-Two SPDX identifiers are in normal use across the repository — one per file,
-by file class:
+Every source file carries *two* SPDX identifier lines, in the file's comment
+syntax:
 
 [source]
 ----
-# Code, configuration, scripts, build files, A2ML metadata, formal specs:
 SPDX-License-Identifier: MPL-2.0
-
-# Prose documentation (*.adoc, narrative *.md):
 SPDX-License-Identifier: CC-BY-SA-4.0
 ----
 
 MPL-2.0 (file-level copyleft) keeps the implementation free and open even in
-networked deployments; CC-BY-SA-4.0 opens the documentation and research content
-under attribution and share-alike. Both licence texts live in `LICENSES/`
+networked deployments; CC-BY-SA-4.0 opens the same content for documentation and
+research reuse under attribution and share-alike. Both texts live in `LICENSES/`
 (`MPL-2.0.txt`, `CC-BY-SA-4.0.txt`), REUSE-style.
 
-== GitHub marker
+This applies to all estate-authored source — `*.ex`, `*.exs`, `*.rs`, `*.idr`,
+`*.tla`, `*.agda`, `*.v`, `*.lean`, `*.scm`, `*.a2ml`, `*.toml`, build files,
+workflows, and prose docs (`*.adoc`, narrative `*.md`) alike.
 
-The root `LICENSE` file carries the plain *MPL-2.0* text. That is deliberate:
-it is the single licence GitHub detects for the repository's community-health
-profile ("git health") and the licence shown in the sidebar and API. CC-BY-SA-4.0
-is declared per-file and in `LICENSES/`, not in the root `LICENSE` (GitHub
-detects one). The distributed Hex package (`mix.exs`) also declares
-`licenses: ["MPL-2.0"]` — the code artefact.
+== GitHub marker (community health)
 
-== Mapping
-
-[cols="2,1,3"]
-|===
-| File class | SPDX | Examples
-
-| Source code | `MPL-2.0` | `*.ex`, `*.exs`, `*.rs`, `*.idr`
-| Formal specs / semantics | `MPL-2.0` | `*.tla`, `spec/SPEC.core.scm`
-| Build / config / metadata | `MPL-2.0` | `mix.exs`, `Justfile`, `Mustfile`, `*.a2ml`, `*.toml`
-| Prose documentation | `CC-BY-SA-4.0` | `README.adoc`, `EXPLAINME.adoc`, `AUDIT.adoc`, `docs/**`, `wiki/**`, `academic/**` prose
-| Root licence text | `MPL-2.0` | `LICENSE` (GitHub marker)
-|===
+The root `LICENSE` file carries the plain *MPL-2.0* text. That is the single
+licence GitHub detects for the repository's community-health profile ("git
+health") and shows in the sidebar and API. The dual per-file labelling above is
+declared in headers and in `LICENSES/`; the root `LICENSE` stays MPL-2.0 so the
+community-health marker is MPL-2.0. The distributed Hex package (`mix.exs`) also
+declares `licenses: ["MPL-2.0"]`.
 
 == Exclusion cases
 
-The dual standard above is the *normal*. It does not apply in these cases:
+The dual standard is the *normal*. It does not apply to:
 
-* *Third-party / vendored* (`deps/**`, any upstream code): preserve the
-  original SPDX exactly — flag, never edit or relicense.
-* *Platform registries* (Hex, crates.io): an explicit `MPL-2.0` declaration is
-  a compliance requirement, not a preference.
-* *Not applicable to Phronesis:* the estate's other categories — All-Rights-Reserved
-  (`007`), `AGPL-3.0-or-later` (repos shared with the owner's son), and
-  `PMPL-1.0-or-later` (the three Palimpsest carve-out repos only) — do **not**
-  apply here. Phronesis is a plain sole-owner repo.
+* *Third-party / vendored* (`deps/**`, any upstream code): preserve the original
+  SPDX exactly — flag, never edit or relicense.
+* *The root `LICENSE` file*: the verbatim MPL-2.0 text (the GitHub marker), not a
+  dual-headed source file.
+* *Not applicable to Phronesis:* the estate's other categories — ARR (`007`),
+  `AGPL-3.0-or-later` (son-shared repos), `PMPL-1.0-or-later` (the three
+  Palimpsest carve-out repos only) — do not apply here.
 
-== Known deviations (flagged, owner-only to resolve)
+== Migration status
 
-Per estate policy, licence-SPDX changes are *manual, per-file, owner-only* — no
-bulk or automated edits (see `standards` `LICENCE-POLICY.adoc` Addendum A2 and
-the neurophone#99 post-mortem). The following currently deviate from the
-standard and are recorded here for an owner decision rather than swept:
+The dual-header standard is being rolled out per-file (manual, owner-directed —
+no bulk/automated SPDX sweeps, per `standards` `LICENCE-POLICY.adoc` Addendum A2
+and the neurophone#99 post-mortem).
 
-[cols="2,1,3"]
-|===
-| Files | Current SPDX | Note
-
-| `academic/formal-verification/{agda/*.agda, coq/Phronesis.v, lean4/Phronesis.lean, lean4/lakefile.lean}` (5)
-| `Apache-2.0`
-| Estate-authored proof files. Apache-2.0 is the convention of the Lean/Coq/Agda
-  proof ecosystems; confirm whether to keep (ecosystem convention) or normalise
-  to `MPL-2.0` (estate default for code).
-
-| `.github/workflows/{scorecard.yml, secret-scanner.yml}` (2)
-| `PMPL-1.0`
-| Drift — Phronesis is not a Palimpsest carve-out repo, so these workflow files
-  should be `MPL-2.0`. PMPL flips are owner-only; not auto-changed.
-|===
+* *Done:* the formal-verification proof files
+  (`academic/formal-verification/{agda/*.agda, coq/Phronesis.v, lean4/*.lean}`)
+  and the two affected workflows
+  (`.github/workflows/{scorecard.yml, secret-scanner.yml}`) now carry the dual
+  header (previously `Apache-2.0 OR MIT` and `PMPL-1.0` respectively).
+* *Pending:* the remaining estate-authored files that still carry a single SPDX
+  line are migrated to the dual header incrementally. Until then the repository
+  legitimately mixes single- and dual-headed files; both are owner-sanctioned
+  during the transition.
 
 == See also
 
