@@ -1,0 +1,100 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+= Phronesis — Licensing
+:toc:
+:icons: font
+
+The standard, authoritative statement of how Phronesis is licensed. Phronesis is
+a sole-owner hyperpolymath repository, so it follows the estate default: a
+*dual* licence — code under MPL-2.0, prose documentation under CC-BY-SA-4.0.
+
+This document is the human source of truth; `.machine_readable/licensing-policy.toml`
+is its machine-readable twin (tools enforce from the TOML, humans read this —
+keep them in sync). The canonical estate policy is
+https://github.com/hyperpolymath/standards[`standards`] `LICENCE-POLICY.adoc`
+and `.claude/CLAUDE.md` §License Policy; this file is the Phronesis-local
+instance of it.
+
+== The standard (dual labelling)
+
+Two SPDX identifiers are in normal use across the repository — one per file,
+by file class:
+
+[source]
+----
+# Code, configuration, scripts, build files, A2ML metadata, formal specs:
+SPDX-License-Identifier: MPL-2.0
+
+# Prose documentation (*.adoc, narrative *.md):
+SPDX-License-Identifier: CC-BY-SA-4.0
+----
+
+MPL-2.0 (file-level copyleft) keeps the implementation free and open even in
+networked deployments; CC-BY-SA-4.0 opens the documentation and research content
+under attribution and share-alike. Both licence texts live in `LICENSES/`
+(`MPL-2.0.txt`, `CC-BY-SA-4.0.txt`), REUSE-style.
+
+== GitHub marker
+
+The root `LICENSE` file carries the plain *MPL-2.0* text. That is deliberate:
+it is the single licence GitHub detects for the repository's community-health
+profile ("git health") and the licence shown in the sidebar and API. CC-BY-SA-4.0
+is declared per-file and in `LICENSES/`, not in the root `LICENSE` (GitHub
+detects one). The distributed Hex package (`mix.exs`) also declares
+`licenses: ["MPL-2.0"]` — the code artefact.
+
+== Mapping
+
+[cols="2,1,3"]
+|===
+| File class | SPDX | Examples
+
+| Source code | `MPL-2.0` | `*.ex`, `*.exs`, `*.rs`, `*.idr`
+| Formal specs / semantics | `MPL-2.0` | `*.tla`, `spec/SPEC.core.scm`
+| Build / config / metadata | `MPL-2.0` | `mix.exs`, `Justfile`, `Mustfile`, `*.a2ml`, `*.toml`
+| Prose documentation | `CC-BY-SA-4.0` | `README.adoc`, `EXPLAINME.adoc`, `AUDIT.adoc`, `docs/**`, `wiki/**`, `academic/**` prose
+| Root licence text | `MPL-2.0` | `LICENSE` (GitHub marker)
+|===
+
+== Exclusion cases
+
+The dual standard above is the *normal*. It does not apply in these cases:
+
+* *Third-party / vendored* (`deps/**`, any upstream code): preserve the
+  original SPDX exactly — flag, never edit or relicense.
+* *Platform registries* (Hex, crates.io): an explicit `MPL-2.0` declaration is
+  a compliance requirement, not a preference.
+* *Not applicable to Phronesis:* the estate's other categories — All-Rights-Reserved
+  (`007`), `AGPL-3.0-or-later` (repos shared with the owner's son), and
+  `PMPL-1.0-or-later` (the three Palimpsest carve-out repos only) — do **not**
+  apply here. Phronesis is a plain sole-owner repo.
+
+== Known deviations (flagged, owner-only to resolve)
+
+Per estate policy, licence-SPDX changes are *manual, per-file, owner-only* — no
+bulk or automated edits (see `standards` `LICENCE-POLICY.adoc` Addendum A2 and
+the neurophone#99 post-mortem). The following currently deviate from the
+standard and are recorded here for an owner decision rather than swept:
+
+[cols="2,1,3"]
+|===
+| Files | Current SPDX | Note
+
+| `academic/formal-verification/{agda/*.agda, coq/Phronesis.v, lean4/Phronesis.lean, lean4/lakefile.lean}` (5)
+| `Apache-2.0`
+| Estate-authored proof files. Apache-2.0 is the convention of the Lean/Coq/Agda
+  proof ecosystems; confirm whether to keep (ecosystem convention) or normalise
+  to `MPL-2.0` (estate default for code).
+
+| `.github/workflows/{scorecard.yml, secret-scanner.yml}` (2)
+| `PMPL-1.0`
+| Drift — Phronesis is not a Palimpsest carve-out repo, so these workflow files
+  should be `MPL-2.0`. PMPL flips are owner-only; not auto-changed.
+|===
+
+== See also
+
+* `LICENSE` — MPL-2.0 text (GitHub marker)
+* `LICENSES/MPL-2.0.txt`, `LICENSES/CC-BY-SA-4.0.txt` — REUSE licence texts
+* `.machine_readable/licensing-policy.toml` — machine-readable form of this policy
+* `.claude/CLAUDE.md` §License Policy — the estate five-way classification
