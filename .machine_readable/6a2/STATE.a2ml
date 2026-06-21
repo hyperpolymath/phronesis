@@ -5,9 +5,9 @@
 [metadata]
 project = "phronesis"
 version = "0.9.0"
-last-updated = "2026-06-20"
+last-updated = "2026-06-21"
 status = "active"
-session = "docs refresh + RSR/bot-doc compliance + root cleanup — 2026-06-20"
+session = "licensing dual-header standard + closeout triage (issues #59, #60) — 2026-06-21"
 
 [project-context]
 name = "Phronesis"
@@ -37,11 +37,13 @@ issues = [
 
 [critical-next-actions]
 actions = [
+  "Complete the dual-SPDX-header migration repo-wide (issue #59)",
+  "Wiki overhaul: audience-divided dev/maintainer/user + depth + re-frame (issue #60)",
   "Wire reflexion claim ingest for the compiler, formal/proof, and benchmark sources",
   "Advance the Rust to WASM production compiler beyond AST scaffolding",
   "Add Idris2 ABI definitions and the Zig FFI layer",
 ]
 
 [maintenance-status]
-last-run-utc = "2026-06-20T00:00:00Z"
+last-run-utc = "2026-06-21T00:00:00Z"
 last-result = "pass"  # unknown | pass | warn | fail  (full ExUnit suite green; consensus/Raft cases skipped pending :ra)
