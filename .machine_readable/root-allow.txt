@@ -15,6 +15,7 @@ GOVERNANCE.adoc
 MAINTAINERS.adoc
 0-AI-MANIFEST.a2ml         # universal AI entry point -> .machine_readable/
 LICENSE                    # MPL-2.0 (code); docs are CC-BY-SA-4.0 per-file
+LICENSING.adoc             # authoritative dual-licence declaration (MPL-2.0 + CC-BY-SA-4.0)
 CHANGELOG.md               # GitHub-required .md
 CODE_OF_CONDUCT.md         # GitHub-required .md
 CONTRIBUTING.md            # GitHub-required .md
