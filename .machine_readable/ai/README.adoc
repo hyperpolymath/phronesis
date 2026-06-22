@@ -1,0 +1,38 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+= AI Guidance Directory (`.machine_readable/ai/`)
+:toc:
+
+Centralised, tool-specific AI-assistant instructions for Phronesis. Keeping them
+here (rather than scattered at the repo root) is the RSR convention.
+
+== Contents
+
+[cols="1,3"]
+|===
+| File | Purpose
+
+| `.cursorrules`   | Rules for Cursor.
+| `.clinerules`    | Rules for Cline.
+| `.windsurfrules` | Rules for Windsurf.
+| `AI.a2ml`        | Machine-readable workflow + repository-focus directives.
+| `README.adoc`    | This index.
+|===
+
+The three `.*rules` files carry identical guidance with a tool-specific header
+line; keep them in sync when one changes.
+
+== Canonical AI authority (outside this directory)
+
+* `0-AI-MANIFEST.a2ml` (repo root) — the universal entry point: canonical file
+  locations and invariants.
+* `.claude/CLAUDE.md` — full language and licence policy for Claude.
+* `.github/copilot-instructions.md` — GitHub Copilot code-review conventions.
+
+== Recommended machine read order
+
+. `0-AI-MANIFEST.a2ml`
+. `.machine_readable/6a2/anchors/ANCHOR.a2ml` — identity + golden path
+. `.machine_readable/6a2/STATE.a2ml` — current status + blockers
+. `.machine_readable/6a2/META.a2ml` — architecture decisions
+. `.claude/CLAUDE.md` — language / licence policy

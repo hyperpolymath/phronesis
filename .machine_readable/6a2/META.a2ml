@@ -4,7 +4,7 @@
 # META.a2ml — Phronesis meta-level information
 [metadata]
 version = "0.1.0"
-last-updated = "2026-04-11"
+last-updated = "2026-06-18"
 
 [project-info]
 license = "MPL-2.0"
@@ -12,7 +12,10 @@ author = "Jonathan D.A. Jewell (hyperpolymath)"
 
 [architecture-decisions]
 decisions = [
-  # No ADRs recorded
+  { id = "ADR-0001", title = "BEAM/Elixir reference runtime with a Rust to WASM production compiler", status = "accepted" },
+  { id = "ADR-0002", title = "Idris2 ABI + Zig FFI as the cross-language boundary standard", status = "accepted" },
+  { id = "ADR-0003", title = "Reflexion layer: design self-relation that gates changes, never auto-mutates semantics", status = "proposed" },
+  { id = "ADR-0004", title = "Dual licence: MPL-2.0 for code, CC-BY-SA-4.0 for documentation/content", status = "accepted" },
 ]
 
 [development-practices]

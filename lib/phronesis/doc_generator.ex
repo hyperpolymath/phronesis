@@ -149,16 +149,15 @@ defmodule Phronesis.DocGenerator do
     ast
     |> Enum.filter(&match?({:const, _, _}, &1))
     |> Enum.map(fn {:const, name, value} ->
-      # Try to find line number from the value if it's a structure
-      line = extract_line_from_value(value) || 1
-      doc_comment = extract_comment(lines, line)
+      line = find_declaration_line(lines, "CONST", to_string(name))
+      signature = "CONST #{name} = #{format_value(value)}"
 
       %{
         name: to_string(name),
-        description: doc_comment,
-        signature: "CONST #{name} = #{format_value(value)}",
+        description: extract_comment(lines, line),
+        signature: signature,
         value: value,
-        examples: [],
+        examples: [signature],
         metadata: %{},
         file: file_path,
         line: line
@@ -166,9 +165,23 @@ defmodule Phronesis.DocGenerator do
     end)
   end
 
-  defp extract_line_from_value({:literal, _type, _value, meta}) when is_map(meta), do: meta[:line]
-  defp extract_line_from_value({:literal, _type, _value}), do: nil
-  defp extract_line_from_value(_), do: nil
+  # Find the 1-based source line of a `KEYWORD name` declaration (CONST/POLICY) so the
+  # doc comment above it can be located. The AST itself carries no line numbers.
+  defp find_declaration_line(lines, keyword, name) do
+    prefix = keyword <> " " <> name
+
+    idx =
+      Enum.find_index(lines, fn line ->
+        trimmed = String.trim_leading(line)
+        String.starts_with?(trimmed, prefix) and
+          declaration_boundary?(String.at(trimmed, String.length(prefix)))
+      end)
+
+    if idx, do: idx + 1, else: 1
+  end
+
+  defp declaration_boundary?(nil), do: true
+  defp declaration_boundary?(ch), do: ch in [" ", "\t", ":", "="]
 
   defp format_value({:literal, _, value}), do: inspect(value)
   defp format_value({:literal, _, value, _meta}), do: inspect(value)
@@ -178,7 +191,7 @@ defmodule Phronesis.DocGenerator do
     ast
     |> Enum.filter(&match?({:policy, _, _, _, _}, &1))
     |> Enum.map(fn {:policy, name, condition, action, meta} ->
-      line = meta[:line] || 1
+      line = find_declaration_line(lines, "POLICY", to_string(name))
       doc_comment = extract_comment(lines, line)
 
       %{
@@ -246,7 +259,9 @@ defmodule Phronesis.DocGenerator do
             {:cont, [comment | acc]}
 
           String.trim(line) == "" ->
-            {:cont, acc}
+            # Stop at a blank line: only the contiguous comment block directly above
+            # the declaration is its doc comment.
+            {:halt, acc}
 
           true ->
             {:halt, acc}
@@ -370,6 +385,16 @@ defmodule Phronesis.DocGenerator do
         <h3>Files</h3>
         <ul class="file-list">
           #{Enum.map_join(docs.files, "\n", &"<li><code>#{Path.basename(&1)}</code></li>")}
+        </ul>
+
+        <h3>Constants</h3>
+        <ul class="const-list">
+          #{Enum.map_join(docs.constants, "\n", &"<li><code>#{escape_html(&1.name)}</code></li>")}
+        </ul>
+
+        <h3>Policies</h3>
+        <ul class="policy-list">
+          #{Enum.map_join(docs.policies, "\n", &"<li><code>#{escape_html(&1.name)}</code></li>")}
         </ul>
 
         #{if length(docs.examples) > 0 do

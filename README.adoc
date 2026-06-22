@@ -1,12 +1,12 @@
-// SPDX-License-Identifier: MPL-2.0
+// SPDX-License-Identifier: CC-BY-SA-4.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
-= Phronesis: A Provably Safe Language for Agentic Ethical Reasoning
+= Phronesis: Towards a Provably Safe Language for Agentic Ethical Reasoning
 image:https://img.shields.io/badge/OpenSSF-Best_Practices-green?logo=openssourcesecurity[OpenSSF Best Practices,link="https://www.bestpractices.dev/en/projects/new?repo_url=https://github.com/hyperpolymath/phronesis"]
 
-:license: PMPL-1.0 + Palimpsest v0.5
+:license: MPL-2.0 (code) and CC-BY-SA-4.0 (documentation)
 :author: Jonathan D. A. Jewell
-:version: Standard Candidate 1.0
-:repo: https://gitlab.com/hyperpolymath/phronesis
+:version: 0.9.0
+:repo: https://github.com/hyperpolymath/phronesis
 :toc:
 :toclevels: 3
 :icons: font
@@ -36,10 +36,12 @@ It fuses the precision of **Symbolic AI** with the adaptability of **neural netw
 
 == 🛡️ Intellectual Property & Licensing
 
-Phronesis defines its IP across three layers, protected by a *dual-licensing* model:
+Phronesis uses a *dual-licensing* model:
 
-* **PMPL-1.0**: Ensures the runtime and compiler remain *free and open-source*, even in networked deployments.
-* **Palimpsest v0.5**: Protects the *philosophical core* and *benchmark suite*, enabling open research while preserving ethical integrity.
+* **MPL-2.0**: The runtime, compiler, and all source code — file-level copyleft that keeps the implementation free and open-source, even in networked deployments.
+* **CC-BY-SA-4.0**: The documentation, philosophical core, and benchmark suite — open research and reuse under attribution and share-alike.
+
+The root `LICENSE` carries the MPL-2.0 text — the single licence GitHub detects for the repository. See xref:LICENSING.adoc[`LICENSING.adoc`] (and its machine twin `.machine_readable/licensing-policy.toml`) for the full policy: the file-class mapping, the GitHub marker, and exclusion cases.
 
 === Claimable IP: Novel Design & Semantic Architecture
 
@@ -52,7 +54,7 @@ Phronesis defines its IP across three layers, protected by a *dual-licensing* mo
 | Guarantees trustworthiness and auditability
 
 | Probabilistic Types
-| `BeliefFunction`, `ProbabilityDistribution` as statically checked types
+| `BeliefFunction`, `ProbabilityDistribution` as first-class types (runtime-represented; static checking on the roadmap)
 | Solves symbol grounding between neural and symbolic layers
 
 | Metaiconic API
@@ -62,6 +64,10 @@ Phronesis defines its IP across three layers, protected by a *dual-licensing* mo
 | Map-Territory Mandate
 | Mandatory `REPORT` action flags model-reality inconsistencies
 | Enforces epistemological safety
+
+| Reflexion Design Layer
+| Judgement-Evidence Graph + Invariant-Path Equivalence Engine that records *why* a design is valid and gates regressions
+| Surfaces design obligations on safety-weakening changes without auto-mutating language semantics
 
 | BEAM/Raft Architecture
 | BEAM VM + Raft consensus for ethical loop execution
@@ -95,11 +101,12 @@ Phronesis defines its IP across three layers, protected by a *dual-licensing* mo
 
 === Phased Bootstrap Strategy
 
-. *Phase 1: Rapid Prototyping (Haskell)*
-   Validate type system and semantics via interpreter and REPL.
+. *Phase 1: Reference Interpreter (Elixir/BEAM)* — implemented
+   Lexer, parser, type checker, interpreter, consensus, LSP, debugger, profiler,
+   and the reflexion design layer, all running on the BEAM.
 
-. *Phase 2: Production Compiler (Rust/BEAM)*
-   Compile to BEAM VM bytecode (or WASM-on-BEAM) for performance and safety.
+. *Phase 2: Production Compiler (Rust → WASM)*
+   Compile to WebAssembly via the `compiler/phronesis-ast` and `compiler/phronesis-wasm` crates.
 
 === Preferred Tooling
 
@@ -108,19 +115,19 @@ Phronesis defines its IP across three layers, protected by a *dual-licensing* mo
 | Component | Tool / Language Preference
 
 | Development
-| Haskell (Interpreter), Rust (Compiler)
+| Elixir (reference implementation), Rust (WASM compiler)
 
 | Runtime
 | Erlang / Elixir (BEAM VM)
 
 | Containerization
-| Podman
+| Podman (Containerfile, Chainguard base)
 
-| Database
-| ArangoDB / Virtuoso
+| Consensus
+| Raft (TLA+ specification in `formal/`, Elixir scaffold in `lib/phronesis/consensus/`)
 
-| Automation
-| Salt (Deployment & Configuration)
+| Formal verification
+| TLA+ (consensus), proof corpus in `academic/` (lattice / order / type theory)
 |===
 
 ---
@@ -129,17 +136,17 @@ Phronesis defines its IP across three layers, protected by a *dual-licensing* mo
 
 To begin contributing:
 
-. Choose your repository name, Jonathan.
 . Clone the repo:
    +
    [source,bash]
    ----
-   git clone git@gitlab.com:hyperpolymath/{REPOSITORY_NAME}.git
+   git clone git@github.com:hyperpolymath/phronesis.git
    ----
 . Install dependencies:
-   - Rust toolchain
-   - Haskell GHC
-. Run the benchmark suite:
+   - Erlang/OTP + Elixir (BEAM runtime)
+   - Rust toolchain (WASM compiler)
+   - `just` (task runner)
+. Run the test suite with `just test`:
    *Passing all ethical scenarios is the definitive measure of correctness.*
 
 ---

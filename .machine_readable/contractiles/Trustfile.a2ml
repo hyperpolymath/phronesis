@@ -54,7 +54,7 @@ Current trust level: maximal
 
 #### license-content
 - description: LICENSE contains expected identifier
-- run: grep -q 'PMPL\|MPL\|MIT\|Apache\|LGPL' LICENSE
+- run: grep -q 'MPL\|MIT\|Apache\|LGPL\|CC-BY-SA' LICENSE
 - severity: warning
 
 ## Template-Specific Trust

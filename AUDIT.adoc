@@ -1,0 +1,106 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+= Phronesis — Audit
+:toc:
+:icons: font
+
+An honest, dated snapshot of what Phronesis *actually does* versus what it
+*aspires to*. The README sells the vision; `EXPLAINME.adoc` shows the receipts;
+this file is the candid ledger of the gap between them. Read it before trusting
+any single claim.
+
+Last audited: 2026-06-20. Version: 0.9.0 (see `mix.exs`).
+
+== What is real and working
+
+[cols="1,2"]
+|===
+| Area | Status
+
+| Lexer / parser / AST
+| Real. `lib/phronesis/lexer.ex`, `parser.ex` (+ `parser/`), `ast.ex`. 15 keywords,
+  IPv4/6 + DateTime literals, probabilistic type tokens.
+
+| Type checker
+| Real, but probabilistic types are *runtime-represented*, not statically checked
+  yet (`lib/phronesis/type_checker.ex`).
+
+| Compiler (to `.phrc` bytecode)
+| Real for the Elixir target: `lib/phronesis/compiler.ex` with constant folding /
+  dead-code elimination. This is the *prototype* compiler, not the Phase-2 WASM one.
+
+| Interpreter
+| Real. Tree-walking `lib/phronesis/interpreter.ex` (+ `tracing_interpreter.ex`).
+
+| Incremental lexer / parser + LSP
+| Real, bounded by expression boundaries. `incremental_{lexer,parser}.ex`,
+  `lib/phronesis/lsp/` (hover, completion, diagnostics).
+
+| Debugger / profiler / doc generator
+| Real. `debugger.ex` (+ `debugger/`), `profiler.ex`, `doc_generator.ex`.
+
+| Reflexion design layer
+| Real but heuristic. `lib/phronesis/reflexion/` — claims, judgement-evidence
+  graph, equivalence classification, hash-chained design ledger. See below.
+
+| Test suite
+| Green. The full ExUnit suite passes (consensus/Raft cases are skipped — see
+  `docs/TESTING-REPORT.adoc`). `just test` is the gate.
+|===
+
+== What is scaffold, stub, or roadmap
+
+[cols="1,2"]
+|===
+| Area | Honest status
+
+| Production Rust -> WASM compiler
+| *Phase 2 roadmap.* The crates exist (`compiler/phronesis-ast`,
+  `compiler/phronesis-wasm`) but the shipping implementation is the Elixir prototype.
+
+| Raft consensus
+| *Scaffold.* `formal/PhronesisConsensus.tla` is a model-checked TLA+ spec; the
+  Elixir side in `lib/phronesis/consensus/` is a skeleton, not a deployable runtime.
+  Consensus tests are skipped pending a real `ra` integration.
+
+| Probabilistic types as static types
+| *Roadmap.* Represented as runtime values today; static checking is future work.
+
+| Reflexion formal-equivalence check
+| *Stubbed.* The invariant-path equivalence engine is heuristic; the formal check
+  falls through to `:unresolved`. Compiler/proof/bench ingestion beyond the AST
+  walk is `# TODO`. Reflexion gates design changes — it never auto-mutates semantics.
+
+| Package registry
+| *Local-only.* `lib/phronesis/package_manager/` resolves locally; no hosted
+  registry and no cryptographic package signing yet.
+
+| Academic proof corpus
+| *Authored, not independently reviewed.* `academic/proofs/` is an extensive
+  AsciiDoc corpus; it has not been externally refereed or mechanically checked
+  end-to-end.
+|===
+
+== Licensing
+
+* Code (`*.ex`, `*.exs`, `*.rs`, `*.idr`, `*.tla`, build files, A2ML metadata,
+  Guix `*.scm`): *MPL-2.0* (`LICENSE`, `LICENSES/MPL-2.0.txt`).
+* Documentation (narrative `*.adoc`, `wiki/`, `academic/` prose): *CC-BY-SA-4.0*
+  (`LICENSES/CC-BY-SA-4.0.txt`).
+* GitHub community files (`SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`,
+  `CHANGELOG.md`): MPL-2.0.
+
+There is no AGPL or Palimpsest licensing here — Phronesis is a sole-owner MPL-2.0
+repository under the estate classification.
+
+== How to verify these claims yourself
+
+[source,bash]
+----
+just deps      # fetch dependencies
+just build     # compile (warnings-as-errors)
+just test      # run the ExUnit suite — the definitive correctness measure
+----
+
+If any statement above no longer matches `git HEAD`, this file is stale: treat
+the code as ground truth and open a PR to correct the audit.
