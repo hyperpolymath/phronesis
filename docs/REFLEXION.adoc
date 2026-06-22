@@ -1,0 +1,189 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+= Phronesis Reflexion Layer
+:toc:
+:toclevels: 3
+
+The *reflexion* layer is Phronesis's mechanism for _design self-relation_ — the
+language treating its own semantics, obligations, and failures as objects of
+judgement. It is deliberately spelled "reflexion", not "reflection": this is not
+runtime introspection, it is the discipline by which the language maintains an
+explicit, checkable account of _why_ its design is held valid, and re-evaluates
+whether that account still coheres as the design changes.
+
+[NOTE]
+====
+Reflexion is *advisory and gate-only*. It produces design obligations; it never
+auto-mutates the AST, the compiler, or the runtime. Phronesis is not wise — but
+it can keep a disciplined account of its own lack of wisdom.
+====
+
+== Motivation
+
+The ordinary toolchain compiles _programs_:
+
+----
+source .phr → parse/CST → core elaboration → type/effect/obligation/probability
+checking → semantic IR → verification/proof obligations → runtime artefacts →
+execution traces / reports / counterexamples
+----
+
+The reflexion layer sits _alongside_ that pipeline and compiles the language's
+_design rationale_. Every important feature becomes an explicit claim
+("Phronesis should require REPORT on map/territory divergence") supported by
+evidence (semantic rationale, safety invariants, benchmark outcomes, proof
+obligations, counterexamples, map-territory reports, human notes). The claims and
+their warrant structure are a first-class artefact of the toolchain, not mere
+documentation.
+
+== Pipeline
+
+----
+Build → Extract → Graph → Compare → Classify → Reevaluate → Gate
+----
+
+1. *Build* — compile/typecheck/verify the language and examples (ordinary toolchain).
+2. *Extract* — `ClaimExtractor` turns artefacts into explicit `Claim`s.
+3. *Graph* — `JudgementEvidenceGraph` records why each design decision is valid.
+4. *Compare* — `InvariantPath` lifts justification paths; `Equivalence` compares them across versions.
+5. *Classify* — the delta is labelled (see <<taxonomy>>).
+6. *Reevaluate* — `Revaluation` turns the classification into design obligations.
+7. *Gate* — block / warn / permit a change to the language itself.
+
+== The three engines
+
+=== Claim Extractor
+
+`Phronesis.Reflexion.ClaimExtractor` walks a parsed program (the `Phronesis.AST`
+tuples returned by `Phronesis.parse/1`) and emits claims of four kinds:
+`:safety_preservation`, `:obligation_discharge`, `:evidence_for`, `:provenance`.
+
+The load-bearing case is the *map-territory mandate*: when a policy's action
+subtree contains a `{:report, _}` node, the extractor emits a
+`:safety_preservation` claim that the policy _preserves REPORT-adequacy_
+(epistemic safety) under the policy's match condition.
+
+Ingest from the compiler, the formal/proof layer (`formal/`,
+`academic/formal-verification/`) and the benchmark suite (`bench/`) are declared
+but stubbed today (`extract_from_compiler/1`, `extract_from_proofs/1`,
+`extract_from_benchmarks/1` return `[]` with documented `TODO`s).
+
+=== Judgement-Evidence Graph
+
+`Phronesis.Reflexion.JudgementEvidenceGraph` is the language's memory of _why_ a
+design is considered valid. Nodes are judgements; typed edges connect each to its
+supporting evidence. The eight evidence kinds are:
+
+[cols="1,3"]
+|===
+| Evidence kind | Meaning
+
+| `:semantic_rationale` | A design rationale / provenance link
+| `:safety_invariant` | A static safety property
+| `:benchmark_outcome` | Evidence from a benchmark run
+| `:proof_obligation` | A discharged or pending proof obligation
+| `:counterexample` | A case where omission caused unsafe behaviour
+| `:map_territory_report` | A REPORT on map/territory divergence
+| `:human_note` | A human design note
+| `:failed_proof_obligation` | An obligation that did not discharge
+|===
+
+=== Invariant-Path Equivalence Engine
+
+`Phronesis.Reflexion.InvariantPath` models a _justification path_:
+
+----
+principle → construct → static_rule → proof_obligation → runtime_behaviour → audit_trace
+----
+
+`Phronesis.Reflexion.Equivalence` compares two paths and asks not "do both
+type-check?" but "are these the same design claim under a harmless refactor, or
+has the design's ethical/epistemic meaning changed?".
+
+[[taxonomy]]
+== Classification taxonomy
+
+[cols="1,3,1"]
+|===
+| Classification | Meaning | Gate
+
+| `:equivalent` | Identical justification; harmless refactor | permit
+| `:refinement` | Additive detail within existing dimensions | permit
+| `:strengthening` | Added a load-bearing justification | permit
+| `:orthogonal_extension` | New, previously-absent dimension | warn
+| `:weakening` | Dropped a load-bearing justification (e.g. a removed REPORT) | gate
+| `:semantic_drift` | The governing principle changed | gate
+| `:contradiction` | Runtime behaviour now contradicts the prior version | gate
+| `:unresolved` | Could not be classified heuristically | gate
+|===
+
+The classifier is a deterministic heuristic; genuinely ambiguous cases fall to
+`:unresolved` — the safe default, which is gated for human/tool review.
+
+== Supporting components
+
+=== Design Ledger
+
+`Phronesis.Reflexion.DesignLedger` is an append-only, SHA-256 hash-chained record
+of design events (claims, classifications, obligations, notes). It is distinct
+from the execution `Phronesis.Trace`: the trace records the run of a single
+decision; the ledger records design events about the language across versions. A
+ledger entry may _reference_ a trace id as evidence, but never embeds or replaces
+traces. The hash chain makes the ledger tamper-evident.
+
+=== Revaluation
+
+`Phronesis.Reflexion.Revaluation` maps a classification to a gate verdict
+(`:permit` / `:warn` / `:gate`) and any `Phronesis.Reflexion.DesignObligation`s.
+For a weakening it emits the canonical obligation with three resolutions: _prove
+the property is still preserved_, _mark as an intentional documented shift_, or
+_reject the change_.
+
+== Integration points
+
+* `Phronesis.AST` — the claim source of truth (`ClaimExtractor` walks its tuples).
+* `Phronesis.Trace` — execution evidence; referenced by, never merged into, the ledger.
+* `Phronesis.Analyzer` / `Phronesis.Compiler` — future evidence sources (stubbed).
+* `formal/` (TLA+) and `academic/formal-verification/` — proof obligations (stubbed).
+* `bench/` — benchmark evidence (stubbed).
+
+== Non-goals
+
+* *Does not auto-mutate semantics.* Reflexion gates, warns, or permits — it never
+  silently changes the AST, compiler, or runtime.
+* *Not a runtime supervisor.* It is a called library (like `Phronesis.Analyzer`),
+  not a supervised process.
+* *Heuristic now, formal later.* Semantic equivalence via the proof layer is a
+  documented future hardening; until then ambiguous deltas are `:unresolved`.
+* *Does not touch licences or provenance.*
+
+== Usage
+
+[source,elixir]
+----
+{:ok, result} = Phronesis.Reflexion.review(v1_source, v2_source)
+result.gate         # :permit | :warn | :gate
+result.obligations  # [%Phronesis.Reflexion.DesignObligation{...}]
+result.ledger       # %Phronesis.Reflexion.DesignLedger{} (hash-chained)
+----
+
+----
+just reflexion-test   # run the reflexion test suite
+just reflexion-demo   # demo: drop a REPORT mandate and watch it get gated
+----
+
+== Status
+
+[cols="2,1,3"]
+|===
+| Component | Status | Note
+
+| Claim extraction (AST) | works | REPORT → REPORT-adequacy safety claim
+| Judgement-evidence graph | works | in-memory, serialisable
+| Invariant path | works | combined-per-subject and from-JEG
+| Equivalence engine | works (heuristic) | 8-way classifier
+| Design ledger | works | append-only, SHA-256 hash chain
+| Revaluation | works | classification → gate + obligations
+| Compiler / proof / benchmark ingest | stubbed | documented `TODO`s
+| Formal semantic equivalence | stubbed | falls to `:unresolved`
+|===

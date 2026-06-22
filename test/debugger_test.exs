@@ -140,7 +140,7 @@ defmodule Phronesis.DebuggerTest do
       {:ok, session} = Debugger.start(policy_file)
 
       # Add a variable to state
-      session = put_in(session.state.variables, %{"test_var" => 42})
+      session = put_in(session.state.environment, %{"test_var" => 42})
 
       assert {:ok, 42} = Debugger.inspect_var(session, "test_var")
       assert {:error, :not_found} = Debugger.inspect_var(session, "nonexistent")
@@ -150,7 +150,7 @@ defmodule Phronesis.DebuggerTest do
       {:ok, session} = Debugger.start(policy_file)
 
       vars = %{"var1" => 1, "var2" => 2}
-      session = put_in(session.state.variables, vars)
+      session = put_in(session.state.environment, vars)
 
       listed_vars = Debugger.list_vars(session)
       assert listed_vars == vars
@@ -189,7 +189,7 @@ defmodule Phronesis.DebuggerTest do
       {:ok, session} = Debugger.start(policy_file)
 
       # Add variable to state
-      session = put_in(session.state.variables, %{"status" => :valid})
+      session = put_in(session.state.environment, %{"status" => :valid})
 
       # Add watch
       session = Debugger.add_watch(session, "status_watch", "status")

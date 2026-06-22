@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MPL-2.0
+// SPDX-License-Identifier: CC-BY-SA-4.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 = Phronesis — Show Me The Receipts
 :toc:
@@ -105,6 +105,42 @@ cryptographic signing for packages yet.
 - Package manager: `lib/phronesis/package_manager.ex`, `lib/phronesis/package_manager/`
 - Conformance suite: `conformance/`, `test/conformance_test.exs`
 
+== Reflexion: Design Self-Relation, Not Runtime Reflection
+
+[quote, README]
+____
+Reflexion Design Layer: Judgement-Evidence Graph + Invariant-Path Equivalence
+Engine that records why a design is valid and gates regressions.
+____
+
+`lib/phronesis/reflexion/` turns compiler, runtime, and proof artefacts into
+explicit *claims*, records *why* a design is considered valid, compares
+justification-paths across versions, and emits *design obligations* that gate
+changes — without ever auto-mutating the language's semantics. The pipeline is
+Build → Extract → Graph → Compare → Classify → Reevaluate → Gate, exposed via
+the `Phronesis.Reflexion.review/2` façade (`Phronesis.Reflexion.demo/0` runs the
+worked example).
+
+The anchor example: `ClaimExtractor` emits a `:safety_preservation` claim
+("policy P preserves REPORT-adequacy") whenever a policy's action subtree
+contains a `{:report, _}` node (the map-territory mandate, real in `ast.ex`).
+A later version that drops that REPORT step classifies as `:weakening`, which
+gates the change with a prove / mark-intentional / reject obligation. Two policy
+strings in → classification + obligation + hash-chained ledger entry out.
+
+**Caveat:** The equivalence engine is heuristic. The formal invariant-path
+equivalence check is stubbed and currently falls through to `:unresolved`;
+compiler/proof/bench ingestion beyond the AST walk is `# TODO`. Reflexion is a
+called library (like `Analyzer`), not part of the OTP supervision tree.
+
+- Façade: `lib/phronesis/reflexion.ex`
+- Claim model: `lib/phronesis/reflexion/claim.ex`, `claim_extractor.ex`
+- Graph + paths: `lib/phronesis/reflexion/judgement_evidence_graph.ex`, `invariant_path.ex`
+- Comparison + gating: `lib/phronesis/reflexion/equivalence.ex`, `revaluation.ex`, `design_obligation.ex`
+- Append-only ledger: `lib/phronesis/reflexion/design_ledger.ex`
+- Tests: `test/reflexion_test.exs`, `test/reflexion/`
+- Design doc: `docs/REFLEXION.adoc`
+
 == Dogfooded Across The Account
 
 [cols="1,2"]
@@ -142,6 +178,7 @@ cryptographic signing for packages yet.
 | `lib/phronesis/profiler.ex` | Execution profiler
 | `lib/phronesis/hot_reload.ex` | Live policy reload without process restart
 | `lib/phronesis/consensus/` | Elixir Raft consensus scaffold
+| `lib/phronesis/reflexion.ex`, `reflexion/` | Reflexion design layer: claims, judgement-evidence graph, equivalence gating, hash-chained design ledger
 | `formal/PhronesisConsensus.tla` | TLA+ Raft consensus specification (model-checked)
 | `formal/PhronesisConsensus.cfg` | TLC model checker configuration
 | `conformance/` | Ethical scenario conformance test fixtures
@@ -152,13 +189,14 @@ cryptographic signing for packages yet.
 | `test/interpreter_test.exs` | Interpreter execution tests
 | `test/conformance_test.exs` | Mandatory ethical scenario suite
 | `test/lsp_integration_test.exs` | LSP integration tests
-| `test/e2e_test.exs`, `test_e2e.exs` | End-to-end pipeline tests
+| `test/e2e_test.exs`, `examples/test_e2e.exs` | End-to-end pipeline tests
 | `src/` | Supplementary source assets (non-Elixir)
 | `spec/` | Language specification documents
 | `syntax/` | Syntax highlighting definitions
 | `editors/` | Editor plugin scaffolds
 | `Containerfile` | Podman container definition (Chainguard base)
 | `.machine_readable/` | A2ML state, meta, ecosystem files
-| `TESTING-REPORT.adoc` | Test results narrative
-| `LSP-IMPLEMENTATION-SUMMARY.md` | LSP feature coverage summary
+| `docs/TESTING-REPORT.adoc` | Test results narrative
+| `docs/LSP-IMPLEMENTATION-SUMMARY.adoc` | LSP feature coverage summary
+| `docs/REFLEXION.adoc` | Reflexion design-layer architecture and 8-class equivalence taxonomy
 |===

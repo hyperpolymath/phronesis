@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+name: Scorecard Score Gate
+description: Fail when the OpenSSF Scorecard score is below the minimum.
+inputs:
+  sarif:
+    description: Path to the Scorecard SARIF results file.
+    required: false
+    default: results.sarif
+  min-score:
+    description: Minimum acceptable score (0-10).
+    required: false
+    default: "5"
+runs:
+  using: composite
+  steps:
+    - name: Check minimum score
+      shell: bash
+      run: |
+        SCORE=$(jq -r '.runs[0].tool.driver.properties.score // 0' "${{ inputs.sarif }}" 2>/dev/null || echo "0")
+        echo "OpenSSF Scorecard Score: $SCORE"
+        MIN_SCORE="${{ inputs.min-score }}"
+        if [ "$(echo "$SCORE < $MIN_SCORE" | bc -l)" = "1" ]; then
+          echo "::error::Scorecard score $SCORE is below minimum $MIN_SCORE"
+          exit 1
+        fi

@@ -171,6 +171,25 @@ defmodule Phronesis.Trace do
   end
 
   @doc """
+  Merge two traces, appending the steps of `b` onto `a` while keeping a's identity.
+
+  Terminal fields (status / completed_at / decision) are taken from `b` when it has
+  progressed beyond `:pending`. Used by the debugger to fold per-node sub-traces into
+  the session trace.
+  """
+  @spec merge(t(), t()) :: t()
+  def merge(%__MODULE__{} = a, %__MODULE__{} = b) do
+    %{
+      a
+      | steps: a.steps ++ b.steps,
+        status: if(b.status == :pending, do: a.status, else: b.status),
+        completed_at: b.completed_at || a.completed_at,
+        decision: b.decision || a.decision,
+        metadata: Map.merge(a.metadata, b.metadata)
+    }
+  end
+
+  @doc """
   Mark the trace as failed with an error.
   """
   @spec fail(t(), term()) :: t()

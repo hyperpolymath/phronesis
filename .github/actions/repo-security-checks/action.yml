@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+name: Repository Security Checks
+description: Assert SECURITY.md exists and warn on unpinned actions in workflows.
+runs:
+  using: composite
+  steps:
+    - name: Check SECURITY.md exists
+      shell: bash
+      run: |
+        if [ ! -f "SECURITY.md" ]; then
+          echo "::error::SECURITY.md is required"
+          exit 1
+        fi
+    - name: Check for pinned dependencies
+      shell: bash
+      run: |
+        unpinned=$(grep -r "uses:.*@v[0-9]" .github/workflows/*.yml 2>/dev/null | grep -v "#" | head -5 || true)
+        if [ -n "$unpinned" ]; then
+          echo "::warning::Found unpinned actions:"
+          echo "$unpinned"
+        fi

@@ -1,0 +1,40 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+
+[[topologymd--phronesis]]
+= TOPOLOGY — phronesis
+
+=== Purpose
+
+Phronesis is a provably safe language for agentic ethical reasoning, combining symbolic AI with neural adaptability. Built on Elixir/BEAM VM, it formalizes ethical reasoning in autonomous systems with formal logic, provable safety guarantees, and neuro-symbolic integration for value-aligned autonomous agents.
+
+=== Module Map
+
+....
+phronesis/
+├── lib/phronesis/       # Reference implementation (Elixir/BEAM): lexer, parser,
+│                        #   type checker, interpreter, consensus, LSP, reflexion
+├── compiler/            # Rust → WASM compiler (phronesis-ast, phronesis-wasm)
+├── spec/                # Grammar (EBNF) + formal semantics
+├── formal/              # TLA+ consensus specification
+├── academic/            # Formal proofs (Lean4 / Agda / Coq)
+├── conformance/         # Conformance test suites and validation
+├── bench/               # Performance benchmarking
+├── docs/                # AsciiDoc design docs (incl. REFLEXION.adoc)
+└── .github/workflows/   # CI/CD (hypatia-scan, codeql, etc.)
+....
+
+=== Data Flow
+
+....
+[Ethical Spec] ──► [Parser] ──► [Type Checker] ──► [Symbolic Reasoner] ──► [BEAM Bytecode]
+                                       ↓                     ↓
+                            [Formal Proofs]      [Provable Safety Properties]
+....
+
+=== Key Components
+
+* *Symbolic reasoning*: Formalize ethical constraints as first-class language features
+* *Neural adaptability*: Integrate learned representations with symbolic logic
+* *Provable safety*: All autonomous decisions backed by formal proofs
+* *BEAM target*: Run on Erlang/Elixir production infrastructure

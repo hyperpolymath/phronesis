@@ -1,1 +1,0 @@
-.machine_readable/SPEC.core.scm

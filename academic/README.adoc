@@ -1,0 +1,273 @@
+// SPDX-License-Identifier: CC-BY-SA-4.0
+// Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+
+== Phronesis Academic Documentation
+
+
+This directory contains comprehensive academic documentation for Phronesis, including formal proofs, white papers, and mechanized verification. The documentation is designed to withstand rigorous academic scrutiny across multiple fields of mathematics and computer science.
+
+'''''
+
+=== Overview
+
+Phronesis is a formally verified consensus-gated policy language for network configuration. This documentation provides rigorous mathematical foundations suitable for academic peer review, covering 20+ areas of mathematics and computer science.
+
+'''''
+
+=== Directory Structure
+
+....
+academic/
+├── papers/
+│   └── phronesis-white-paper.adoc              # Main academic paper
+│
+├── proofs/
+│   ├── type-theory/
+│   │   └── type-theory-proofs.adoc             # Type safety (progress + preservation)
+│   │
+│   ├── category-theory/
+│   │   └── category-theory-foundations.adoc    # Categorical semantics, functors, monads
+│   │
+│   ├── lattice-theory/
+│   │   └── type-lattice-proofs.adoc            # Type lattice structure, meets/joins
+│   │
+│   ├── proof-theory/
+│   │   └── curry-howard-correspondence.adoc    # Curry-Howard, proof normalization
+│   │
+│   ├── model-theory/
+│   │   ├── model-theory-specification.adoc     # First-order semantics
+│   │   └── denotational-semantics.adoc         # Denotational semantics, adequacy
+│   │
+│   ├── domain-theory/
+│   │   └── domain-theory-foundations.adoc      # CPOs, Scott topology, fixed points
+│   │
+│   ├── axiomatic-semantics/
+│   │   └── hoare-logic.adoc                    # Hoare logic, WP/SP calculus
+│   │
+│   ├── operational-semantics/
+│   │   └── complete-operational-semantics.adoc # All 45+ evaluation rules
+│   │
+│   ├── algebraic-semantics/
+│   │   └── algebraic-semantics.adoc            # Initial algebras, F-algebras
+│   │
+│   ├── automata-theory/
+│   │   └── automata-theory-proofs.adoc         # Lexer DFA, parser PDA, LL(1)
+│   │
+│   ├── complexity-theory/
+│   │   └── computational-complexity-analysis.adoc  # Time/space bounds, P membership
+│   │
+│   ├── game-theory/
+│   │   └── consensus-game-theory.adoc          # Nash equilibrium, mechanism design
+│   │
+│   ├── graph-theory/
+│   │   └── bgp-graph-theory.adoc               # AS graphs, valley-free routing
+│   │
+│   ├── temporal-logic/
+│   │   └── temporal-logic-specifications.adoc  # LTL, CTL, TLA+
+│   │
+│   ├── concurrency-theory/
+│   │   └── process-algebra.adoc                # CSP, CCS, π-calculus, session types
+│   │
+│   ├── information-theory/
+│   │   └── information-flow-analysis.adoc      # Noninterference, security types
+│   │
+│   ├── cryptography/
+│   │   └── cryptographic-proofs.adoc           # Signatures, BFT, UC framework
+│   │
+│   ├── abstract-interpretation/
+│   │   └── abstract-interpretation-framework.adoc  # Galois connections, widening
+│   │
+│   ├── separation-logic/
+│   │   └── separation-logic.adoc               # Capability reasoning, frame rule
+│   │
+│   ├── order-theory/
+│   │   └── order-theory-foundations.adoc       # Well-foundedness, WQOs, lattices
+│   │
+│   ├── number-theory/
+│   │   └── number-theory-foundations.adoc      # IP arithmetic, modular crypto
+│   │
+│   ├── probabilistic-analysis/
+│   │   └── probabilistic-analysis.adoc         # Voting probability, tail bounds
+│   │
+│   ├── protocol-verification/
+│   │   └── dolev-yao-model.adoc                # Symbolic security, ProVerif
+│   │
+│   ├── set-theory/
+│   │   └── set-theoretic-foundations.adoc      # ZFC, cardinals, ordinals
+│   │
+│   └── real-analysis/
+│       └── ieee754-analysis.adoc               # Floating-point, error bounds
+│
+├── formal-verification/
+│   ├── coq/
+│   │   └── Phronesis.v                       # Coq formalization (complete proofs)
+│   │
+│   ├── lean4/
+│   │   └── Phronesis.lean                    # Lean 4 formalization
+│   │
+│   └── agda/
+│       └── Phronesis.agda                    # Agda intrinsic typing
+│
+├── notation-guide.adoc                         # Unified notation reference
+├── theorem-index.adoc                          # Cross-referenced theorem index
+└── TODO.adoc                                   # Remaining work items
+....
+
+'''''
+
+=== Complete Theorem Coverage
+
+==== Foundations (120+ Theorems)
+
+[cols=",,",options="header",]
+|===
+|Area |Key Theorems |Document
+|*Type Theory* |Progress, Preservation, Strong Normalization |type-theory-proofs.adoc
+|*Category Theory* |Functor Laws, Monad Laws, CCC Structure |category-theory-foundations.adoc
+|*Domain Theory* |CPO Completeness, Scott Continuity, Fixed Points |domain-theory-foundations.adoc
+|*Order Theory* |Well-Foundedness, WQO Closure, Lattice Properties |order-theory-foundations.adoc
+|*Set Theory* |ZFC Axioms, Cardinality, Transfinite Induction |set-theoretic-foundations.adoc
+|===
+
+==== Semantics
+
+[cols=",,",options="header",]
+|===
+|Area |Key Theorems |Document
+|*Operational* |Determinism, Totality, 45+ Rules |complete-operational-semantics.adoc
+|*Denotational* |Compositionality, Adequacy, Full Abstraction |denotational-semantics.adoc
+|*Axiomatic* |Soundness, Completeness, WP Characterization |hoare-logic.adoc
+|*Algebraic* |Initial Algebra, Catamorphism, Hylomorphism |algebraic-semantics.adoc
+|===
+
+==== Security
+
+[cols=",,",options="header",]
+|===
+|Area |Key Theorems |Document
+|*Information Flow* |Noninterference, TINI, Declassification |information-flow-analysis.adoc
+|*Cryptography* |EUF-CMA, BFT Safety, UC Security |cryptographic-proofs.adoc
+|*Protocol* |Authentication, Agreement, Replay Prevention |dolev-yao-model.adoc
+|*Separation Logic* |Frame Rule, Capability Isolation |separation-logic.adoc
+|===
+
+==== Consensus
+
+[cols=",,",options="header",]
+|===
+|Area |Key Theorems |Document
+|*Game Theory* |Nash Equilibrium, Incentive Compatibility |consensus-game-theory.adoc
+|*Temporal Logic* |Safety, Liveness, Fairness |temporal-logic-specifications.adoc
+|*Concurrency* |Deadlock Freedom, Bisimulation |process-algebra.adoc
+|*Probability* |Vote Distribution, Tail Bounds |probabilistic-analysis.adoc
+|===
+
+==== Language Theory
+
+[cols=",,",options="header",]
+|===
+|Area |Key Theorems |Document
+|*Automata* |DFA Recognition, LL(1) Parsing |automata-theory-proofs.adoc
+|*Complexity* |O(n) Parsing, P Membership |computational-complexity-analysis.adoc
+|*Graph Theory* |Valley-Free Routing, Cycle Detection |bgp-graph-theory.adoc
+|===
+
+'''''
+
+=== Formal Verification Status
+
+[cols=",,,,,",options="header",]
+|===
+|Property |Coq |Lean 4 |Agda |TLA+ |ProVerif
+|Type Safety |✓ |✓ |✓ |- |-
+|Preservation |✓ |✓ |✓ |- |-
+|Determinism |✓ |✓ |✓ |- |-
+|Termination |✓ |✓ |✓ |- |-
+|Subtyping |✓ |✓ |- |- |-
+|Consensus Safety |- |- |- |✓ |-
+|Liveness |- |- |- |✓ |-
+|Authentication |- |- |- |- |✓
+|Noninterference |- |- |- |- |-
+|===
+
+*Legend:*
+
+* ✓ = Fully mechanized and verified
+* `-` = Not applicable or symbolic proof only
+
+'''''
+
+=== Quick Start
+
+==== View Documentation
+
+All proofs are in Markdown format for easy reading:
+
+[source,bash]
+----
+# Main paper
+less academic/papers/phronesis-white-paper.adoc
+
+# Type safety proofs
+less academic/proofs/type-theory/type-theory-proofs.adoc
+
+# Theorem index
+less academic/theorem-index.adoc
+----
+
+==== Verify Coq Proofs
+
+[source,bash]
+----
+opam install coq coq-mathcomp
+coqc academic/formal-verification/coq/Phronesis.v
+----
+
+==== Check TLA+ Specification
+
+[source,bash]
+----
+tlc formal/PhronesisConsensus.tla
+----
+
+'''''
+
+=== Navigation Aids
+
+* *notation-guide.adoc*: Comprehensive notation reference across all documents
+* *theorem-index.adoc*: Cross-referenced index of 120+ theorems with dependencies
+
+'''''
+
+=== Citation
+
+[source,bibtex]
+----
+@techreport{phronesis2025,
+  title={Phronesis: A Formally Verified Consensus-Gated Policy Language},
+  author={Phronesis Development Team},
+  year={2025},
+  institution={Open Source},
+  note={Available at https://github.com/hyperpolymath/phronesis}
+}
+----
+
+'''''
+
+=== Contributing
+
+Academic contributions are welcome. Please:
+
+[arabic]
+. Follow notation conventions in `notation-guide.adoc`
+. Include complete proofs with all steps justified
+. Add theorem to `theorem-index.adoc` with dependencies
+. Provide mechanized proofs where possible
+. Reference existing work appropriately
+
+'''''
+
+=== License
+
+All academic documentation is licensed under CC-BY-SA-4.0 (see the SPDX header on each file). The Phronesis implementation code is licensed under MPL-2.0.
+See SPDX headers in individual files.
