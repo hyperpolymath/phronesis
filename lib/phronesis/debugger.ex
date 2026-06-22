@@ -204,7 +204,7 @@ defmodule Phronesis.Debugger do
   Inspect a variable in the current scope.
   """
   def inspect_var(session, var_name) do
-    case Map.fetch(session.state.variables, var_name) do
+    case Map.fetch(session.state.environment, var_name) do
       {:ok, value} -> {:ok, value}
       :error -> {:error, :not_found}
     end
@@ -214,7 +214,7 @@ defmodule Phronesis.Debugger do
   List all variables in current scope.
   """
   def list_vars(session) do
-    session.state.variables
+    session.state.environment
   end
 
   @doc """
@@ -355,11 +355,11 @@ defmodule Phronesis.Debugger do
   defp extract_line(_), do: nil
 
   defp evaluate_condition({:var_equals, var_name, expected}, state) do
-    Map.get(state.variables, var_name) == expected
+    Map.get(state.environment, var_name) == expected
   end
 
   defp evaluate_condition({:var_matches, var_name, pattern}, state) do
-    value = Map.get(state.variables, var_name)
+    value = Map.get(state.environment, var_name)
     matches_pattern?(value, pattern)
   end
 
@@ -374,7 +374,7 @@ defmodule Phronesis.Debugger do
   defp evaluate_watch(expr, state) do
     # Simple variable lookup for now
     # Could be extended to full expression evaluation
-    Map.get(state.variables, expr, :undefined)
+    Map.get(state.environment, expr, :undefined)
   end
 
   ## Pretty Printing
@@ -390,7 +390,7 @@ defmodule Phronesis.Debugger do
     Breakpoints: #{MapSet.size(session.breakpoints)}
     Call Stack Depth: #{length(session.call_stack)}
     Current Position: #{format_position(session.current_position)}
-    Variables: #{map_size(session.state.variables)}
+    Variables: #{map_size(session.state.environment)}
     Watches: #{map_size(session.watches)}
     """
   end

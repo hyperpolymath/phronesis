@@ -1,13 +1,14 @@
 # SPDX-License-Identifier: MPL-2.0
 # Example policy file with documentation comments
 
-# CONST: threshold - Risk threshold above which routes are rejected
+# CONST: threshold - risk threshold above which routes are rejected
 CONST threshold = 75
 
 # CONST: max_as_path_length - Maximum allowed AS path length
 CONST max_as_path_length = 10
 
 # POLICY: security_check - Primary security validation policy
+# Rejects a route when the risk level exceeds the threshold
 POLICY security_check:
   risk_level > threshold
   THEN REJECT("Risk level too high")

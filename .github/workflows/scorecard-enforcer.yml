@@ -37,37 +37,39 @@ jobs:
         uses: github/codeql-action/upload-sarif@c6f931105cb2c34c8f901cc885ba1e2e259cf745 # v4
         with:
           sarif_file: results.sarif
-      - name: Check minimum score
-        run: |
-          # Parse score from results
-          SCORE=$(jq -r '.runs[0].tool.driver.properties.score // 0' results.sarif 2>/dev/null || echo "0")
-
-          echo "OpenSSF Scorecard Score: $SCORE"
-
-          # Minimum acceptable score (0-10 scale)
-          MIN_SCORE=5
-
-          if [ "$(echo "$SCORE < $MIN_SCORE" | bc -l)" = "1" ]; then
-            echo "::error::Scorecard score $SCORE is below minimum $MIN_SCORE"
-            exit 1
-          fi
-  # Check specific high-priority items
+      - name: Upload results artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: scorecard-sarif
+          path: results.sarif
+          retention-days: 1
+  # The score gate runs the check via a local composite action so this
+  # scorecard-publishing workflow file contains no run: steps (the publish job
+  # holds the OIDC id-token; run logic lives in .github/actions/*).
+  score-gate:
+    needs: scorecard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Download results artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: scorecard-sarif
+      - name: Gate on minimum score
+        uses: ./.github/actions/scorecard-gate
+        with:
+          sarif: results.sarif
+          min-score: "5"
+  # Check specific high-priority items (run logic in a local composite action).
   check-critical:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Check SECURITY.md exists
-        run: |
-          if [ ! -f "SECURITY.md" ]; then
-            echo "::error::SECURITY.md is required"
-            exit 1
-          fi
-      - name: Check for pinned dependencies
-        run: |
-          # Check workflows for unpinned actions
-          unpinned=$(grep -r "uses:.*@v[0-9]" .github/workflows/*.yml 2>/dev/null | grep -v "#" | head -5 || true)
-          if [ -n "$unpinned" ]; then
-            echo "::warning::Found unpinned actions:"
-            echo "$unpinned"
-          fi
+      - name: Repository security checks
+        uses: ./.github/actions/repo-security-checks

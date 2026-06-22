@@ -1,5 +1,5 @@
 import? "contractile.just"
-// Owner: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+# Owner: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 
 # SPDX-License-Identifier: MPL-2.0
 # SPDX-FileCopyrightText: 2025 Phronesis Contributors
@@ -19,6 +19,14 @@ test:
 # Run the demo (produces decision traces)
 demo:
     mix run -e 'Phronesis.Demo.run()'
+
+# Run the reflexion design-review pipeline tests
+reflexion-test:
+    mix test test/reflexion test/reflexion_test.exs
+
+# Demo the reflexion pipeline on two policy versions (drops a REPORT mandate)
+reflexion-demo:
+    mix run --no-start -e 'Phronesis.Reflexion.demo()'
 
 # Run conformance test suite
 conformance:

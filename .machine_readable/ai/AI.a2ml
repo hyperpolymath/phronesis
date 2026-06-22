@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+#
+# AI.a2ml — machine-readable AI-assistant directives for Phronesis.
+
+[repository-focus]
+name = "phronesis"
+kind = "language"
+one-sentence = "A neuro-symbolic, provably-safe language for agentic ethical reasoning on the BEAM."
+authority = ".machine_readable/ is authoritative; the 6 core A2ML files live in .machine_readable/6a2/ only."
+
+[read-order]
+1 = "0-AI-MANIFEST.a2ml"
+2 = ".machine_readable/6a2/anchors/ANCHOR.a2ml"
+3 = ".machine_readable/6a2/STATE.a2ml"
+4 = ".machine_readable/6a2/META.a2ml"
+5 = ".claude/CLAUDE.md"
+
+[workflow]
+step-1 = "Inspect .machine_readable/6a2/STATE.a2ml for blockers and next actions."
+step-2 = "Respect constraints in .machine_readable/6a2/AGENTIC.a2ml when changing tooling."
+step-3 = "Run `just test` (the correctness gate) before claiming a change is done."
+step-4 = "After edits, update STATE.a2ml outcomes and commit with a concise, imperative message."
+
+[languages]
+reference-implementation = "Elixir/BEAM (lib/phronesis/)"
+compiler = "Rust -> WASM (compiler/)"
+formal = "TLA+ (formal/); proof corpus in academic/"
+banned = ["Python", "Go", "TypeScript", "ReScript", "V-lang", "Java", "Kotlin", "Swift", "Node.js", "npm"]
+
+[licence]
+code = "MPL-2.0"
+documentation = "CC-BY-SA-4.0"
+never = "AGPL-3.0"
+rule = "SPDX-License-Identifier header required on every file."
+
+[delivery-promises]
+report-changes-to = ["STATE.a2ml", ".machine_readable/contractiles/", ".machine_readable/ai/"]
+keep-in-sync = "Update this file if repository governance changes."

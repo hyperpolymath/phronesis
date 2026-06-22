@@ -69,6 +69,11 @@ defmodule Phronesis.IncrementalLexer do
   @spec edit(t(), edit()) :: t()
   def edit(state, %{start: start, old_end: old_end, new_text: new_text}) do
     old_source = state.source
+    size = byte_size(old_source)
+    # Clamp the edit window into the source so an out-of-bounds delta (e.g. an old_end
+    # past end-of-buffer) can't drive binary_part/3 with a negative length.
+    start = start |> max(0) |> min(size)
+    old_end = old_end |> max(start) |> min(size)
 
     # Apply the text edit.
     prefix = binary_part(old_source, 0, start)
@@ -83,20 +88,29 @@ defmodule Phronesis.IncrementalLexer do
 
     # Find the first affected token index.
     first_raw = find_first_after(state.tokens, start, 0)
-    first_affected = max(0, first_raw - @resync_buffer)
+    first_affected0 = max(0, first_raw - @resync_buffer)
 
     # Find the last affected token: first token starting at or past old_end.
-    last_raw = find_last_affected(state.tokens, old_end, first_affected)
+    last_raw = find_last_affected(state.tokens, old_end, first_affected0)
     last_affected = min(n, last_raw + @resync_buffer)
 
     # Determine byte range to re-lex in the new source.
-    relex_start =
-      if first_affected < n do
-        tok = Enum.at(state.tokens, first_affected)
+    relex_start_raw =
+      if first_affected0 < n do
+        tok = Enum.at(state.tokens, first_affected0)
         min(tok.start_offset, start)
       else
         start
       end
+
+    # Snap the re-lex start back to the beginning of its line. An edit inside a
+    # line-structured token (e.g. a comment, which runs to end-of-line and yields no
+    # token) would otherwise start the re-lex mid-line and be misread as identifiers.
+    relex_start = line_start(new_source, relex_start_raw)
+
+    # Recompute the head boundary so it stays consistent with the snapped start: the
+    # head is exactly the tokens that end at or before relex_start.
+    first_affected = Enum.count(state.tokens, fn ct -> ct.end_offset <= relex_start end)
 
     relex_end_old =
       if last_affected > 0 and last_affected <= n do
@@ -293,6 +307,16 @@ defmodule Phronesis.IncrementalLexer do
       idx
     else
       find_first_after(rest, target, idx + 1)
+    end
+  end
+
+  # Byte offset of the start of the line containing `offset`.
+  defp line_start(_source, 0), do: 0
+
+  defp line_start(source, offset) do
+    case :binary.matches(binary_part(source, 0, offset), "\n") do
+      [] -> 0
+      matches -> elem(List.last(matches), 0) + 1
     end
   end
 
