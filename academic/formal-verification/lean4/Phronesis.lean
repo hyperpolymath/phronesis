@@ -1,5 +1,5 @@
 -- SPDX-License-Identifier: MPL-2.0
--- SPDX-License-Identifier: CC-BY-SA-4.0
+-- SPDX-License-Identifier: MPL-2.0
 -- Phronesis Formalization in Lean 4
 -- Mechanized proofs of type safety, termination, and security properties.
 --
