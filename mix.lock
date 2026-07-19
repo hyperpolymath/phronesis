@@ -4,5 +4,5 @@
   "jason": {:hex, :jason, "1.4.5", "2e3a008590b0b8d7388c20293e9dcc9cf3e5d642fd2a114e4cbbb52e595d940a", [:mix], [{:decimal, "~> 1.0 or ~> 2.0 or ~> 3.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm", "b0c823996102bcd0239b3c2444eb00409b72f6a140c1950bc8b457d836b30684"},
   "ra": {:hex, :ra, "3.1.8", "de642e1d8cba1f10c964484ab1d5e9a1d660dc0452020fa7bacfadb798a6204b", [:rebar3], [{:aten, "0.6.0", [hex: :aten, repo: "hexpm", optional: false]}, {:gen_batch_server, "0.10.0", [hex: :gen_batch_server, repo: "hexpm", optional: false]}, {:seshat, "1.0.1", [hex: :seshat, repo: "hexpm", optional: false]}], "hexpm", "38c846844224e40bf231e48e36e17087b4acc8c4f2cce1de55aa750b2e287be7"},
   "seshat": {:hex, :seshat, "1.0.1", "fa7a8e89218d19394f7ddc47ba6725471103d654cd0bd0a98e5fdd922a943eac", [:rebar3], [], "hexpm", "38324fe8c5782c69d73b334dd00b20e16c0d99eef3e7b4005c519fe9bc0e34fc"},
-  "stream_data": {:hex, :stream_data, "1.3.0", "bde37905530aff386dea1ddd86ecbf00e6642dc074ceffc10b7d4e41dfd6aac9", [:mix], [], "hexpm", "3cc552e286e817dca43c98044c706eec9318083a1480c52ae2688b08e2936e3c"},
+  "stream_data": {:hex, :stream_data, "1.4.0", "026f929db613aabea6208012ae9b8970d3fd5f88b3bdf26831bc536f98c42036", [:mix], [], "hexpm", "2b0ee3a340dcce1c8cf6302a763ee757d1e01c54d6e16d9069062509d68b1dc9"},
 }
