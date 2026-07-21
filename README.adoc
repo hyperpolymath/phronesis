@@ -19,7 +19,7 @@ image:https://img.shields.io/badge/OpenSSF-Best_Practices-green?logo=openssource
 // Header
 [.text-center]
 🧠 *Phronesis* +
-*A Provably Safe Language for Agentic Ethical Reasoning*
+*A Provably Safer Language for Agentic Ethical Reasoning*
 
 [.text-center]
 *Author:* {author} +
