@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: CC-BY-SA-4.0
 // Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
-= Phronesis: Towards a Provably Safe Language for Agentic Ethical Reasoning
+= Phronesis: Towards a Provably Safer Language for Agentic Ethical Reasoning
 image:https://img.shields.io/badge/OpenSSF-Best_Practices-green?logo=openssourcesecurity[OpenSSF Best Practices,link="https://www.bestpractices.dev/en/projects/new?repo_url=https://github.com/hyperpolymath/phronesis"]
 
 :license: MPL-2.0 (code) and CC-BY-SA-4.0 (documentation)
