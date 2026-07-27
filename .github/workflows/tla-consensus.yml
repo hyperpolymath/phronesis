@@ -36,7 +36,7 @@ jobs:
         run: |
           curl -fsSL -o tla2tools.jar \
             https://github.com/tlaplus/tlaplus/releases/download/v1.8.0/tla2tools.jar
-          echo "237332bdcc79a35c7d26efa7b82c77c85c2744591c5598673a8a45085ff2a4fb  tla2tools.jar" \
+          echo "cc4803dce2a8ffaf0f5920a9dc39df4b5ee34ab4cb53fb58ac557277a7e516b3  tla2tools.jar" \
             | sha256sum -c -
 
       - name: TLC positive — all safety invariants hold at Threshold = 2F+1
