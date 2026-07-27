@@ -1,47 +1,40 @@
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
 # Architecture
 
-## Overview
+Phronesis is a provably safer language for agentic ethical reasoning. The
+repository is a multi-layer project: an Elixir reference implementation, a Rust
+compiler workspace, and a formal-verification layer that gates the metatheory
+in CI.
 
-This repository follows a modular, maintainable architecture designed for clarity, scalability, and long-term sustainability.
-
-## Directory Structure
+## Layout
 
 ```
 .
-├── src/           # Source code
-├── tests/        # Test suites
-├── docs/         # Documentation
-├── scripts/      # Utility scripts
-├── config/       # Configuration files
-├── LICENSE       # License file
-├── LICENSES/     # Full license texts
-└── README.adoc   # Project documentation
+├── lib/, src/, mix.exs        # Elixir reference implementation (core language)
+├── compiler/
+│   ├── phronesis-ast/         # Rust AST crate
+│   └── phronesis-wasm/        # Rust → WASM compiler target
+├── formal/                    # TLA+ BFT consensus spec (PhronesisConsensus.tla)
+│                              #   gated by .github/workflows/tla-consensus.yml
+├── academic/formal-verification/lean4/
+│                              # Lean 4 metatheory, gated by lean.yml (lake build)
+├── conformance/               # Conformance suite, gated by conformance.yml
+├── spec/, docs/, wiki/        # Language specification and documentation
+├── editors/, syntax/          # Editor support (TextMate, Vim, Emacs)
+├── schemas/, configs/         # Machine-readable schemas and configuration
+├── LICENSES/                  # Full licence texts (MPL-2.0 + CC-BY-SA-4.0)
+└── .machine_readable/         # A2ML manifests and estate policy files
 ```
 
-## Design Principles
+## Verification gates
 
-- **Separation of Concerns**: Each module has a single responsibility
-- **Testability**: Code is written to be easily testable
-- **Documentation**: All public APIs are documented
-- **Configuration**: Environment-specific settings are externalized
+- **Lean 4** (`lean.yml`): builds the metatheory with `lake build`.
+- **TLA+** (`tla-consensus.yml`): model-checks the BFT consensus spec with TLC.
+- **Conformance** (`conformance.yml`): runs the language conformance suite.
 
-## Dependencies
+## Licensing
 
-- External dependencies are minimized and clearly declared
-- Version pinning is used for reproducibility
+Code is MPL-2.0; documentation is CC-BY-SA-4.0 (dual SPDX headers — see
+`LICENSING.adoc`). AGPL is deliberately not used in this repository.
 
-## Security Considerations
-
-- Sensitive data is never committed to the repository
-- Secrets are managed through environment variables or secure vaults
-- Regular dependency audits are performed
-
-## Maintainability
-
-- Code follows consistent style guidelines
-- Pull requests require review and CI checks
-- Issues and discussions are tracked transparently
-
----
-
-*Last updated: 2026-07-18*
+For governance and maintainers see `GOVERNANCE.adoc` and `MAINTAINERS.adoc`.
