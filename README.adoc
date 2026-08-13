@@ -19,7 +19,7 @@ image:https://img.shields.io/badge/OpenSSF-Best_Practices-green?logo=openssource
 // Header
 [.text-center]
 🧠 *Phronesis* +
-*A Provably Safer Language for Agentic Ethical Reasoning*
+*A More Transparent, Auditable, and Hopefully Safer Language for Agentic Ethical Reasoning*
 
 [.text-center]
 *Author:* {author} +
@@ -29,7 +29,7 @@ image:https://img.shields.io/badge/OpenSSF-Best_Practices-green?logo=openssource
 
 == 🌐 Overview
 
-Phronesis is a *neuro-symbolic*, *agentic* language designed to formalize ethical reasoning in autonomous systems.
+Phronesis* is a *neuro-symbolic*, *agentic* language designed to formalize ethical reasoning in autonomous systems.
 It fuses the precision of **Symbolic AI** with the adaptability of **neural networks**, enforcing *provable safety* and *fault tolerance* through a dedicated **BEAM VM** runtime.
 
 ---
@@ -76,7 +76,7 @@ The root `LICENSE` carries the MPL-2.0 text — the single licence GitHub detect
 
 ---
 
-== 🛡️ Safety & Dependability
+== 🛡️ Language Safety & Dependability
 
 [cols="1h,2"]
 |===
@@ -149,6 +149,4 @@ To begin contributing:
 . Run the test suite with `just test`:
    *Passing all ethical scenarios is the definitive measure of correctness.*
 
----
-[.text-center]
-*Let’s build the future of ethical AI—together.*
+* the name is purposely ironic, though why, I will let you figure out.
