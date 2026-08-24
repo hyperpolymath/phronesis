@@ -1,0 +1,63 @@
+== Changelog
+
+All notable changes to `+phronesis+` will be documented in this file.
+
+This file is generated from conventional commits by the
+https://github.com/hyperpolymath/standards/blob/main/.github/workflows/changelog-reusable.yml[`+changelog-reusable.yml+`]
+workflow (`+hyperpolymath/standards#206+`). Adopt the workflow in this
+repo’s CI to keep this file in sync automatically — see
+https://github.com/hyperpolymath/standards/blob/main/templates/cliff.toml[`+templates/cliff.toml+`]
+for the canonical config.
+
+The format follows https://keepachangelog.com/en/1.1.0/[Keep a
+Changelog]; this project aims to follow
+https://semver.org/spec/v2.0.0.html[Semantic Versioning].
+
+=== [Unreleased]
+
+==== Added
+
+* feat(crg): add crg-grade and crg-badge justfile recipes
+* feat: wire conflow config validation pipeline
+
+==== Fixed
+
+* fix(ci): bump a2ml/k9-validate-action pins to canonical (standards#85)
+(#9)
+* fix(ci): sync hypatia-scan.yml to canonical (kill cd-scanner build
+drift) (#8)
+* fix(ci): Phase-2 fleet submission must not fail the security gate (#7)
+* fix(ci): update dogfood-gate workflow
+* fix(perms): restore exec bit on conformance runner scripts
+* fix(security): remove eval from conformance runner
+* fix: replace String.to_atom with String.to_existing_atom
+
+==== Changed
+
+* refactor(agda): remove TERMINATING pragma via mutual block split
+
+==== Documentation
+
+* docs: record tech-debt audit findings (2026-05-26) (#14)
+* docs: add TOPOLOGY.md
+* docs: substantive CRG C annotation (EXPLAINME.adoc)
+
+==== CI
+
+* ci: redistribute concurrency-cancel guard to read-only check workflows
+(#12)
+* ci: bump actions/upload-artifact SHA to current v4 (#6)
+* ci(secret-scanner): drop duplicate –fail from trufflehog extra_args
+(#5)
+* ci: SHA-pin hyperpolymath validate-actions in dogfood-gate
+* ci: fix workflow-linter YAML parse error + self-flag bug
+
+=== Pre-history
+
+Prior commits to this file’s introduction are recorded in git history
+but not formally classified into Keep-a-Changelog sections. To backfill,
+run `+git cliff -o CHANGELOG.md+` locally using the canonical
+https://github.com/hyperpolymath/standards/blob/main/templates/cliff.toml[`+cliff.toml+`]
+— this is one-shot mechanical work.
+
+'''''
