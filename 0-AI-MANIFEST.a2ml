@@ -63,10 +63,9 @@ phronesis/
 ├── spec/ formal/ academic/     # Grammar, semantics, proofs
 ├── docs/                       # AsciiDoc design docs (incl. REFLEXION.adoc)
 ├── .machine_readable/
-│   ├── *.a2ml                  # The 6 core A2ML files
-│   │   ├── STATE.a2ml  META.a2ml  ECOSYSTEM.a2ml
-│   │   ├── AGENTIC.a2ml  NEUROSYM.a2ml  PLAYBOOK.a2ml
-│   │   └── anchors/ANCHOR.a2ml # identity + golden path
+│   ├── STATE.a2ml  META.a2ml  ECOSYSTEM.a2ml  # The 6 core A2ML files
+│   ├── AGENTIC.a2ml  NEUROSYM.a2ml  PLAYBOOK.a2ml
+│   └── anchors/ANCHOR.a2ml # identity + golden path
 │   ├── ai/                     # Cursor/Cline/Windsurf rules + AI.a2ml
 │   ├── configs/                # relocated estate *.toml configs
 │   ├── contractiles/           # Mustfile / Trustfile / Justfile / etc.
