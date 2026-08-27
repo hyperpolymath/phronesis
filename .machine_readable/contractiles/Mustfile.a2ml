@@ -62,8 +62,8 @@ hooks fail if any check fails.
 - severity: critical
 
 ### six-directory-present
-- description: core A2ML files exist in .machine_readable/
-- run: test -f .machine_readable/META.a2ml && test -f .machine_readable/ECOSYSTEM.a2ml && test -f .machine_readable/STATE.a2ml && test -f .machine_readable/PLAYBOOK.a2ml && test -f .machine_readable/AGENTIC.a2ml && test -f .machine_readable/NEUROSYM.a2ml
+- description: core A2ML files exist in .machine_readable/descriptiles/
+- run: test -f .machine_readable/descriptiles/META.a2ml && test -f .machine_readable/descriptiles/ECOSYSTEM.a2ml && test -f .machine_readable/descriptiles/STATE.a2ml && test -f .machine_readable/descriptiles/PLAYBOOK.a2ml && test -f .machine_readable/descriptiles/AGENTIC.a2ml && test -f .machine_readable/descriptiles/NEUROSYM.a2ml
 - severity: critical
 
 ### anchors-directory

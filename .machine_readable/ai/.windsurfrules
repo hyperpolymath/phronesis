@@ -6,7 +6,7 @@
 # STARTUP (read in this order)
 # 1. 0-AI-MANIFEST.a2ml          — canonical file locations + invariants
 # 2. .machine_readable/anchors/ANCHOR.a2ml — identity + golden path
-# 3. .machine_readable/STATE.a2ml          — current status + blockers
+# 3. .machine_readable/descriptiles/STATE.a2ml          — current status + blockers
 # 4. .claude/CLAUDE.md           — full language / licence policy
 
 # LICENSE (per-file, REUSE-style; SPDX header required on EVERY file)

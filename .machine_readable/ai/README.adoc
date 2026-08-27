@@ -33,6 +33,6 @@ line; keep them in sync when one changes.
 
 . `0-AI-MANIFEST.a2ml`
 . `.machine_readable/anchors/ANCHOR.a2ml` — identity + golden path
-. `.machine_readable/STATE.a2ml` — current status + blockers
-. `.machine_readable/META.a2ml` — architecture decisions
+. `.machine_readable/descriptiles/STATE.a2ml` — current status + blockers
+. `.machine_readable/descriptiles/META.a2ml` — architecture decisions
 . `.claude/CLAUDE.md` — language / licence policy
