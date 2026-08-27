@@ -112,9 +112,9 @@ for the canonical statement.
 | ReScript | AffineScript | RS/TS/JS → AffineScript → typed-wasm. |
 | **ReScript** | AffineScript | Banned in new code as of 2026-04-30. Existing `.res` files migrate to `.affine` directly (do not pass through ReScript). |
 | Deno | Bun |
-| Node.js | Bun |
-| npm | Bun |
-| pnpm/yarn | Bun |
+ Node.js | Bun | |
+ npm | Bun | |
+ pnpm/yarn | Bun | |
 | Go | Rust/SPARK | |
 | **Python** | AffineScript/Rust/SPARK/Julia | Fully banned, no exceptions (SaltStack exception removed 2026-01-03) |
 | Java/Kotlin | Rust/SPARK, Tauri, Dioxus | |
