@@ -85,7 +85,7 @@ for the canonical statement.
 | Language/Tool | Use Case | Notes |
 |---------------|----------|-------|
 | **AffineScript** | Primary application code | Compiles to typed-wasm; affine/linear types. Replaces ReScript across the estate (RS/TS/JS → AffineScript → typed-wasm). |
-| **Deno** | Runtime & package management | Replaces Node/npm/bun |
+| **Bun** | JS runtime & package management (tier 1) | Default for all new work. Runs compiled ESM/JS directly — no bundler step. Uses an npm-compatible `package.json` plus `bun.lock` — both are expected, not anti-patterns. |
 | **Rust/SPARK** | Performance-critical, systems, WASM, CLI tools, safety-critical | "Rust" always means "Rust/SPARK" per terminology note above. Preferred over Ada where reachable. |
 | **Zig** | **APIs, FFIs, gateways, client SDKs (estate default 2026-05-28)**, memory-safe systems where Rust/SPARK is overkill | Zig is the estate-wide default for all API/FFI/gateway/client-SDK work unless explicitly special-cased; Idris2 owns ABIs. Completed V-lang→Zig migration 2026-05-28. |
 | **Idris2** | Formal verification (primary, ABI-style proofs) | ATS2 rejected. Proven-library status in `proven` repo. |
@@ -109,11 +109,12 @@ for the canonical statement.
 | Banned | Replacement | Notes |
 |--------|-------------|-------|
 | TypeScript | AffineScript | RS/TS/JS → AffineScript → typed-wasm. |
+| ReScript | AffineScript | RS/TS/JS → AffineScript → typed-wasm. |
 | **ReScript** | AffineScript | Banned in new code as of 2026-04-30. Existing `.res` files migrate to `.affine` directly (do not pass through ReScript). |
-| Node.js | Deno | |
-| npm | Deno | |
-| Bun | Deno | |
-| pnpm/yarn | Deno | |
+| Deno | Bun |
+| Node.js | Bun |
+| npm | Bun |
+| pnpm/yarn | Bun |
 | Go | Rust/SPARK | |
 | **Python** | AffineScript/Rust/SPARK/Julia | Fully banned, no exceptions (SaltStack exception removed 2026-01-03) |
 | Java/Kotlin | Rust/SPARK, Tauri, Dioxus | |
@@ -151,8 +152,8 @@ Both are FOSS with independent governance (no Big Tech).
 ### Enforcement Rules
 
 1. **No new TypeScript or ReScript files** - Convert existing TS/RS to AffineScript directly (`.affine`); ReScript is no longer the destination
-2. **No package.json for runtime deps** - Use deno.json imports
-3. **No node_modules in production** - Deno caches deps automatically
+2. **Use `package.json` + `bun.lock` for JS runtime deps** - Bun is npm-compatible; a manifest is REQUIRED
+3. **`bun install --production --frozen-lockfile` for production deps** - resolved from `package.json` and pinned via `bun.lock`; `--frozen-lockfile` makes a lockfile mismatch a build failure rather than a silent re-resolve
 4. **No Go code** - Use Rust instead
 5. **No Python** - All Python must be rewritten
 6. **No Kotlin/Swift for mobile** - Use Tauri 2.0+ or Dioxus
@@ -162,7 +163,7 @@ Both are FOSS with independent governance (no Big Tech).
 
 - **Primary**: Guix (guix.scm)
 - **Fallback**: Nix (flake.nix)
-- **JS deps**: Deno (deno.json imports)
+- **JS deps**: Bun (`package.json` + `bun.lock`). Declare tooling as a devDependency and run `bunx --no-install --bun <tool>` — a bare `bunx <tool>` can fetch an unpinned package and may start Node via its shebang.
 
 ### Documentation Format
 
