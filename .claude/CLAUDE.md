@@ -152,8 +152,8 @@ Both are FOSS with independent governance (no Big Tech).
 ### Enforcement Rules
 
 1. **No new TypeScript or ReScript files** - Convert existing TS/RS to AffineScript directly (`.affine`); ReScript is no longer the destination
-2. **Use `package.json` + `bun.lock` for JS runtime deps** - Bun is npm-compatible; a manifest is REQUIRED
-3. **`bun install --production --frozen-lockfile` for production deps** - resolved from `package.json` and pinned via `bun.lock`; `--frozen-lockfile` makes a lockfile mismatch a build failure rather than a silent re-resolve
+2. **Use `package.json` + `bun.lock` for non-exempt JS runtime deps** - Bun is npm-compatible; a manifest is REQUIRED
+3. **Use `bun install --production --frozen-lockfile` for non-exempt production deps** - resolved from `package.json` and pinned via `bun.lock`; `--frozen-lockfile` makes a lockfile mismatch a build failure rather than a silent re-resolve. Approved `cicd_rules/nodejs_detected` exemptions, including `editors/vscode/`, are outside these Bun manifest and lockfile requirements; follow their host-specific dependency contract instead.
 4. **No Go code** - Use Rust instead
 5. **No Python** - All Python must be rewritten
 6. **No Kotlin/Swift for mobile** - Use Tauri 2.0+ or Dioxus
@@ -163,7 +163,7 @@ Both are FOSS with independent governance (no Big Tech).
 
 - **Primary**: Guix (guix.scm)
 - **Fallback**: Nix (flake.nix)
-- **JS deps**: Bun (`package.json` + `bun.lock`). Declare tooling as a devDependency and run `bunx --no-install --bun <tool>` — a bare `bunx <tool>` can fetch an unpinned package and may start Node via its shebang.
+- **Non-exempt JS deps**: Bun (`package.json` + `bun.lock`). Declare tooling as a devDependency and run `bunx --no-install --bun <tool>` — a bare `bunx <tool>` can fetch an unpinned package and may start Node via its shebang. `cicd_rules/nodejs_detected` exemptions follow their documented host-specific dependency contract.
 
 ### Documentation Format
 
