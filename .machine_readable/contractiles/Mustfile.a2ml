@@ -62,14 +62,14 @@ hooks fail if any check fails.
 - severity: critical
 
 ### six-directory-present
-- description: 6a2 directory exists with required files
-- run: test -d .machine_readable/6a2 && test -f .machine_readable/6a2/META.a2ml && test -f .machine_readable/6a2/ECOSYSTEM.a2ml && test -f .machine_readable/6a2/STATE.a2ml && test -f .machine_readable/6a2/PLAYBOOK.a2ml && test -f .machine_readable/6a2/AGENTIC.a2ml && test -f .machine_readable/6a2/NEUROSYM.a2ml
+- description: Core A2ML files exist in .machine_readable/descriptiles/ and retired .machine_readable/6a2/ is absent
+- run: test -f .machine_readable/descriptiles/META.a2ml && test -f .machine_readable/descriptiles/ECOSYSTEM.a2ml && test -f .machine_readable/descriptiles/STATE.a2ml && test -f .machine_readable/descriptiles/PLAYBOOK.a2ml && test -f .machine_readable/descriptiles/AGENTIC.a2ml && test -f .machine_readable/descriptiles/NEUROSYM.a2ml && test ! -d .machine_readable/6a2
 - severity: critical
 
 ### anchors-directory
-- description: anchors directory exists in 6a2
-- run: test -d .machine_readable/6a2/anchors
-- severity: warning
+- description: ANCHOR.a2ml exists in .machine_readable/anchors/
+- run: test -f .machine_readable/anchors/ANCHOR.a2ml
+- severity: critical
 
 ### self-validating-structure
 - description: self-validating directory has k9-svc and examples

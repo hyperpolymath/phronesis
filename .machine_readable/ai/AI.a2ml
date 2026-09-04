@@ -7,18 +7,18 @@
 name = "phronesis"
 kind = "language"
 one-sentence = "A neuro-symbolic, provably-safe language for agentic ethical reasoning on the BEAM."
-authority = ".machine_readable/ is authoritative; the 6 core A2ML files live in .machine_readable/6a2/ only."
+authority = ".machine_readable/ is authoritative; the 6 core A2ML files live in .machine_readable/ only."
 
 [read-order]
 1 = "0-AI-MANIFEST.a2ml"
-2 = ".machine_readable/6a2/anchors/ANCHOR.a2ml"
-3 = ".machine_readable/6a2/STATE.a2ml"
-4 = ".machine_readable/6a2/META.a2ml"
+2 = ".machine_readable/anchors/ANCHOR.a2ml"
+3 = ".machine_readable/descriptiles/STATE.a2ml"
+4 = ".machine_readable/descriptiles/META.a2ml"
 5 = ".claude/CLAUDE.md"
 
 [workflow]
-step-1 = "Inspect .machine_readable/6a2/STATE.a2ml for blockers and next actions."
-step-2 = "Respect constraints in .machine_readable/6a2/AGENTIC.a2ml when changing tooling."
+step-1 = "Inspect .machine_readable/descriptiles/STATE.a2ml for blockers and next actions."
+step-2 = "Respect constraints in .machine_readable/descriptiles/AGENTIC.a2ml when changing tooling."
 step-3 = "Run `just test` (the correctness gate) before claiming a change is done."
 step-4 = "After edits, update STATE.a2ml outcomes and commit with a concise, imperative message."
 

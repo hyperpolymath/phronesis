@@ -18,7 +18,7 @@ category = "nextgen-language"
 projects = [
   { name = "phronesiser", relation = "sibling", note = "The -iser that adds provably-safe ethical constraints to AI agents via Phronesis deontic logic." },
   { name = "standards", relation = "depends-on", note = "Estate standards: RSR template, A2ML format family, licence policy." },
-  { name = "rsr-template-repo", relation = "templated-from", note = "Rhodium Standard Repository template (.machine_readable/6a2 layout, contractiles)." },
+  { name = "rsr-template-repo", relation = "templated-from", note = "Rhodium Standard Repository template (.machine_readable flat layout, contractiles)." },
   { name = "hypatia", relation = "ci", note = "Neurosymbolic CI scanning (report-format = logtalk)." },
   { name = "gitbot-fleet", relation = "ci", note = "Learning / feedback submission." },
   { name = "a2ml-validate-action", relation = "ci", note = "Validates the .machine_readable A2ML artefacts." },

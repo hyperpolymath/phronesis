@@ -32,7 +32,7 @@ line; keep them in sync when one changes.
 == Recommended machine read order
 
 . `0-AI-MANIFEST.a2ml`
-. `.machine_readable/6a2/anchors/ANCHOR.a2ml` — identity + golden path
-. `.machine_readable/6a2/STATE.a2ml` — current status + blockers
-. `.machine_readable/6a2/META.a2ml` — architecture decisions
+. `.machine_readable/anchors/ANCHOR.a2ml` — identity + golden path
+. `.machine_readable/descriptiles/STATE.a2ml` — current status + blockers
+. `.machine_readable/descriptiles/META.a2ml` — architecture decisions
 . `.claude/CLAUDE.md` — language / licence policy
