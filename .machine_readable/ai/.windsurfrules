@@ -5,8 +5,8 @@
 
 # STARTUP (read in this order)
 # 1. 0-AI-MANIFEST.a2ml          — canonical file locations + invariants
-# 2. .machine_readable/6a2/anchors/ANCHOR.a2ml — identity + golden path
-# 3. .machine_readable/6a2/STATE.a2ml          — current status + blockers
+# 2. .machine_readable/anchors/ANCHOR.a2ml — identity + golden path
+# 3. .machine_readable/descriptiles/STATE.a2ml          — current status + blockers
 # 4. .claude/CLAUDE.md           — full language / licence policy
 
 # LICENSE (per-file, REUSE-style; SPDX header required on EVERY file)
@@ -18,9 +18,9 @@
 # Never AGPL-3.0. Copyright: Jonathan D.A. Jewell (hyperpolymath)
 #   <j.d.a.jewell@open.ac.uk>.
 
-# STATE FILES (.machine_readable/6a2/ ONLY)
+# STATE FILES (.machine_readable/ ONLY)
 # The 6 core A2ML files — STATE, META, ECOSYSTEM, AGENTIC, NEUROSYM, PLAYBOOK —
-# live in .machine_readable/6a2/ and NOWHERE else. Never create *.a2ml metadata
+# live in .machine_readable/ and NOWHERE else. Never create *.a2ml metadata
 # in the repo root; the root copy is always treated as stale drift.
 
 # LANGUAGES (this repo)
