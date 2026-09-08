@@ -1,0 +1,165 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+//
+// ByteDetector — Byte-wise detection of BOMs and C0 control characters.
+//
+// Provides separate, explicit checks for:
+//  - Leading Byte Order Marks (UTF-8, UTF-16 BE/LE, UTF-32 BE/LE)
+//  - C0 control characters (U+0000-U+001F, excluding TAB/LF/CR)
+//
+// This module operates on raw bytes rather than decoded characters,
+// ensuring detection before character encoding interpretation.
+
+// C0 control character range (excludes TAB/LF/CR)
+// U+0000-U+0008, U+000B, U+000C, U+000E-U+001F
+const C0_CONTROL_MIN: Int = 0x00;
+const C0_CONTROL_MAX: Int = 0x1F;
+const TAB: Int = 0x09;
+const LF: Int = 0x0A;
+const CR: Int = 0x0D;
+
+// Known BOM byte sequences
+const UTF8_BOM: [Int; 3] = [0xEF, 0xBB, 0xBF];
+const UTF16_BE_BOM: [Int; 2] = [0xFE, 0xFF];
+const UTF16_LE_BOM: [Int; 2] = [0xFF, 0xFE];
+const UTF32_BE_BOM: [Int; 4] = [0x00, 0x00, 0xFE, 0xFF];
+const UTF32_LE_BOM: [Int; 4] = [0xFF, 0xFE, 0x00, 0x00];
+
+// BOM detection result
+pub enum BomType {
+  Utf8,
+  Utf16BE,
+  Utf16LE,
+  Utf32BE,
+  Utf32LE,
+  None
+}
+
+// Detection result for a single byte
+pub enum ByteClass {
+  Clean,
+  BomByte,
+  C0Control,
+  AllowedControl  // TAB, LF, CR
+}
+
+// Overall detection result
+pub struct DetectionResult {
+  pub has_bom: Bool,
+  pub bom_type: BomType,
+  pub bom_length: Int,
+  pub c0_control_positions: [Int],
+  pub first_c0_position: Int  // -1 if none
+}
+
+// Check if a byte is a C0 control character (excluding TAB/LF/CR)
+fn is_c0_control(byte: Int) -> Bool {
+  if byte >= C0_CONTROL_MIN && byte <= C0_CONTROL_MAX {
+    return byte != TAB && byte != LF && byte != CR;
+  }
+  return false;
+}
+
+// Check if a byte is an allowed control character (TAB/LF/CR)
+fn is_allowed_control(byte: Int) -> Bool {
+  return byte == TAB || byte == LF || byte == CR;
+}
+
+// Classify a single byte
+pub fn classify_byte(byte: Int) -> ByteClass {
+  if is_c0_control(byte) {
+    return ByteClass::C0Control;
+  }
+  if is_allowed_control(byte) {
+    return ByteClass::AllowedControl;
+  }
+  return ByteClass::Clean;
+}
+
+// Check if bytes match a BOM pattern
+fn matches_bom(bytes: [Int], bom: [Int]) -> Bool {
+  if bytes.length < bom.length {
+    return false;
+  }
+
+  let mut i = 0;
+  while i < bom.length {
+    if bytes[i] != bom[i] {
+      return false;
+    }
+    i = i + 1;
+  }
+  return true;
+}
+
+// Detect BOM at the start of a byte sequence (SEPARATE byte-wise leading-BOM check)
+pub fn detect_leading_bom(bytes: [Int]) -> (BomType, Int) {
+  // Check UTF-32 first (longest BOM, 4 bytes) to avoid false matches with UTF-16
+  if matches_bom(bytes, UTF32_BE_BOM) {
+    return (BomType::Utf32BE, 4);
+  }
+  if matches_bom(bytes, UTF32_LE_BOM) {
+    return (BomType::Utf32LE, 4);
+  }
+
+  // Check UTF-8 (3 bytes)
+  if matches_bom(bytes, UTF8_BOM) {
+    return (BomType::Utf8, 3);
+  }
+
+  // Check UTF-16 (2 bytes)
+  if matches_bom(bytes, UTF16_BE_BOM) {
+    return (BomType::Utf16BE, 2);
+  }
+  if matches_bom(bytes, UTF16_LE_BOM) {
+    return (BomType::Utf16LE, 2);
+  }
+
+  return (BomType::None, 0);
+}
+
+// Scan for C0 control characters in a byte sequence
+pub fn scan_c0_controls(bytes: [Int]) -> [Int] {
+  let mut positions: [Int] = [];
+  let mut i = 0;
+
+  while i < bytes.length {
+    if is_c0_control(bytes[i]) {
+      positions.push(i);
+    }
+    i = i + 1;
+  }
+
+  return positions;
+}
+
+// Comprehensive detection: BOM + C0 controls
+pub fn detect_all(bytes: [Int]) -> DetectionResult {
+  let (bom_type, bom_length) = detect_leading_bom(bytes);
+  let has_bom = bom_type != BomType::None;
+
+  let c0_positions = scan_c0_controls(bytes);
+  let first_c0 = if c0_positions.length > 0 {
+    c0_positions[0]
+  } else {
+    -1
+  };
+
+  return DetectionResult {
+    has_bom: has_bom,
+    bom_type: bom_type,
+    bom_length: bom_length,
+    c0_control_positions: c0_positions,
+    first_c0_position: first_c0
+  };
+}
+
+// Get C0 control character range as a tuple (for configuration export)
+pub fn get_c0_range() -> (Int, Int) {
+  return (C0_CONTROL_MIN, C0_CONTROL_MAX);
+}
+
+// Get excluded control characters (TAB, LF, CR)
+pub fn get_excluded_controls() -> [Int] {
+  return [TAB, LF, CR];
+}
