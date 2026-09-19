@@ -22,29 +22,27 @@ just test    # run the test suite
 
 ### Repository Structure
 
-    phronesis/
-    ├── lib/phronesis/        # Reference implementation (Elixir/BEAM):
-    │                         #   lexer, parser, type checker, interpreter,
-    │                         #   consensus, LSP, debugger, profiler, reflexion
-    ├── compiler/             # Rust → WASM compiler (phronesis-ast, phronesis-wasm)
-    ├── spec/                 # Grammar (EBNF) + formal semantics
-    ├── formal/               # TLA+ consensus specification
-    ├── academic/             # Formal proofs (Lean4 / Agda / Coq)
-    ├── conformance/          # Conformance test suites
-    ├── bench/                # Benchmarks
-    ├── docs/                 # AsciiDoc design docs (incl. REFLEXION.adoc)
-    ├── examples/             # Example .phr policies
-    ├── test/                 # ExUnit test suite
-    ├── editors/              # VSCode extension + grammars
-    ├── .machine_readable/    # A2ML metadata + contractiles
-    ├── .github/workflows/    # CI/CD
-    ├── CHANGELOG.md  CODE_OF_CONDUCT.md  CONTRIBUTING.md  SECURITY.md
-    ├── GOVERNANCE.adoc  MAINTAINERS.adoc  README.adoc  EXPLAINME.adoc
-    ├── LICENSE  LICENSES/    # MPL-2.0 (code) + CC-BY-SA-4.0 (docs)
-    ├── mix.exs  Justfile  Mustfile
-    └── guix.scm
-
-’’’’’
+```text
+phronesis/
+├── lib/phronesis/ # Reference implementation (Elixir/BEAM):
+├── compiler/ # Rust → WASM compiler (phronesis-ast, phronesis-wasm)
+├── spec/ # Grammar (EBNF) + formal semantics
+├── formal/ # TLA+ consensus specification
+├── academic/ # Formal proofs (Lean4 / Agda / Coq)
+├── conformance/ # Conformance test suites
+├── bench/ # Benchmarks
+├── docs/ # AsciiDoc design docs (incl. REFLEXION.adoc)
+├── examples/ # Example .phr policies
+├── test/ # ExUnit test suite
+├── editors/ # VSCode extension + grammars
+├── .machine_readable/ # A2ML metadata + contractiles
+├── .github/workflows/ # CI/CD
+├── CHANGELOG.md CODE_OF_CONDUCT.md CONTRIBUTING.md SECURITY.md
+├── GOVERNANCE.adoc MAINTAINERS.adoc README.adoc EXPLAINME.adoc
+├── LICENSE LICENSES/ # MPL-2.0 (code) + CC-BY-SA-4.0 (docs)
+├── mix.exs Justfile Mustfile
+└── guix.scm ’’’’’
+```
 
 ## How to Contribute
 
