@@ -136,6 +136,7 @@ unsigned pushes. Estate policy:
 - **People and interactive agents** sign with an SSH key registered on GitHub
   as a *signing* key (`gpg.format=ssh`, `user.signingkey=<key>.pub`,
   `commit.gpgsign=true`). The committer email must be verified on that account.
+  SSH commit signing requires Git 2.34 or later.
 - **Apps, bots and workflows** never `git push` local commits. They write
   through the API (`createCommitOnBranch` or the estate `signed-push` action)
   so that GitHub signs each commit.
