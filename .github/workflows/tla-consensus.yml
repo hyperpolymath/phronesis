@@ -32,25 +32,67 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Fetch tla2tools (pinned version + sha256-verified)
+      - name: Fetch tla2tools (stable v1.7.4 release, sha256-verified)
+        shell: bash
         run: |
+          # v1.8.0 is a rolling pre-release rebuilt in place from master, so its
+          # hash changes under the same URL. Pin the stable release instead.
           curl -fsSL -o tla2tools.jar \
-            https://github.com/tlaplus/tlaplus/releases/download/v1.8.0/tla2tools.jar
-          echo "cc4803dce2a8ffaf0f5920a9dc39df4b5ee34ab4cb53fb58ac557277a7e516b3  tla2tools.jar" \
+            https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar
+          echo "936a262061c914694dfd669a543be24573c45d5aa0ff20a8b96b23d01e050e88  tla2tools.jar" \
             | sha256sum -c -
 
       - name: TLC positive — all safety invariants hold at Threshold = 2F+1
         working-directory: formal
+        shell: bash
         run: |
-          java -XX:+UseParallelGC -cp "${GITHUB_WORKSPACE}/tla2tools.jar" \
-            tlc2.TLC -config PhronesisConsensus.cfg PhronesisConsensus.tla
-
-      - name: TLC negative — Agreement must fail below the quorum bound
-        working-directory: formal
-        run: |
-          if java -cp "${GITHUB_WORKSPACE}/tla2tools.jar" \
-               tlc2.TLC -config PhronesisConsensus_neg.cfg PhronesisConsensus.tla; then
-            echo "::error::Agreement held at Threshold < 2F+1 — the quorum bound is not load-bearing (invariant vacuous)."
+          set -uo pipefail
+          for inv in TypeOK Agreement Validity ByzantineSafety; do
+            grep -Eq "^[[:space:]]+${inv}[[:space:]]*\$" PhronesisConsensus.cfg \
+              || { echo "::error::positive cfg no longer checks invariant ${inv}."; exit 1; }
+          done
+          log="${RUNNER_TEMP}/tlc-pos.log"
+          set +e
+          java -XX:+UseParallelGC -cp "${GITHUB_WORKSPACE}/tla2tools.jar" tlc2.TLC \
+            -metadir "${RUNNER_TEMP}/tlc-pos-states" \
+            -config PhronesisConsensus.cfg PhronesisConsensus.tla 2>&1 | tee "$log"
+          rc="${PIPESTATUS[0]}"
+          set -e
+          if [ "$rc" -ne 0 ] || ! grep -Fxq 'Model checking completed. No error has been found.' "$log"; then
+            echo "::error::positive gate: TLC exit ${rc}; expected 0 with a completed, error-free search."
             exit 1
           fi
-          echo "Negative test OK: Agreement correctly violated below the quorum bound."
+
+      - name: TLC negative — exactly Agreement must be violated below the quorum bound
+        working-directory: formal
+        shell: bash
+        run: |
+          set -uo pipefail
+          # The two cfgs may differ only in Threshold (3 vs 2), or the negative proves nothing.
+          norm() { grep -v '^[[:space:]]*\\\*' "$1" | sed -E 's/[[:space:]]+/ /g; s/^ //; s/ $//' | grep -v '^$'; }
+          if ! diff <(norm PhronesisConsensus.cfg | grep -v '^Threshold ') \
+                    <(norm PhronesisConsensus_neg.cfg | grep -v '^Threshold ') >/dev/null \
+             || [ "$(norm PhronesisConsensus.cfg | grep -c '^Threshold = 3$')" -ne 1 ] \
+             || [ "$(norm PhronesisConsensus_neg.cfg | grep -c '^Threshold = 2$')" -ne 1 ]; then
+            echo "::error::positive and negative cfg must differ only in Threshold (3 vs 2)."
+            diff <(norm PhronesisConsensus.cfg) <(norm PhronesisConsensus_neg.cfg) || true
+            exit 1
+          fi
+          log="${RUNNER_TEMP}/tlc-neg.log"
+          set +e
+          java -XX:+UseParallelGC -cp "${GITHUB_WORKSPACE}/tla2tools.jar" tlc2.TLC \
+            -metadir "${RUNNER_TEMP}/tlc-neg-states" \
+            -config PhronesisConsensus_neg.cfg PhronesisConsensus.tla 2>&1 | tee "$log"
+          rc="${PIPESTATUS[0]}"
+          set -e
+          # TLC EC.ExitStatus.VIOLATION_SAFETY = 12; parse/config errors are 150/151, crashes 1/255.
+          if [ "$rc" -ne 12 ]; then
+            echo "::error::negative gate: expected TLC exit 12 (safety violation), got ${rc}."
+            exit 1
+          fi
+          if [ "$(grep -c '^Error: Invariant .* is violated' "$log")" -ne 1 ] \
+             || ! grep -Fxq 'Error: Invariant Agreement is violated.' "$log"; then
+            echo "::error::negative gate: TLC exit 12 but the violated invariant is not exactly Agreement."
+            exit 1
+          fi
+          echo "Negative test OK: TLC exit 12, Invariant Agreement violated below the quorum bound."
