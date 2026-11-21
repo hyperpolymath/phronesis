@@ -100,3 +100,13 @@ crg-badge:
 
 secret-scan-trufflehog:
     @command -v trufflehog >/dev/null && trufflehog filesystem . --only-verified || true
+
+# Repair .github/workflows/actions.lock after a Dependabot github-actions bump.
+# Dependabot rewrites `uses:` in the workflow YAML but cannot touch the lock, so
+# the Lock Sync Gate goes red. This resolves each new ref (git ls-remote, peeled
+# commit for annotated tags), rewrites the lock, and re-validates with
+# scripts/check-lock-sync.sh. Fails loudly (lock untouched) on anything it cannot
+# resolve. Run it on the Dependabot branch, then commit with a SIGNED commit.
+lock-sync-fix:
+    ./scripts/lock-sync-fix.sh
+    ./scripts/check-lock-sync.sh
