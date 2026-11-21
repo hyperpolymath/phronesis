@@ -32,12 +32,12 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
 
       # Installs elan + the toolchain from lean-toolchain, then runs `lake build`.
       # No test/lint targets and no Mathlib in this project, so those are off.
       - name: Build + verify Lean proofs
-        uses: leanprover/lean-action@fe408643ea7367d8c0404a8be3975bb145f5fb64 # v1.7.0
+        uses: leanprover/lean-action@v1.7.0
         with:
           lake-package-directory: academic/formal-verification/lean4
           build: "true"
