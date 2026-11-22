@@ -92,7 +92,8 @@ grep -qF "'actions/upload-artifact@v1.0.0':" "$work/wf/actions.lock" || fail "re
 grep -qF "'acme/setup@$S3':" "$work/wf/actions.lock" || fail "SHA-pinned record missing"
 grep -qF "ref: 'v3.0.0'" "$work/wf/actions.lock" || fail "SHA-pinned record lost its tag ref"
 grep -qF "'acme/setup@$S1'" "$work/wf/actions.lock" && fail "orphaned old record not dropped"
-head -1 "$work/wf/actions.lock" | grep -qF "# header comment" || fail "lock header not preserved"
+header=$(head -n 1 "$work/wf/actions.lock")
+grep -qF "# header comment" <<<"$header" || fail "lock header not preserved"
 grep -q '^tag actions/upload-artifact v1.0.0' "$work/log" && fail "re-resolved an unchanged record"
 
 # 2. idempotent: second run changes nothing and asks the resolver nothing
