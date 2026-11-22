@@ -115,7 +115,7 @@ jobs:
   # Job 3: Empty-linter — invisible character detection
   # ---------------------------------------------------------------------------
   empty-lint:
-    name: Empty-linter (invisible characters)
+    name: "🔴 GATE: Empty-linter (invisible characters)"
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
