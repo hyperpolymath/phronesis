@@ -22,9 +22,11 @@
 -- language's semantics and the echo-types formalisation share ONE notion of
 -- structured loss.
 --
--- Flag stance: left at Agda's default discipline (matching Phronesis.agda),
--- importing the `--safe --without-K` `Echo`.  Machine-checked against the real
+-- Flag stance: PROOF-POLICY 2.1 (`--safe --without-K --cubical-compatible`, set
+-- by the OPTIONS pragma below), importing the `--safe --without-K` `Echo`.  Machine-checked against the real
 -- echo-types library (registered as `echo-types`); see phronesis-formal.agda-lib.
+
+{-# OPTIONS --safe --without-K --cubical-compatible #-}
 
 module PhronesisEcho where
 

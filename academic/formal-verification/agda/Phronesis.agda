@@ -3,6 +3,8 @@
 -- Phronesis Formalization in Agda
 -- Intrinsically typed representation with dependent types
 
+{-# OPTIONS --safe --without-K --cubical-compatible #-}
+
 module Phronesis where
 
 open import Data.Nat using (ℕ; zero; suc; _+_; _≤_)
